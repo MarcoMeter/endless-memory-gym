@@ -70,7 +70,7 @@ class SearingSpotlightsEnv(gym.Env):
         self.action_space = spaces.MultiDiscrete([3, 3])
         self.observation_space= spaces.Box(
                     low = 0,
-                    high = 1.0,
+                    high = 255,
                     shape = [self.screen_dim, self.screen_dim, 3],
                     dtype = np.uint8)
 
@@ -295,7 +295,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "length": len(self.episode_rewards)
             }
         else:
-            info = None
+            info = {}
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8)
