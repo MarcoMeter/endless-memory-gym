@@ -76,7 +76,9 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Init PyGame screen
         pygame.init()
-        self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim))
+        self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
+        if headless:
+            pygame.event.set_allowed(None)
         self.clock = pygame.time.Clock()
 
         # Initialize surfaces
