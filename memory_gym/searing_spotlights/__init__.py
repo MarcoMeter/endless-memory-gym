@@ -1,0 +1,1 @@
+from memory_gym.searing_spotlights.searing_spotlights import SearingSpotlightsEnv
