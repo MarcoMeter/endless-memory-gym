@@ -4,5 +4,5 @@ from memory_gym.searing_spotlights.searing_spotlights import SearingSpotlightsEn
 register(
      id="SearingSpotlights-v0",
      entry_point="memory_gym.searing_spotlights.searing_spotlights:SearingSpotlightsEnv",
-     max_episode_steps=300,
+     max_episode_steps=1000,
 )
