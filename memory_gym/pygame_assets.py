@@ -192,6 +192,7 @@ class Exit():
         self.radius = 20 / 2 * scale
         self.color_open = (48, 141, 70)
         self.color_closed = (55, 55, 55)
+        self.rounded_corners = (int(10 * scale), int(10 * scale), 0, 0)
         self.location = location
         self.open = True
 
@@ -200,10 +201,10 @@ class Exit():
             self.open = open
             self.rect.center = self.origin.center
             if open:
-                pygame.draw.rect(self.surface, self.color_open, self.rect, 0, 0, 10, 10, 0, 0)
+                pygame.draw.rect(self.surface, self.color_open, self.rect, 0, 0, *self.rounded_corners)
             else:
-                pygame.draw.rect(self.surface, self.color_closed, self.rect, 0, 0, 10, 10, 0, 0)
-            pygame.draw.rect(self.surface, 0, self.rect, int(2 * self.scale), 0, 10, 10, 0, 0)
+                pygame.draw.rect(self.surface, self.color_closed, self.rect, 0, 0, *self.rounded_corners)
+            pygame.draw.rect(self.surface, 0, self.rect, int(2 * self.scale), 0, *self.rounded_corners)
             self.rect.center = self.location
 
     def is_agent_inside(self, agent) -> bool:
