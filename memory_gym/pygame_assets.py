@@ -117,7 +117,7 @@ class CharacterController():
         return self.rotate(self.rotation)
 
 class Spotlight():
-    def __init__(self, dim, radius, speed) -> None:
+    def __init__(self, dim, radius, speed, rng) -> None:
         self.speed = speed
         self.t = 0
         self.done = False
@@ -130,10 +130,10 @@ class Spotlight():
         self.radius = radius
 
         # Sample angles for start, end and offset position
-        start_angle = random.randint(0, 360) # TODO: Sample all angles during reset
+        start_angle = rng.integers(0, 360)
         inverted_angle = start_angle + 180
-        target_angle = inverted_angle + random.randint(-45, 45) # TODO: Sample all angles during reset
-        offset_angle = target_angle + random.randint(-135, 135) # TODO: Sample all angles during reset
+        target_angle = inverted_angle + rng.integers(-45, 45)
+        offset_angle = target_angle + rng.integers(-135, 135)
 
         # Calculate the start position by the sampled angle
         # Code variant A

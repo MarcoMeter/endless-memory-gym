@@ -83,8 +83,8 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Initialize surfaces
         # Tiled background surface
-        self.blue_background_surface = get_tiled_background_surface(self.screen, self.screen_dim, (0, 0, 255))
-        self.red_background_surface = get_tiled_background_surface(self.screen, self.screen_dim, (255, 0, 0))
+        self.blue_background_surface = get_tiled_background_surface(self.screen, self.screen_dim, (0, 0, 255), SCALE)
+        self.red_background_surface = get_tiled_background_surface(self.screen, self.screen_dim, (255, 0, 0), SCALE)
 
         # Spotlight surface
         self.spotlight_surface = pygame.Surface((self.screen_dim, self.screen_dim))
@@ -116,7 +116,7 @@ class SearingSpotlightsEnv(gym.Env):
         if self.spawn_intervals:
             if self.spawn_timer >= self.spawn_intervals[0]:
                 self.spotlights.append(Spotlight(self.screen_dim, self.np_random.integers(self.reset_params["spot_min_radius"], self.reset_params["spot_max_radius"] + 1),
-                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"])))
+                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random))
                 self.spawn_intervals.pop()
                 self.spawn_timer = 0
 
@@ -217,7 +217,7 @@ class SearingSpotlightsEnv(gym.Env):
         self.spawn_timer = self.spawn_intervals[0] # ensure that the first spotlight is spawned right away
         for _ in range(self.reset_params["initial_spawns"]):
             self.spotlights.append(Spotlight(self.screen_dim, self.np_random.integers(self.reset_params["spot_min_radius"], self.reset_params["spot_max_radius"] + 1),
-                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"])))
+                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random))
 
         # Spawn coin and exit entities if applicable
         self.coins = []
