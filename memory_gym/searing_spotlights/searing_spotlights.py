@@ -91,7 +91,7 @@ class SearingSpotlightsEnv(gym.Env):
         self.spotlight_surface.set_colorkey((255, 255, 255))
 
         # Init grid spawner
-        self.grid_sampler = GridPositionSampler(self.screen_dim, (self.screen_dim) // 24)
+        self.grid_sampler = GridPositionSampler(self.screen_dim, self.screen_dim // 24)
 
     def _compute_spawn_intervals(self, reset_params) -> list:
         intervals = []
@@ -153,14 +153,14 @@ class SearingSpotlightsEnv(gym.Env):
         self.coin_surface.set_colorkey(255)
         for _ in range(self.np_random.integers(self.reset_params["min_num_coins"], self.reset_params["max_num_coins"] + 1)):
             spawn_pos = self.grid_sampler.sample(2)
-            spawn_pos = (spawn_pos[0] + self.np_random.integers(5, 10), spawn_pos[1] + self.np_random.integers(5, 10))
+            spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
             coin = Coin(self.reset_params["coin_scale"], spawn_pos)
             coin.draw(self.coin_surface)
             self.coins.append(coin)
 
     def _spawn_exit(self):
         spawn_pos = self.grid_sampler.sample(3)
-        spawn_pos = (spawn_pos[0] + self.np_random.integers(5, 10), spawn_pos[1] + self.np_random.integers(5, 10))
+        spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
         self.exit = Exit(spawn_pos, self.reset_params["exit_scale"])
         self.exit.draw(open=False)
 
@@ -206,7 +206,7 @@ class SearingSpotlightsEnv(gym.Env):
         # Setup agent
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
         spawn_pos = self.grid_sampler.sample(5)
-        spawn_pos = (spawn_pos[0] + self.np_random.integers(5, 10), spawn_pos[1] + self.np_random.integers(5, 10))
+        spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
         self.agent.rect.center = spawn_pos
         self.agent_health = self.reset_params["agent_health"]
 
