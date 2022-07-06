@@ -107,7 +107,7 @@ class CharacterController():
         if self.rect.center[0] > self.screen_dim - self.radius:
             x = self.screen_dim - self.radius
         if self.rect.center[0] < self.radius:
-            x = 25
+            x = self.radius
         if self.rect.center[1] > self.screen_dim - self.radius:
             y = self.screen_dim - self.radius
         if self.rect.center[1] < self.radius:
