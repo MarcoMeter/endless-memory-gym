@@ -8,7 +8,7 @@ import pygame
 from gym import  spaces
 from memory_gym.pygame_assets import CharacterController, Coin, Exit, GridPositionSampler, Spotlight, get_tiled_background_surface
 
-SCALE = 0.5
+SCALE = 0.25
 
 class SearingSpotlightsEnv(gym.Env):
     metadata = {
@@ -193,9 +193,9 @@ class SearingSpotlightsEnv(gym.Env):
                 reward = self.reset_params["reward_exit"]
         return reward, done
 
-    def reset(self, reset_params = None, seed = None):
+    def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
-        self.reset_params = SearingSpotlightsEnv.process_reset_params(reset_params)
+        self.reset_params = SearingSpotlightsEnv.process_reset_params(options)
 
         # Reset spawner
         self.grid_sampler.reset(self.np_random)
@@ -240,7 +240,7 @@ class SearingSpotlightsEnv(gym.Env):
         # plt.show()
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return vis_obs
 
@@ -300,7 +300,7 @@ class SearingSpotlightsEnv(gym.Env):
             info = {}
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return vis_obs, reward, done, info
 
@@ -309,12 +309,12 @@ class SearingSpotlightsEnv(gym.Env):
 
     def render(mode = "rgb_array"):
         env.clock.tick(SearingSpotlightsEnv.metadata["render_fps"])
-        return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8)
+        return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
 if __name__ == "__main__":
     env = SearingSpotlightsEnv(headless = False)
     reset_params = {}
-    vis_obs = env.reset(reset_params)
+    vis_obs = env.reset(options = reset_params)
 
     done = False
 
