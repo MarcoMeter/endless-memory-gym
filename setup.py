@@ -6,11 +6,6 @@ sys.path.insert(0, os.getcwd())
 # Get current working directory
 cwd = os.getcwd()
 
-# Get install requirements from requirements.txt
-install_requires = None
-with open(cwd + "\\requirements.txt") as file:
-    install_requires = [module_name.rstrip() for module_name in file.readlines()]
-
 # Get long description from README.md
 long_description = ""
 with open(cwd + "\\README.md", "r", encoding="utf-8") as fh:
@@ -37,7 +32,8 @@ setup(
       packages=find_packages(where='.', include="memory_gym*"),
       python_requires=">=3.6",
       include_package_data=True,
-      install_requires=install_requires,
+      install_requires=["gym>=0.24.1",
+                        "pygame>=2.1.2"],
       entry_points={
             "console_scripts": [
             "searing_spotlights=memory_gym.searing_spotlights.searing_spotlights:main",

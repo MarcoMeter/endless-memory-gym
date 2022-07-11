@@ -16,7 +16,7 @@ copy_tree("memory_gym", dst="tmp\\memory_gym")
 pypi_folders = []
 
 # Setup files to create the package
-setup_files = ["setup.py", "LICENSE", "README.md", "requirements.txt",]
+setup_files = ["setup.py", "LICENSE", "README.md"]
 
 # Build the package directories
 for folder in pypi_folders:
