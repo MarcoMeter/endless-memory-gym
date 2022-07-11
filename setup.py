@@ -39,5 +39,5 @@ setup(
             "searing_spotlights=memory_gym.searing_spotlights.searing_spotlights:main",
             ],
       },
-      version="0.0.1",
+      version="0.0.2",
 )
