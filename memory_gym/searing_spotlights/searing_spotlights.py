@@ -307,11 +307,11 @@ class SearingSpotlightsEnv(gym.Env):
     def close(self):
         pygame.quit()
 
-    def render(mode = "rgb_array"):
-        env.clock.tick(SearingSpotlightsEnv.metadata["render_fps"])
+    def render(self, mode = "rgb_array"):
+        self.clock.tick(SearingSpotlightsEnv.metadata["render_fps"])
         return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-if __name__ == "__main__":
+def main():
     env = SearingSpotlightsEnv(headless = False)
     reset_params = {}
     vis_obs = env.reset(options = reset_params)
@@ -344,3 +344,6 @@ if __name__ == "__main__":
 
     env.close()
     exit()
+
+if __name__ == "__main__":
+    main()
