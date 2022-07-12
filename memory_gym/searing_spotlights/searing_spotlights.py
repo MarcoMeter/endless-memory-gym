@@ -125,7 +125,7 @@ class SearingSpotlightsEnv(gym.Env):
             coin.draw(coin_surface)
 
         # Gather surfaces
-        surfs = [(self.blue_background_surface, (0, 0)), (self.spotlight_surface, (0, 0)), (self.exit.surface, self.exit.rect),
+        surfs = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.exit.surface, self.exit.rect),
                 (coin_surface, (0, 0))]
         # Retrieve the rotated agent surface or the original one
         if self.rotated_agent_surface is not None:
@@ -261,7 +261,8 @@ class SearingSpotlightsEnv(gym.Env):
             self.exit_surface = None
 
         # Draw initially all surfaces
-        self._draw_surfaces([(self.blue_background_surface, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
+        self.bg = self.blue_background_surface
+        self._draw_surfaces([(self.bg, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
                             (self.agent.surface, self.agent.rect), (self.spotlight_surface, (0, 0))])
 
         # Show spawn mask for debugging purposes
@@ -285,7 +286,7 @@ class SearingSpotlightsEnv(gym.Env):
         # Process tasks
         # Spotlight task
         reward = 0.0
-        r, spotlights_done, bg = self._step_spotlight_task()
+        r, spotlights_done, self.bg = self._step_spotlight_task()
         reward += r
         # Coin collection task
         if self.reset_params["min_num_coins"] > 0:
@@ -315,7 +316,7 @@ class SearingSpotlightsEnv(gym.Env):
                     done = True
 
         # Draw all surfaces
-        self._draw_surfaces([(bg, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
+        self._draw_surfaces([(self.bg, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
                             (self.rotated_agent_surface, self.rotated_agent_rect), (self.spotlight_surface, (0, 0))])
 
         # Track all rewards
