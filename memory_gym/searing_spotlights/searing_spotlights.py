@@ -5,6 +5,7 @@ import numpy as np
 import os
 import pygame
 
+from argparse import ArgumentParser
 from gym import  spaces
 from memory_gym.pygame_assets import CharacterController, Coin, Exit, GridPositionSampler, Spotlight, get_tiled_background_surface
 from pygame._sdl2 import Window, Texture, Renderer
@@ -361,9 +362,13 @@ class SearingSpotlightsEnv(gym.Env):
             return pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8)
 
 def main():
+    parser = ArgumentParser()
+    parser.add_argument("--seed", type=int, help="The to be used seed for the environment's random number generator.", default=0)
+    options = parser.parse_args()
+
     env = SearingSpotlightsEnv(headless = False)
     reset_params = {}
-    vis_obs = env.reset(options = reset_params)
+    vis_obs = env.reset(seed = options.seed, options = reset_params)
     img = env.render(mode = "debug_rgb_array")
     done = False
 
