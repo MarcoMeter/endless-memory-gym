@@ -31,6 +31,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "spot_damage": 1.0,
                 # Light Parameters
                 "light_dim_off_duration": 10,
+                "light_threshold": 255,
                 # Coin Parameters
                 "min_num_coins": 2,
                 "max_num_coins": 5,
@@ -280,7 +281,7 @@ class SearingSpotlightsEnv(gym.Env):
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
 
         # Dim light untill off
-        if self.spotlight_surface.get_alpha() <= 255:
+        if self.spotlight_surface.get_alpha() <= self.reset_params["light_threshold"]:
             self.spotlight_surface.set_alpha(self.spotlight_surface.get_alpha() + int(255 / self.reset_params["light_dim_off_duration"]))
 
         # Process tasks
