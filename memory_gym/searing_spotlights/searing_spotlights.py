@@ -7,12 +7,13 @@ import pygame
 
 from gym import  spaces
 from memory_gym.pygame_assets import CharacterController, Coin, Exit, GridPositionSampler, Spotlight, get_tiled_background_surface
+from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
 class SearingSpotlightsEnv(gym.Env):
     metadata = {
-        "render_modes": ["rgb_array"],
+        "render_modes": ["rgb_array", "debug_rgb_array"],
         "render_fps": 25,
     }
 
@@ -77,6 +78,10 @@ class SearingSpotlightsEnv(gym.Env):
         # Init PyGame screen
         pygame.init()
         self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
+
+        # Init debug window
+        self.debug_window = None
+        
         if headless:
             pygame.event.set_allowed(None)
         self.clock = pygame.time.Clock()
@@ -93,6 +98,8 @@ class SearingSpotlightsEnv(gym.Env):
         # Init grid spawner
         self.grid_sampler = GridPositionSampler(self.screen_dim, self.screen_dim // 24)
 
+        self.rotated_agent_surface, self.rotated_agent_rect = None, None
+
     def _compute_spawn_intervals(self, reset_params) -> list:
         intervals = []
         initial = reset_params["initial_spawn_interval"]
@@ -107,6 +114,29 @@ class SearingSpotlightsEnv(gym.Env):
             if surface[0] is not None:
                 self.screen.blit(surface[0], surface[1])
         pygame.display.flip()
+
+    def _build_debug_surface(self):
+        surface = pygame.Surface((336 * SCALE, 336 * SCALE))
+        # Create coin surface
+        coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
+        coin_surface.fill(255)
+        coin_surface.set_colorkey(255)
+        for coin in self.coins:
+            coin.draw(coin_surface)
+
+        # Gather surfaces
+        surfs = [(self.blue_background_surface, (0, 0)), (self.spotlight_surface, (0, 0)), (self.exit.surface, self.exit.rect),
+                (coin_surface, (0, 0))]
+        # Retrieve the rotated agent surface or the original one
+        if self.rotated_agent_surface is not None:
+            surfs.append((self.rotated_agent_surface, self.rotated_agent_rect))
+        else:
+            surfs.append((self.agent.surface, self.agent.rect))
+        # Blit all surfaces
+        for surf, rect in surfs:
+            surface.blit(surf, rect)
+
+        return pygame.transform.scale(surface, (336, 336))
 
     def _step_spotlight_task(self):
         reward = 0.0
@@ -246,7 +276,7 @@ class SearingSpotlightsEnv(gym.Env):
 
     def step(self, action):
         # Move the agent's controlled character
-        agent_surface, agent_rect = self.agent.step(action)
+        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
 
         # Dim light untill off
         if self.spotlight_surface.get_alpha() <= 255:
@@ -286,7 +316,7 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Draw all surfaces
         self._draw_surfaces([(bg, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
-                            (agent_surface, agent_rect), (self.spotlight_surface, (0, 0))])
+                            (self.rotated_agent_surface, self.rotated_agent_rect), (self.spotlight_surface, (0, 0))])
 
         # Track all rewards
         self.episode_rewards.append(reward)
@@ -305,22 +335,37 @@ class SearingSpotlightsEnv(gym.Env):
         return vis_obs, reward, done, info
 
     def close(self):
+        if self.debug_window is not None:
+            self.debug_window.destroy()
         pygame.quit()
 
     def render(self, mode = "rgb_array"):
-        self.clock.tick(SearingSpotlightsEnv.metadata["render_fps"])
-        return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        if mode == "rgb_array":
+            self.clock.tick(SearingSpotlightsEnv.metadata["render_fps"])
+            return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        elif mode == "debug_rgb_array":
+            # Create debug window if it doesn't exist yet
+            if self.debug_window is None:
+                self.debug_window = Window(size = (336, 336))
+                self.debug_window.show()
+                self.renderer = Renderer(self.debug_window)
+            
+            self.clock.tick(SearingSpotlightsEnv.metadata["render_fps"])
+
+            debug_surface = self._build_debug_surface()
+            texture = Texture.from_surface(self.renderer, debug_surface)
+            texture.draw(dstrect=(0, 0))
+            self.renderer.present()
+            return pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8)
 
 def main():
     env = SearingSpotlightsEnv(headless = False)
     reset_params = {}
     vis_obs = env.reset(options = reset_params)
-
+    img = env.render(mode = "debug_rgb_array")
     done = False
 
     while not done:
-        img = env.render()
-
         actions = [0, 0]
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] or keys[pygame.K_w]:
@@ -332,6 +377,7 @@ def main():
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             actions[0] = 1
         vis_obs, reward, done, info = env.step(actions)
+        img = env.render(mode = "debug_rgb_array")
 
         # Process event-loop
         for event in pygame.event.get():
