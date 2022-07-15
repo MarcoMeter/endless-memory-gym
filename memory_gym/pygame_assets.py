@@ -280,4 +280,15 @@ class Command():
             # self.surface, self.rect = self.rotate(angle)
             self.surface = pygame.transform.rotate(self.surface, angle)
             self.rect = self.surface.get_rect(center = self.rect.center)
-            
+
+class MortarTile():
+    def __init__(self, scale, location) -> None:
+        self.scale = scale
+        self.location = location
+        rect_dim = 48 * scale
+        self.surface = pygame.Surface((rect_dim, rect_dim))
+        pygame.draw.rect(self.surface, (21, 43, 77), ((0, 0, rect_dim, rect_dim)))
+        pygame.draw.rect(self.surface, (29, 60, 107), ((0, 0, rect_dim, rect_dim)), width=4)
+
+    def is_agent_inside(self, agent):
+        return False
