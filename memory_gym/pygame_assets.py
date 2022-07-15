@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import pygame
-import random
 
 from pygame.math import Vector2
 
@@ -221,3 +220,64 @@ def get_tiled_background_surface(screen, screen_dim, tile_color, scale):
     for rect, color in tiles:
         pygame.draw.rect(background_surface, color, rect)
     return background_surface
+
+class Command():
+    COMMANDS = {
+        "right"     : (1, 0),
+        "down"      : (0, 1),
+        "left"      : (-1, 0),
+        "up"        : (0, -1),
+        "stay"      : (0, 0),
+        "right_down": (1, 1),
+        "right_up"  : (1, -1),
+        "left_down" : (-1, 1),
+        "left_up"   : (-1, -1),
+    }
+
+    def __init__(self, command_type, scale, location) -> None:
+        assert command_type in Command.COMMANDS
+        self.location = location
+        self.scale = scale
+        rect_dim = 88 * scale
+        self.surface = pygame.Surface((rect_dim, rect_dim))
+        self.surface.fill(0)
+        self.surface.set_colorkey(0)
+        self.rect = self.surface.get_rect()
+
+        # Draw command symbol
+        line_width = int(8 * scale)
+        if command_type == "stay":
+            radius = rect_dim // 2 - 4 * scale
+            x = rect_dim - 12 * scale
+            y = rect_dim // 2 - 8 * scale
+            pygame.draw.circle(self.surface, (255, 255, 255), (radius, radius), radius=radius, width=line_width)
+            pygame.draw.line(self.surface, (255, 255, 255), (0, y), (x, y), width=line_width)
+        else:
+            # Draw arrow that points right
+            x1 = 2 * scale
+            x2 = 80 * scale
+            y1 = 40 * scale
+            y2 = 0
+            pygame.draw.line(self.surface, (255, 255, 255), (x1, y1), (x2, y1), line_width)
+            pygame.draw.line(self.surface, (255, 255, 255), (x2, y1), (y1, y2), line_width)
+            pygame.draw.line(self.surface, (255, 255, 255), (x2, y1), (y1, x2), line_width)
+            # Determine rotation
+            angle = 0
+            if command_type == "left":
+                angle = 180
+            elif command_type == "down":
+                angle = 270
+            elif command_type == "up":
+                angle = 90
+            elif command_type == "right_down":
+                angle = 315
+            elif command_type == "right_up":
+                angle = 45
+            elif command_type == "left_down":
+                angle = 225
+            elif command_type == "left_up":
+                angle = 135
+            # self.surface, self.rect = self.rotate(angle)
+            self.surface = pygame.transform.rotate(self.surface, angle)
+            self.rect = self.surface.get_rect(center = self.rect.center)
+            

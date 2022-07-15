@@ -6,10 +6,10 @@ import pygame
 
 from argparse import ArgumentParser
 from gym import  spaces
-from memory_gym.pygame_assets import CharacterController, Coin, Exit, GridPositionSampler, Spotlight, get_tiled_background_surface
+from memory_gym.pygame_assets import CharacterController, Command
 from pygame._sdl2 import Window, Texture, Renderer
 
-SCALE = 0.25
+SCALE = 1.0
 
 class MortarMayhemEnv(gym.Env):
     metadata = {
@@ -91,9 +91,10 @@ class MortarMayhemEnv(gym.Env):
         self.agent.rect.center = spawn_pos
 
         # Draw
+        self.command = Command("up", SCALE, (0, 0))
         self.bg = pygame.Surface((self.screen_dim, self.screen_dim))
         self.bg.fill(0)
-        self._draw_surfaces([(self.bg, (0, 0)), (self.agent.surface, self.agent.rect)])
+        self._draw_surfaces([(self.bg, (0, 0)), (self.agent.surface, self.agent.rect), (self.command.surface, (0, 0))])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
@@ -119,7 +120,7 @@ class MortarMayhemEnv(gym.Env):
             info = {}
 
         # Draw
-        self._draw_surfaces([(self.bg, (0, 0)), (self.rotated_agent_surface, self.rotated_agent_rect)])
+        self._draw_surfaces([(self.bg, (0, 0)), (self.rotated_agent_surface, self.rotated_agent_rect), (self.command.surface, (0, 0))])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
