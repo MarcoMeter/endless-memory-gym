@@ -37,7 +37,8 @@ setup(
       entry_points={
             "console_scripts": [
             "searing_spotlights=memory_gym.searing_spotlights.searing_spotlights:main",
+            "mortar_mayhem=memory_gym.mortar_mayhem.mortar_mayhem:main",
             ],
       },
-      version="0.0.3",
+      version="0.0.4",
 )
