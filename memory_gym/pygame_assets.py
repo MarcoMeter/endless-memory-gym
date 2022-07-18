@@ -68,7 +68,7 @@ class CharacterController():
         rect = new_surface.get_rect(center = self.rect.center)
         return new_surface, rect
 
-    def step(self, action):
+    def step(self, action, boundary_rect = None):
         # Determine agent velocity and rotation
         velocity = Vector2()
         if action[0] == 1:
@@ -100,20 +100,22 @@ class CharacterController():
         # Update the agent's position
         self.rect.center = Vector2(self.rect.center[0],self.rect.center[1]) + velocity
 
-        # Limit the agent to the screen's boundary
-        x = self.rect.center[0]
-        y = self.rect.center[1]
-        if self.rect.center[0] > self.screen_dim - self.radius:
-            x = self.screen_dim - self.radius
-        if self.rect.center[0] < self.radius:
-            x = self.radius
-        if self.rect.center[1] > self.screen_dim - self.radius:
-            y = self.screen_dim - self.radius
-        if self.rect.center[1] < self.radius:
-            y = self.radius
-        self.rect.center = (x, y)
+        # Limit the agent to the specified rect's boundary
+        if boundary_rect is not None:
+            x = self.rect.center[0]
+            y = self.rect.center[1]
+            if x > boundary_rect.bottomright[0] - self.radius:
+                x = boundary_rect.bottomright[0] - self.radius
+            if x < boundary_rect.topleft[0] + self.radius:
+                x = boundary_rect.topleft[0] + self.radius
+            if y > boundary_rect.bottomright[1] - self.radius:
+                y = boundary_rect.bottomright[1] - self.radius
+            if y < boundary_rect.topleft[1] + self.radius:
+                y = boundary_rect.topleft[1] + self.radius
+            self.rect.center = (x, y)
 
         return self.rotate(self.rotation)
+
 
 class Spotlight():
     def __init__(self, dim, radius, speed, rng) -> None:
@@ -295,7 +297,7 @@ class MortarTile():
 
 class MortarArena():
     def __init__(self, scale, arena_size) -> None:
-        assert arena_size % 3 == 0 or arena_size % 5 == 0 or arena_size % 7 == 0
+        assert arena_size == 3 or arena_size == 5 or arena_size == 7
         self.scale = scale
         self.arena_size = arena_size
         self.tile_dim = 48 * scale

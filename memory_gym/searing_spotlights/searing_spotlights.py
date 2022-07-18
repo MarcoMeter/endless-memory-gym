@@ -279,7 +279,7 @@ class SearingSpotlightsEnv(gym.Env):
 
     def step(self, action):
         # Move the agent's controlled character
-        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
+        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.screen.get_rect())
 
         # Dim light untill off
         if self.spotlight_surface.get_alpha() <= self.reset_params["light_threshold"]:

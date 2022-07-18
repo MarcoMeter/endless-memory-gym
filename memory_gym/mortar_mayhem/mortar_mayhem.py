@@ -94,7 +94,8 @@ class MortarMayhemEnv(gym.Env):
         self.command = Command("up", SCALE, (0, 0))
         self.bg = pygame.Surface((self.screen_dim, self.screen_dim))
         self.bg.fill(0)
-        self.arena = MortarArena(SCALE, 9)
+        self.arena = MortarArena(SCALE, 7)
+        self.arena.rect.center = (self.screen_dim // 2, self.screen_dim // 2)
         self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect), (self.command.surface, (0, 0))])
 
         # Retrieve the rendered image of the environment
@@ -104,7 +105,7 @@ class MortarMayhemEnv(gym.Env):
 
     def step(self, action):
         # Move the agent's controlled character
-        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
+        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.arena.rect)
 
         reward = 0
         done = False
@@ -119,7 +120,7 @@ class MortarMayhemEnv(gym.Env):
             }
         else:
             info = {}
-
+        
         # Draw
         self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.rotated_agent_surface, self.rotated_agent_rect), (self.command.surface, (0, 0))])
 
