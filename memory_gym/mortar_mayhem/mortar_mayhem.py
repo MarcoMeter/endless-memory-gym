@@ -20,17 +20,17 @@ class MortarMayhemEnv(gym.Env):
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 10.0 * SCALE,
-                "arene-size": 5,
-                "allowed-commands": 4,
-                "command-count": 5,
-                "command-duration": 3,
-                "command-delay": 1,
-                "use-command-alternative": False,
-                "explosion-duration": 4,
-                "explosion-delay": 4,
-                "reward-command-failuer": -0.1,
-                "reward-command-success": 0.1,
-                "reward-episode-success": 0.0
+                "arena_size": 5,
+                "allowed_commands": 4,
+                "command_count": 5,
+                "command_duration": 3,
+                "command_delay": 1,
+                "use_command_alternative": False,
+                "explosion_duration": 4,
+                "explosion_delay": 4,
+                "reward_command_failuer": -0.1,
+                "reward_command_success": 0.1,
+                "reward_episode_success": 0.0
             }
 
     def process_reset_params(reset_params):
@@ -85,17 +85,20 @@ class MortarMayhemEnv(gym.Env):
         # Track all rewards during one episode
         self.episode_rewards = []
 
+        # Setup arena
+        self.bg = pygame.Surface((self.screen_dim, self.screen_dim))
+        self.bg.fill(0)
+        self.arena = MortarArena(SCALE, self.reset_params["arena_size"])
+        self.arena.rect.center = (self.screen_dim // 2, self.screen_dim // 2)
+
         # Setup agent
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
-        spawn_pos = (42, 42)
+        spawn_pos = (self.np_random.integers(self.arena.rect.topleft[0] + self.agent.radius, self.arena.rect.bottomright[0] - self.agent.radius),
+                    self.np_random.integers(self.arena.rect.topleft[1] + self.agent.radius, self.arena.rect.bottomright[1] - self.agent.radius))
         self.agent.rect.center = spawn_pos
 
         # Draw
         self.command = Command("up", SCALE, (0, 0))
-        self.bg = pygame.Surface((self.screen_dim, self.screen_dim))
-        self.bg.fill(0)
-        self.arena = MortarArena(SCALE, 7)
-        self.arena.rect.center = (self.screen_dim // 2, self.screen_dim // 2)
         self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect), (self.command.surface, (0, 0))])
 
         # Retrieve the rendered image of the environment
@@ -146,7 +149,7 @@ def main():
     options = parser.parse_args()
 
     env = MortarMayhemEnv(headless = False)
-    reset_params = {}
+    reset_params = {"arena_size": 5}
     vis_obs = env.reset(seed = options.seed, options = reset_params)
     img = env.render(mode = "rgb_array")
     done = False
