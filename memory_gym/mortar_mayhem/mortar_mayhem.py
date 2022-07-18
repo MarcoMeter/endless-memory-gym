@@ -78,6 +78,10 @@ class MortarMayhemEnv(gym.Env):
                 self.screen.blit(surface[0], surface[1])
         pygame.display.flip()
 
+    def normalize_agent_position(self, agent_position):
+        return ((agent_position[0] - self.arena.rect[0]) // self.arena.tile_dim,
+                (agent_position[1] - self.arena.rect[1]) // self.arena.tile_dim)
+
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
         self.reset_params = MortarMayhemEnv.process_reset_params(options)
@@ -96,6 +100,7 @@ class MortarMayhemEnv(gym.Env):
         spawn_pos = (self.np_random.integers(self.arena.rect.topleft[0] + self.agent.radius, self.arena.rect.bottomright[0] - self.agent.radius),
                     self.np_random.integers(self.arena.rect.topleft[1] + self.agent.radius, self.arena.rect.bottomright[1] - self.agent.radius))
         self.agent.rect.center = spawn_pos
+        self.normalized_agent_position = self.normalize_agent_position(self.agent.rect.center)
 
         # Draw
         self.command = Command("up", SCALE, (0, 0))
@@ -109,6 +114,7 @@ class MortarMayhemEnv(gym.Env):
     def step(self, action):
         # Move the agent's controlled character
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.arena.rect)
+        self.normalized_agent_position = self.normalize_agent_position(self.rotated_agent_rect.center)
 
         reward = 0
         done = False

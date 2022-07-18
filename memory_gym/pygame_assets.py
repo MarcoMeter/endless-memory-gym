@@ -284,11 +284,13 @@ class Command():
             self.rect = self.surface.get_rect(center = self.rect.center)
 
 class MortarTile():
-    def __init__(self, dim, scale, pos) -> None:
+    def __init__(self, dim, scale, global_position, surface_rect) -> None:
         self.dim = dim
         self.surface = pygame.Surface((dim, dim))
         self.rect = self.surface.get_rect()
-        self.pos = pos
+        self.global_position = global_position
+        self.local_position = (global_position[0] - surface_rect[0], global_position[1] - surface_rect[1])
+        self.normalized_pos = (self.local_position[0] // self.dim, self.local_position[1] // self.dim)
         pygame.draw.rect(self.surface, (21, 43, 77), ((0, 0, dim, dim)))
         pygame.draw.rect(self.surface, (29, 60, 107), ((0, 0, dim, dim)), width=int(4 * scale))
 
@@ -309,6 +311,6 @@ class MortarArena():
             x = self.tile_dim * i
             for j in range(self.arena_size):
                 y = self.tile_dim * j
-                tile = MortarTile(self.tile_dim, scale, (x, y))
+                tile = MortarTile(self.tile_dim, scale, (x, y), self.rect)
                 self.tiles[i].append(tile)
-                self.surface.blit(tile.surface, tile.pos)
+                self.surface.blit(tile.surface, tile.global_position)
