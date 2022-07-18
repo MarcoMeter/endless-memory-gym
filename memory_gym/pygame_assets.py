@@ -284,32 +284,31 @@ class Command():
             self.rect = self.surface.get_rect(center = self.rect.center)
 
 class MortarTile():
-    def __init__(self, scale) -> None:
-        self.scale = scale
-        rect_dim = 48 * scale
-        self.surface = pygame.Surface((rect_dim, rect_dim))
+    def __init__(self, dim, scale, pos) -> None:
+        self.dim = dim
+        self.surface = pygame.Surface((dim, dim))
         self.rect = self.surface.get_rect()
-        pygame.draw.rect(self.surface, (21, 43, 77), ((0, 0, rect_dim, rect_dim)))
-        pygame.draw.rect(self.surface, (29, 60, 107), ((0, 0, rect_dim, rect_dim)), width=int(4 * scale))
+        self.pos = pos
+        pygame.draw.rect(self.surface, (21, 43, 77), ((0, 0, dim, dim)))
+        pygame.draw.rect(self.surface, (29, 60, 107), ((0, 0, dim, dim)), width=int(4 * scale))
 
     def is_agent_inside(self, agent):
         return False
 
 class MortarArena():
     def __init__(self, scale, arena_size) -> None:
-        assert arena_size == 3 or arena_size == 5 or arena_size == 7
+        assert arena_size >= 2 and arena_size <= 7
         self.scale = scale
         self.arena_size = arena_size
         self.tile_dim = 48 * scale
         self.rect_dim = self.tile_dim * arena_size
         self.surface = pygame.Surface((self.rect_dim, self.rect_dim))
         self.rect = self.surface.get_rect()
-        self.tiles = []
+        self.tiles = [[] for _ in range(arena_size)]
         for i in range(self.arena_size):
             x = self.tile_dim * i
             for j in range(self.arena_size):
                 y = self.tile_dim * j
-                tile = MortarTile(scale)
-                self.tiles.append(tile)
-                self.surface.blit(tile.surface, (x, y))
-        
+                tile = MortarTile(self.tile_dim, scale, (x, y))
+                self.tiles[i].append(tile)
+                self.surface.blit(tile.surface, tile.pos)
