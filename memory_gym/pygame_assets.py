@@ -285,13 +285,26 @@ class Command():
 class MortarTile():
     def __init__(self, dim, scale, global_position, surface_rect) -> None:
         self.dim = dim
+        self.scale = scale
         self.surface = pygame.Surface((dim, dim))
         self.rect = self.surface.get_rect()
         self.global_position = global_position
         self.local_position = (global_position[0] - surface_rect[0], global_position[1] - surface_rect[1])
         self.normalized_pos = (self.local_position[0] // self.dim, self.local_position[1] // self.dim)
-        pygame.draw.rect(self.surface, (21, 43, 77), ((0, 0, dim, dim)))
-        pygame.draw.rect(self.surface, (29, 60, 107), ((0, 0, dim, dim)), width=int(4 * scale))
+        self.blue = (21, 43, 77)
+        self.light_blue = (29, 60, 107)
+        self.red = (81, 18, 26)
+        self.light_red = (112, 24, 36)
+        self.is_blue = True
+        pygame.draw.rect(self.surface, self.blue, ((0, 0, dim, dim)))
+        pygame.draw.rect(self.surface, self.light_blue, ((0, 0, dim, dim)), width=int(4 * scale))
+
+    def toggle_color(self, on):
+        self.is_blue = not self.is_blue
+        c1 = self.blue if on else self.red
+        c2 = self.light_blue if on else self.light_red
+        pygame.draw.rect(self.surface, c1, ((0, 0, self.dim, self.dim)))
+        pygame.draw.rect(self.surface, c2, ((0, 0, self.dim, self.dim)), width=int(4 * self.scale))
 
 class MortarArena():
     def __init__(self, scale, arena_size) -> None:
@@ -302,6 +315,7 @@ class MortarArena():
         self.surface = pygame.Surface((self.rect_dim, self.rect_dim))
         self.rect = self.surface.get_rect()
         self.tiles = [[] for _ in range(arena_size)]
+        self.tiles_on = False
         for i in range(self.arena_size):
             x = self.tile_dim * i
             for j in range(self.arena_size):
@@ -317,3 +331,17 @@ class MortarArena():
         pos = tile.global_position
         pos = (pos[0] + self.tile_dim, pos[1] + self.tile_dim)
         return pos
+
+    def toggle_tiles(self, target_tile = None):
+        self.tiles_on = target_tile is None
+        for i in range(self.arena_size):
+            for j in range(self.arena_size):
+                if target_tile is not None:
+                    if not target_tile == (i, j):
+                        tile = self.tiles[i][j]
+                        tile.toggle_color(on = self.tiles_on)
+                        self.surface.blit(tile.surface, tile.global_position)
+                else:
+                    tile = self.tiles[i][j]
+                    tile.toggle_color(on = self.tiles_on)
+                    self.surface.blit(tile.surface, tile.global_position)
