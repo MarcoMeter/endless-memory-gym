@@ -40,6 +40,7 @@ class MortarMayhemEnv(gym.Env):
                 assert k in cloned_params.keys(), "Provided reset parameter (" + str(k) + ") is not valid. Check spelling."
                 cloned_params[k] = v
         assert cloned_params["allowed_commands"] >= 4 and cloned_params["allowed_commands"] <= 9
+        assert cloned_params["arena_size"] >= 2 and cloned_params["arena_size"] <= 6
         return cloned_params
 
     def __init__(self, headless = True) -> None:
@@ -130,9 +131,6 @@ class MortarMayhemEnv(gym.Env):
                 command_vis.append("")
         return command_vis
 
-    def _step_command_visualization(self):
-        return Command(self._command_visualization.pop(0), SCALE, )
-
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
         self.reset_params = MortarMayhemEnv.process_reset_params(options)
@@ -146,11 +144,10 @@ class MortarMayhemEnv(gym.Env):
         self.arena = MortarArena(SCALE, self.reset_params["arena_size"])
         self.arena.rect.center = (self.screen_dim // 2, self.screen_dim // 2)
 
-        # Setup agent
+        # Setup the agent and sample its position
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
-        # maybe spawn on tile instead of entire random position
-        spawn_pos = (self.np_random.integers(self.arena.rect.topleft[0] + self.agent.radius, self.arena.rect.bottomright[0] - self.agent.radius),
-                    self.np_random.integers(self.arena.rect.topleft[1] + self.agent.radius, self.arena.rect.bottomright[1] - self.agent.radius))
+        spawn_pos = self.arena.get_tile_global_position(self.np_random.integers(0, self.reset_params["arena_size"] ** 2))
+        spawn_pos = (spawn_pos[0] + self.np_random.integers(-12 * SCALE, 12 * SCALE), spawn_pos[1] + self.np_random.integers(-12 * SCALE, 12 * SCALE))
         self.agent.rect.center = spawn_pos
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
 
@@ -158,7 +155,7 @@ class MortarMayhemEnv(gym.Env):
         self._commands = self._generate_commands(self.normalized_agent_position)
         self._command_visualization = self._generate_command_visualization(self._commands, self.reset_params["command_duration"], self.reset_params["command_delay"])
         # Show first command frame
-        command = self._step_command_visualization()
+        command = Command(self._command_visualization.pop(0), SCALE)
 
         # Init episode members
         self._target_pos = (self.normalized_agent_position[0] + Command.COMMANDS[self._commands[0]][0],
@@ -181,7 +178,7 @@ class MortarMayhemEnv(gym.Env):
 
         # Show each command one by one, while the agent cannot move
         if self._command_visualization:
-            command = self._step_command_visualization()
+            command = Command(self._command_visualization.pop(0), SCALE)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.surface, self.agent.rect
         else:
             command = None
@@ -213,7 +210,10 @@ class MortarMayhemEnv(gym.Env):
 
     def render(self, mode = "rgb_array"):
         if mode == "rgb_array":
-            self.clock.tick(MortarMayhemEnv.metadata["render_fps"])
+            if self._command_visualization:
+                self.clock.tick(4)
+            else:
+                self.clock.tick(MortarMayhemEnv.metadata["render_fps"])
             return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
     def close(self):
@@ -227,7 +227,7 @@ def main():
     options = parser.parse_args()
 
     env = MortarMayhemEnv(headless = False)
-    reset_params = {"arena_size": 5}
+    reset_params = {}
     vis_obs = env.reset(seed = options.seed, options = reset_params)
     img = env.render(mode = "rgb_array")
     done = False

@@ -295,10 +295,9 @@ class MortarTile():
 
 class MortarArena():
     def __init__(self, scale, arena_size) -> None:
-        assert arena_size >= 2 and arena_size <= 7
         self.scale = scale
         self.arena_size = arena_size
-        self.tile_dim = 48 * scale
+        self.tile_dim = 56 * scale
         self.rect_dim = self.tile_dim * arena_size
         self.surface = pygame.Surface((self.rect_dim, self.rect_dim))
         self.rect = self.surface.get_rect()
@@ -310,3 +309,11 @@ class MortarArena():
                 tile = MortarTile(self.tile_dim, scale, (x, y), self.rect)
                 self.tiles[i].append(tile)
                 self.surface.blit(tile.surface, tile.global_position)
+
+    def get_tile_global_position(self, flat_tile_id):
+        x = flat_tile_id // self.arena_size
+        y = flat_tile_id % self.arena_size
+        tile = self.tiles[x][y]
+        pos = tile.global_position
+        pos = (pos[0] + self.tile_dim, pos[1] + self.tile_dim)
+        return pos
