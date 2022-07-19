@@ -109,6 +109,27 @@ class MortarMayhemEnv(gym.Env):
             simulated_pos = (simulated_pos[0] + Command.COMMANDS[sample][0], simulated_pos[1] + Command.COMMANDS[sample][1])
         return commands
 
+    def _generate_command_visualization(self, commands, duration=1, delay=0):
+        """Generates a list that states on which step to show which command. Each element corresponds to one step.
+
+        Args:
+            commands {list} -- Sampled commands
+            duration {int} -- How many steps to show one command (default: {1})
+            delay {int} -- How many steps until the next command is shown (default: {0})
+
+        Returns:
+            {list} -- list that states on which step to show which command
+        """
+        command_vis = []
+        for i in range(len(commands)):
+            # Duplicate the command related to the duration
+            for j in range(duration):
+                command_vis.append(commands[i])
+            # For each step delay, add None instead of the command
+            for k in range(delay):
+                command_vis.append(None)
+        return command_vis
+
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
         self.reset_params = MortarMayhemEnv.process_reset_params(options)
@@ -132,7 +153,11 @@ class MortarMayhemEnv(gym.Env):
 
         # Sample n commands
         self._commands = self._generate_commands(self.normalized_agent_position)
-        print(self._commands)
+        self._command_visualization = self._generate_command_visualization(self._commands, self.reset_params["command_duration"], self.reset_params["command_delay"])
+
+        # Initial target position
+        self._target_pos = (self.normalized_agent_position[0] + Command.COMMANDS[self._commands[0]][0],
+                            self.normalized_agent_position[1] + Command.COMMANDS[self._commands[0]][1])
 
         # Draw
         self.command = Command("up", SCALE, (0, 0))
