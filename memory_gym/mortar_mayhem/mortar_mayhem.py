@@ -9,7 +9,7 @@ from gym import  spaces
 from memory_gym.pygame_assets import CharacterController, Command, MortarArena
 from pygame._sdl2 import Window, Texture, Renderer
 
-SCALE = 1.0
+SCALE = 0.25
 
 class MortarMayhemEnv(gym.Env):
     metadata = {
