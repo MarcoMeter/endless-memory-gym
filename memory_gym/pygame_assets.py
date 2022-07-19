@@ -236,12 +236,11 @@ class Command():
         "left_up"   : (-1, -1),
     }
 
-    def __init__(self, command_type, scale, location) -> None:
-        assert command_type in Command.COMMANDS
-        self.location = location
+    def __init__(self, command_type, scale) -> None:
+        assert command_type in Command.COMMANDS or command_type == ""
         self.scale = scale
-        rect_dim = 88 * scale
-        self.surface = pygame.Surface((rect_dim, rect_dim))
+        self.rect_dim = 88 * scale
+        self.surface = pygame.Surface((self.rect_dim, self.rect_dim))
         self.surface.fill(0)
         self.surface.set_colorkey(0)
         self.rect = self.surface.get_rect()
@@ -249,12 +248,12 @@ class Command():
         # Draw command symbol
         line_width = int(8 * scale)
         if command_type == "stay":
-            radius = rect_dim // 2 - 4 * scale
-            x = rect_dim - 12 * scale
-            y = rect_dim // 2 - 8 * scale
+            radius = self.rect_dim // 2 - 4 * scale
+            x = self.rect_dim - 12 * scale
+            y = self.rect_dim // 2 - 8 * scale
             pygame.draw.circle(self.surface, (255, 255, 255), (radius, radius), radius=radius, width=line_width)
             pygame.draw.line(self.surface, (255, 255, 255), (0, y), (x, y), width=line_width)
-        else:
+        elif len(command_type) > 0:
             # Draw arrow that points right
             x1 = 2 * scale
             x2 = 80 * scale
@@ -293,9 +292,6 @@ class MortarTile():
         self.normalized_pos = (self.local_position[0] // self.dim, self.local_position[1] // self.dim)
         pygame.draw.rect(self.surface, (21, 43, 77), ((0, 0, dim, dim)))
         pygame.draw.rect(self.surface, (29, 60, 107), ((0, 0, dim, dim)), width=int(4 * scale))
-
-    def is_agent_inside(self, agent):
-        return False
 
 class MortarArena():
     def __init__(self, scale, arena_size) -> None:

@@ -127,8 +127,11 @@ class MortarMayhemEnv(gym.Env):
                 command_vis.append(commands[i])
             # For each step delay, add None instead of the command
             for k in range(delay):
-                command_vis.append(None)
+                command_vis.append("")
         return command_vis
+
+    def _step_command_visualization(self):
+        return Command(self._command_visualization.pop(0), SCALE, )
 
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
@@ -154,14 +157,18 @@ class MortarMayhemEnv(gym.Env):
         # Sample n commands
         self._commands = self._generate_commands(self.normalized_agent_position)
         self._command_visualization = self._generate_command_visualization(self._commands, self.reset_params["command_duration"], self.reset_params["command_delay"])
+        # Show first command frame
+        command = self._step_command_visualization()
 
-        # Initial target position
+        # Init episode members
         self._target_pos = (self.normalized_agent_position[0] + Command.COMMANDS[self._commands[0]][0],
                             self.normalized_agent_position[1] + Command.COMMANDS[self._commands[0]][1])
+        self._current_command = 0
+        self._step_count_commands = 0
 
         # Draw
-        self.command = Command("up", SCALE, (0, 0))
-        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect), (self.command.surface, (0, 0))])
+        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect),
+                            (command.surface, (((self.screen_dim // 2) - command.rect_dim // 2, (self.screen_dim // 2) - command.rect_dim // 2)))])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
@@ -169,12 +176,18 @@ class MortarMayhemEnv(gym.Env):
         return vis_obs
 
     def step(self, action):
-        # Move the agent's controlled character
-        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.arena.rect)
-        self.normalized_agent_position = self._normalize_agent_position(self.rotated_agent_rect.center)
-
         reward = 0
         done = False
+
+        # Show each command one by one, while the agent cannot move
+        if self._command_visualization:
+            command = self._step_command_visualization()
+            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.surface, self.agent.rect
+        else:
+            command = None
+            # Move the agent's controlled character
+            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.arena.rect)
+            self.normalized_agent_position = self._normalize_agent_position(self.rotated_agent_rect.center)
 
         # Track all rewards
         self.episode_rewards.append(reward)
@@ -188,7 +201,10 @@ class MortarMayhemEnv(gym.Env):
             info = {}
         
         # Draw
-        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.rotated_agent_surface, self.rotated_agent_rect), (self.command.surface, (0, 0))])
+        surfaces = [(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.rotated_agent_surface, self.rotated_agent_rect)]
+        if command is not None:
+            surfaces.append((command.surface, ((self.screen_dim // 2) - command.rect_dim // 2, (self.screen_dim // 2) - command.rect_dim // 2)))
+        self._draw_surfaces(surfaces)
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
