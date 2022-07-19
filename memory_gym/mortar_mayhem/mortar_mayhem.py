@@ -146,7 +146,7 @@ class MortarMayhemEnv(gym.Env):
         # Setup the agent and sample its position
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
         spawn_pos = self.arena.get_tile_global_position(self.np_random.integers(0, self.reset_params["arena_size"] ** 2))
-        spawn_pos = (spawn_pos[0] + self.np_random.integers(-12 * SCALE, 12 * SCALE), spawn_pos[1] + self.np_random.integers(-12 * SCALE, 12 * SCALE))
+        spawn_pos = (spawn_pos[0] + self.np_random.integers(-8 * SCALE, 8 * SCALE), spawn_pos[1] + self.np_random.integers(-8 * SCALE, 8 * SCALE))
         self.agent.rect.center = spawn_pos
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
 
