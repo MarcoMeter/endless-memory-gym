@@ -40,5 +40,5 @@ setup(
             "mortar_mayhem=memory_gym.mortar_mayhem.mortar_mayhem:main",
             ],
       },
-      version="0.0.4",
+      version="0.0.5",
 )
