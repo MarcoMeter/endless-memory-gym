@@ -301,8 +301,8 @@ class MortarTile():
 
     def toggle_color(self, on):
         self.is_blue = not self.is_blue
-        c1 = self.blue if on else self.red
-        c2 = self.light_blue if on else self.light_red
+        c1 = self.blue if not on else self.red
+        c2 = self.light_blue if not on else self.light_red
         pygame.draw.rect(self.surface, c1, ((0, 0, self.dim, self.dim)))
         pygame.draw.rect(self.surface, c2, ((0, 0, self.dim, self.dim)), width=int(4 * self.scale))
 
@@ -333,10 +333,10 @@ class MortarArena():
         return pos
 
     def toggle_tiles(self, target_tile = None):
-        self.tiles_on = target_tile is None
+        self.tiles_on = target_tile is not None
         for i in range(self.arena_size):
             for j in range(self.arena_size):
-                if target_tile is not None:
+                if self.tiles_on:
                     if not target_tile == (i, j):
                         tile = self.tiles[i][j]
                         tile.toggle_color(on = self.tiles_on)

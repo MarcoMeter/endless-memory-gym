@@ -131,7 +131,7 @@ class MortarMayhemEnv(gym.Env):
             for k in range(delay):
                 command_vis.append("")
         return command_vis
-        
+
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
         self.reset_params = MortarMayhemEnv.process_reset_params(options)
@@ -193,9 +193,8 @@ class MortarMayhemEnv(gym.Env):
             # Process the command execution logic
             # One command is alive for command_duration steps
             verify = self._command_steps % self.reset_params["command_duration"] == 0 and self._command_steps > 0
-            if verify and not self.toggle:
-                self.toggle = True
-                 # Check if to be executed commands are still remaining
+
+            if verify and not self.arena.tiles_on:
                 if self._current_command < self.reset_params["command_count"]:
                     self._current_command += 1
                     self.arena.toggle_tiles(self._target_pos)
@@ -203,10 +202,6 @@ class MortarMayhemEnv(gym.Env):
                     # Check if the agent is on the target position
                     if self.normalized_agent_position == self._target_pos:
                         # Success!
-                        if self._current_command < self.reset_params["command_count"]:
-                            # Update target position
-                            self._target_pos = (self._target_pos[0] + Command.COMMANDS[self._commands[self._current_command]][0],
-                                                self._target_pos[1] + Command.COMMANDS[self._commands[self._current_command]][1])
                         reward += self.reset_params["reward_command_success"]
                     # If the agent is not on the target position, terminate the episode
                     else:
@@ -218,21 +213,24 @@ class MortarMayhemEnv(gym.Env):
                     # All commands completed!
                     done = True
                     reward += self.reset_params["reward_episode_success"]
-            else:
+                self._command_steps = 0
+
+            if self.arena.tiles_on:
                 if self._command_verify_step % self.reset_params["explosion_duration"] == 0 and self._command_verify_step > 0:
                     self.arena.toggle_tiles()
-                    self.toggle = False
                     self._command_verify_step = 0
+                    if self._current_command < self.reset_params["command_count"]:
+                        # Update target position
+                        self._target_pos = (self._target_pos[0] + Command.COMMANDS[self._commands[self._current_command]][0],
+                                            self._target_pos[1] + Command.COMMANDS[self._commands[self._current_command]][1])
                 else:
+                    if not self.normalized_agent_position == self._target_pos:
+                        # Failure!
+                        done = True
+                        reward += self.reset_params["reward_command_failure"]
                     self._command_verify_step += 1
-
-            if self.arena.tiles_on and not self.normalized_agent_position == self._target_pos:
-                # Failure!
-                done = True
-                reward += self.reset_params["reward_command_failure"]
-
-            # We cannot make use of the global step count due to potentially using the single command visualization
-            self._command_steps +=1
+            else:
+                self._command_steps +=1
 
         # Track all rewards
         self.episode_rewards.append(reward)
