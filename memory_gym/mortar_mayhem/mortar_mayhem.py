@@ -24,11 +24,9 @@ class MortarMayhemEnv(gym.Env):
                 "allowed_commands": 4,
                 "command_count": 5,
                 "command_show_duration": 3,
-                "command_duration": 25,
                 "command_show_delay": 1,
-                "use_command_alternative": False,
-                "explosion_duration": 50,
-                "explosion_delay": 4,
+                "explosion_duration": 6,
+                "explosion_delay": 12,
                 "reward_command_failure": -0.1,
                 "reward_command_success": 0.1,
                 "reward_episode_success": 0.0
@@ -191,8 +189,8 @@ class MortarMayhemEnv(gym.Env):
             self.normalized_agent_position = self._normalize_agent_position(self.rotated_agent_rect.center)
 
             # Process the command execution logic
-            # One command is alive for command_duration steps
-            verify = self._command_steps % self.reset_params["command_duration"] == 0 and self._command_steps > 0
+            # One command is alive for explosion delay steps
+            verify = self._command_steps % self.reset_params["explosion_delay"] == 0 and self._command_steps > 0
 
             if verify and not self.arena.tiles_on:
                 if self._current_command < self.reset_params["command_count"]:
