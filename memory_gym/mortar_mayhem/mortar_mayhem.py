@@ -39,6 +39,7 @@ class MortarMayhemEnv(gym.Env):
             for k, v in reset_params.items():
                 assert k in cloned_params.keys(), "Provided reset parameter (" + str(k) + ") is not valid. Check spelling."
                 cloned_params[k] = v
+        assert cloned_params["allowed_commands"] >= 4 and cloned_params["allowed_commands"] <= 9
         return cloned_params
 
     def __init__(self, headless = True) -> None:
@@ -78,9 +79,35 @@ class MortarMayhemEnv(gym.Env):
                 self.screen.blit(surface[0], surface[1])
         pygame.display.flip()
 
-    def normalize_agent_position(self, agent_position):
+    def _normalize_agent_position(self, agent_position):
         return ((agent_position[0] - self.arena.rect[0]) // self.arena.tile_dim,
                 (agent_position[1] - self.arena.rect[1]) // self.arena.tile_dim)
+
+    def _get_valid_commands(self, pos):
+        # Check whether each command can be executed or not
+        valid_commands = []
+        keys = list(Command.COMMANDS.keys())[:self.reset_params["allowed_commands"]]
+        available_commands = {key: Command.COMMANDS[key] for key in keys}
+        for key, value in available_commands.items():
+            test_pos = (pos[0] + value[0], pos[1] + value[1])
+            if test_pos[0] >= 0 and test_pos[0] < self.reset_params["arena_size"]:
+                if test_pos[1] >= 0 and test_pos[1] < self.reset_params["arena_size"]:
+                    valid_commands.append(key)
+        # Return the commands that can be executed
+        return valid_commands
+
+    def _generate_commands(self, start_pos):
+        simulated_pos = start_pos
+        commands = []
+        for i in range(self.reset_params["command_count"]):
+            # Retrieve valid commands (we cannot walk on to a wall)
+            valid_commands = self._get_valid_commands(simulated_pos)            
+            # Sample one command from the available ones
+            sample = valid_commands[self.np_random.integers(0, len(valid_commands))]
+            commands.append(sample)
+            # Update the simulated position
+            simulated_pos = (simulated_pos[0] + Command.COMMANDS[sample][0], simulated_pos[1] + Command.COMMANDS[sample][1])
+        return commands
 
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
@@ -97,10 +124,15 @@ class MortarMayhemEnv(gym.Env):
 
         # Setup agent
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
+        # maybe spawn on tile instead of entire random position
         spawn_pos = (self.np_random.integers(self.arena.rect.topleft[0] + self.agent.radius, self.arena.rect.bottomright[0] - self.agent.radius),
                     self.np_random.integers(self.arena.rect.topleft[1] + self.agent.radius, self.arena.rect.bottomright[1] - self.agent.radius))
         self.agent.rect.center = spawn_pos
-        self.normalized_agent_position = self.normalize_agent_position(self.agent.rect.center)
+        self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
+
+        # Sample n commands
+        self._commands = self._generate_commands(self.normalized_agent_position)
+        print(self._commands)
 
         # Draw
         self.command = Command("up", SCALE, (0, 0))
@@ -114,7 +146,7 @@ class MortarMayhemEnv(gym.Env):
     def step(self, action):
         # Move the agent's controlled character
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.arena.rect)
-        self.normalized_agent_position = self.normalize_agent_position(self.rotated_agent_rect.center)
+        self.normalized_agent_position = self._normalize_agent_position(self.rotated_agent_rect.center)
 
         reward = 0
         done = False
@@ -142,7 +174,6 @@ class MortarMayhemEnv(gym.Env):
         if mode == "rgb_array":
             self.clock.tick(MortarMayhemEnv.metadata["render_fps"])
             return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
-
 
     def close(self):
             if self.debug_window is not None:
