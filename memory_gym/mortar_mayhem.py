@@ -297,7 +297,7 @@ class MortarMayhemEnv(gym.Env):
         
         if mode == "rgb_array":
             self.clock.tick(fps)
-            return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
         elif mode == "debug_rgb_array":
             # Create debug window if it doesn't exist yet
             if self.debug_window is None:
@@ -311,7 +311,7 @@ class MortarMayhemEnv(gym.Env):
             texture = Texture.from_surface(self.renderer, debug_surface)
             texture.draw(dstrect=(0, 0))
             self.renderer.present()
-            return pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8)
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
             if self.debug_window is not None:

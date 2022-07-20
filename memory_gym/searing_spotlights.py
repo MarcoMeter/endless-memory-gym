@@ -344,7 +344,7 @@ class SearingSpotlightsEnv(gym.Env):
     def render(self, mode = "rgb_array"):
         if mode == "rgb_array":
             self.clock.tick(SearingSpotlightsEnv.metadata["render_fps"])
-            return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
         elif mode == "debug_rgb_array":
             # Create debug window if it doesn't exist yet
             if self.debug_window is None:
@@ -358,7 +358,7 @@ class SearingSpotlightsEnv(gym.Env):
             texture = Texture.from_surface(self.renderer, debug_surface)
             texture.draw(dstrect=(0, 0))
             self.renderer.present()
-            return pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8)
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
 def main():
     parser = ArgumentParser()
