@@ -330,7 +330,6 @@ class MortarArena():
         y = flat_tile_id % self.arena_size
         tile = self.tiles[x][y]
         pos = tile.global_position
-        pos = (pos[0] + self.tile_dim, pos[1] + self.tile_dim)
         return pos
 
     def toggle_tiles(self, target_tile = None):
