@@ -159,41 +159,41 @@ class MortarMayhemEnv(gym.Env):
 
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
+
+        # Check reset parameters for completeness and errors
         self.reset_params = MortarMayhemEnv.process_reset_params(options)
 
         # Track all rewards during one episode
         self.episode_rewards = []
 
-        # Setup arena and place on the center of the screen
+        # Setup the arena and place it on the center of the screen
         self.bg = pygame.Surface((self.screen_dim, self.screen_dim))
-        self.bg.fill(0)
         self.arena = MortarArena(SCALE, self.reset_params["arena_size"])
         self.arena.rect.center = (self.screen_dim // 2, self.screen_dim // 2)
 
         # Setup the agent and sample its position
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
         spawn_pos = self.arena.get_tile_global_position(self.np_random.integers(0, self.reset_params["arena_size"] ** 2))
-        translate_x = self.arena.rect.center[0] - self.arena.local_center[0] + self.arena.tile_dim // 2 + self.np_random.integers(-8 * SCALE, 8 * SCALE)
-        translate_y = self.arena.rect.center[0] - self.arena.local_center[0] + self.arena.tile_dim // 2 + self.np_random.integers(-8 * SCALE, 8 * SCALE)
-        spawn_pos = (spawn_pos[0] + translate_x, spawn_pos[1] + translate_y)
-        self.agent.rect.center = spawn_pos
+        offset = self.np_random.integers(-8 * SCALE, 8 * SCALE, 2)
+        translate_x = self.arena.rect.center[0] - self.arena.local_center[0] + self.arena.tile_dim // 2 + offset[0]
+        translate_y = self.arena.rect.center[1] - self.arena.local_center[1] + self.arena.tile_dim // 2 + offset[1]
+        self.agent.rect.center = spawn_pos[0] + translate_x, spawn_pos[1] + translate_y
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
 
-        # Sample n commands
+        # Sample the entire command sequence
         self._commands = self._generate_commands(self.normalized_agent_position)
+        # Prepare list which prepares all steps (i.e. frames) for the visualization
         self._command_visualization = self._generate_command_visualization(self._commands, self.reset_params["command_show_duration"], self.reset_params["command_show_delay"])
-        self._command_visualization_clone = self._command_visualization.copy() # this duplicate is used for render()
-        # Show first command frame
+        self._command_visualization_clone = self._command_visualization.copy() # the clone is needed for render()
+        # Retrieve the first command frame
         command = Command(self._command_visualization.pop(0), SCALE)
 
         # Init episode members
         self._target_pos = (self.normalized_agent_position[0] + Command.COMMANDS[self._commands[0]][0],
                             self.normalized_agent_position[1] + Command.COMMANDS[self._commands[0]][1])
-        self._current_command = 0
-        self._command_steps = 0
-        self._command_verify_step = 0
-        self.toggle = False
-        self.is_executing = True
+        self._current_command = 0       # the current to be executed command
+        self._command_steps = 0         # the current step while executing a command (i.e. death tiles off)
+        self._command_verify_step = 0   # the current step while the command is being evaluated (i.e. death tiles on)
 
         # Draw
         self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect),
@@ -207,13 +207,14 @@ class MortarMayhemEnv(gym.Env):
     def step(self, action):
         reward = 0
         done = False
+        command = None
 
         # Show each command one by one, while the agent cannot move
         if self._command_visualization:
             command = Command(self._command_visualization.pop(0), SCALE)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.surface, self.agent.rect
+        # All commands were shown, the agent can move now, while the command execution logic is running
         else:
-            command = None
             # Move the agent's controlled character
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.arena.rect)
             self.normalized_agent_position = self._normalize_agent_position(self.rotated_agent_rect.center)
@@ -222,9 +223,12 @@ class MortarMayhemEnv(gym.Env):
             # One command is alive for explosion delay steps
             verify = self._command_steps % self.reset_params["explosion_delay"] == 0 and self._command_steps > 0
 
+            # Run the verification logic on whether the agent succeeded on moving to the target tile
             if verify and not self.arena.tiles_on:
                 if self._current_command < self.reset_params["command_count"]:
                     self._current_command += 1
+
+                    # Turn on the death tiles
                     self.arena.toggle_tiles(self._target_pos)
 
                     # Check if the agent is on the target position
@@ -243,8 +247,10 @@ class MortarMayhemEnv(gym.Env):
                     reward += self.reset_params["reward_episode_success"]
                 self._command_steps = 0
 
+            # Keep the death tiles on for as long as the explosion duration
             if self.arena.tiles_on:
                 if self._command_verify_step % self.reset_params["explosion_duration"] == 0 and self._command_verify_step > 0:
+                    # Turn death tiles off
                     self.arena.toggle_tiles()
                     self._command_verify_step = 0
                     if self._current_command < self.reset_params["command_count"]:
@@ -252,6 +258,7 @@ class MortarMayhemEnv(gym.Env):
                         self._target_pos = (self._target_pos[0] + Command.COMMANDS[self._commands[self._current_command]][0],
                                             self._target_pos[1] + Command.COMMANDS[self._commands[self._current_command]][1])
                 else:
+                    # The agent dies upon walking on a death tile
                     if not self.normalized_agent_position == self._target_pos:
                         # Failure!
                         done = True
