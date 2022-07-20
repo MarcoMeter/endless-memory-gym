@@ -230,7 +230,7 @@ class MortarMayhemEnv(gym.Env):
                     # Check if the agent is on the target position
                     if self.normalized_agent_position == self._target_pos:
                         # Success!
-                        reward = self.reset_params["reward_command_success"]
+                        reward += self.reset_params["reward_command_success"]
                     # If the agent is not on the target position, terminate the episode
                     else:
                         # Failure!
@@ -240,7 +240,7 @@ class MortarMayhemEnv(gym.Env):
                 if self._current_command >= self.reset_params["command_count"]:
                     # All commands completed!
                     done = True
-                    reward = self.reset_params["reward_episode_success"]
+                    reward += self.reset_params["reward_episode_success"]
                 self._command_steps = 0
 
             if self.arena.tiles_on:
