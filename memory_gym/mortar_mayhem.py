@@ -1,5 +1,4 @@
 import gym
-import math
 import numpy as np
 import os
 import pygame
@@ -26,7 +25,7 @@ class MortarMayhemEnv(gym.Env):
                 "command_show_duration": 3,
                 "command_show_delay": 1,
                 "explosion_duration": 6,
-                "explosion_delay": 12,
+                "explosion_delay": 18,
                 "reward_command_failure": -0.1,
                 "reward_command_success": 0.1,
                 "reward_episode_success": 0.0
@@ -231,7 +230,7 @@ class MortarMayhemEnv(gym.Env):
                     # Check if the agent is on the target position
                     if self.normalized_agent_position == self._target_pos:
                         # Success!
-                        reward += self.reset_params["reward_command_success"]
+                        reward = self.reset_params["reward_command_success"]
                     # If the agent is not on the target position, terminate the episode
                     else:
                         # Failure!
@@ -241,7 +240,7 @@ class MortarMayhemEnv(gym.Env):
                 if self._current_command >= self.reset_params["command_count"]:
                     # All commands completed!
                     done = True
-                    reward += self.reset_params["reward_episode_success"]
+                    reward = self.reset_params["reward_episode_success"]
                 self._command_steps = 0
 
             if self.arena.tiles_on:
@@ -256,7 +255,7 @@ class MortarMayhemEnv(gym.Env):
                     if not self.normalized_agent_position == self._target_pos:
                         # Failure!
                         done = True
-                        reward += self.reset_params["reward_command_failure"]
+                        reward = self.reset_params["reward_command_failure"]
                     self._command_verify_step += 1
             else:
                 self._command_steps +=1
