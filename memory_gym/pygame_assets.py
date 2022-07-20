@@ -314,6 +314,7 @@ class MortarArena():
         self.rect_dim = self.tile_dim * arena_size
         self.surface = pygame.Surface((self.rect_dim, self.rect_dim))
         self.rect = self.surface.get_rect()
+        self.local_center = self.rect.center
         self.tiles = [[] for _ in range(arena_size)]
         self.tiles_on = False
         for i in range(self.arena_size):

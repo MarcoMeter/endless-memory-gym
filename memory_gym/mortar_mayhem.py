@@ -101,7 +101,8 @@ class MortarMayhemEnv(gym.Env):
 
         # Mark the target tile to visualize the ground truth
         target_tile = self.arena.tiles[int(self._target_pos[0])][int(self._target_pos[1])]
-        pos = (target_tile.global_position[0] + self.arena.tile_dim, target_tile.global_position[1] + self.arena.tile_dim)
+        translation = self.arena.rect.center[0] - self.arena.local_center[0] + self.arena.tile_dim // 2
+        pos = (target_tile.global_position[0] + translation, target_tile.global_position[1] + translation)
         pygame.draw.circle(surface, (0, 255, 0), pos, self.arena.tile_dim // 2, int(8 * SCALE))
 
         return pygame.transform.scale(surface, (336, 336))
