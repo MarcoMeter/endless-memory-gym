@@ -79,6 +79,33 @@ class MortarMayhemEnv(gym.Env):
                 self.screen.blit(surface[0], surface[1])
         pygame.display.flip()
 
+    def _build_debug_surface(self):
+        surface = pygame.Surface((336 * SCALE, 336 * SCALE))
+
+        # Gather surfaces
+        surfs = [(self.arena.surface, self.arena.rect)]
+        # Retrieve the rotated agent surface or the original one
+        if self.rotated_agent_surface is not None:
+            surfs.append((self.rotated_agent_surface, self.rotated_agent_rect))
+        else:
+            surfs.append((self.agent.surface, self.agent.rect))
+
+        # Draw command visualization
+        if self._command_visualization:
+            command = Command(self._command_visualization_clone.pop(0), SCALE)
+            surfs.append((command.surface, (((self.screen_dim // 2) - command.rect_dim // 2, (self.screen_dim // 2) - command.rect_dim // 2))))
+       
+        # Blit all surfaces
+        for surf, rect in surfs:
+            surface.blit(surf, rect)
+
+        # Mark the target tile to visualize the ground truth
+        target_tile = self.arena.tiles[int(self._target_pos[0])][int(self._target_pos[1])]
+        pos = (target_tile.global_position[0] + self.arena.tile_dim, target_tile.global_position[1] + self.arena.tile_dim)
+        pygame.draw.circle(surface, (0, 255, 0), pos, self.arena.tile_dim // 2, int(8 * SCALE))
+
+        return pygame.transform.scale(surface, (336, 336))
+
     def _normalize_agent_position(self, agent_position):
         return ((agent_position[0] - self.arena.rect[0]) // self.arena.tile_dim,
                 (agent_position[1] - self.arena.rect[1]) // self.arena.tile_dim)
@@ -153,6 +180,7 @@ class MortarMayhemEnv(gym.Env):
         # Sample n commands
         self._commands = self._generate_commands(self.normalized_agent_position)
         self._command_visualization = self._generate_command_visualization(self._commands, self.reset_params["command_show_duration"], self.reset_params["command_show_delay"])
+        self._command_visualization_clone = self._command_visualization.copy() # this duplicate is used for render()
         # Show first command frame
         command = Command(self._command_visualization.pop(0), SCALE)
 
@@ -253,12 +281,28 @@ class MortarMayhemEnv(gym.Env):
         return vis_obs, reward, done, info
 
     def render(self, mode = "rgb_array"):
+        if self._command_visualization:
+                fps = 4
+        else:
+            fps = MortarMayhemEnv.metadata["render_fps"]
+        
         if mode == "rgb_array":
-            if self._command_visualization:
-                self.clock.tick(4)
-            else:
-                self.clock.tick(MortarMayhemEnv.metadata["render_fps"])
+            self.clock.tick(fps)
             return pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        elif mode == "debug_rgb_array":
+            # Create debug window if it doesn't exist yet
+            if self.debug_window is None:
+                self.debug_window = Window(size = (336, 336))
+                self.debug_window.show()
+                self.renderer = Renderer(self.debug_window)
+            
+            self.clock.tick(fps)
+
+            debug_surface = self._build_debug_surface()
+            texture = Texture.from_surface(self.renderer, debug_surface)
+            texture.draw(dstrect=(0, 0))
+            self.renderer.present()
+            return pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8)
 
     def close(self):
             if self.debug_window is not None:
@@ -273,7 +317,7 @@ def main():
     env = MortarMayhemEnv(headless = False)
     reset_params = {}
     vis_obs = env.reset(seed = options.seed, options = reset_params)
-    img = env.render(mode = "rgb_array")
+    img = env.render(mode = "debug_rgb_array")
     done = False
 
     while not done:
@@ -288,7 +332,7 @@ def main():
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             actions[0] = 1
         vis_obs, reward, done, info = env.step(actions)
-        img = env.render(mode = "rgb_array")
+        img = env.render(mode = "debug_rgb_array")
 
         # Process event-loop
         for event in pygame.event.get():
