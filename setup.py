@@ -38,6 +38,7 @@ setup(
             "console_scripts": [
             "searing_spotlights=memory_gym.searing_spotlights:main",
             "mortar_mayhem=memory_gym.mortar_mayhem:main",
+            "mystery_path=memory_gym.mystery_path:main",
             ],
       },
       version="0.0.7",
