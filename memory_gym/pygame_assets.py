@@ -345,3 +345,89 @@ class MortarArena():
                     tile = self.tiles[i][j]
                     tile.toggle_color(on = self.tiles_on)
                     self.surface.blit(tile.surface, tile.global_position)
+
+class Node():
+    def __init__(self, i, j):
+        self.x, self.y = i, j
+        self.f_cost, self.g_cost, self.h_cost = 0, 0, 0
+        self.neighbors = []
+        self.previous_node = None
+
+    def add_neighbors(self, grid, num_columns, num_rows):
+        if self.x < num_columns - 1:
+            self.neighbors.append(grid[self.x+1][self.y])
+        if self.x > 0:
+            self.neighbors.append(grid[self.x-1][self.y])
+        if self.y < num_rows - 1:
+            self.neighbors.append(grid[self.x][self.y+1])
+        if self.y > 0:
+            self.neighbors.append(grid[self.x][self.y-1])
+
+class MysteryPath():
+    def __init__(self, num_columns, num_rows, start_position, end_position) -> None:
+        path_found = False
+        grid = []
+        open_set, closed_set = [], []
+        self.path = []
+
+        # Instantiate all nodes
+        for i in range(num_columns):
+            column = []
+            for j in range(num_rows):
+                column.append(Node(i,j))
+            grid.append(column)
+
+        # Set neighbors
+        for i in range(num_columns):
+            for j in range(num_rows):
+                grid[i][j].add_neighbors(grid, num_columns, num_rows)
+
+        start_node = grid[start_position[0]][start_position[1]]
+        end_node = grid[end_position[0]][end_position[1]]
+
+        # Add start node to open set
+        open_set.append(start_node)
+
+        while not path_found:
+            if len(open_set) > 0:
+                # Pick the most promising node from the open set
+                winner_node_id = 0
+                for i in range(len(open_set)):
+                    if open_set[i].f_cost < open_set[winner_node_id].f_cost:
+                        winner_node_id = i
+                        break # maybe don't, or sample break because there might be multiple shortest paths
+                current_node = open_set[winner_node_id]
+
+                # If the end node is reached, trace back the nodes to retrieve the path
+                if current_node == end_node:
+                    temp = current_node
+                    while temp.previous_node:
+                        self.path.append(temp.previous_node)
+                        temp = temp.previous_node 
+                    path_found = True
+                else:
+                    open_set.remove(current_node)
+                    closed_set.append(current_node)
+
+                    for neighbor in current_node.neighbors:
+                        if neighbor in closed_set:
+                            continue
+                        g = current_node.g_cost + 1
+
+                        new_path = False
+                        if neighbor in open_set:
+                            if g < neighbor.g_cost:
+                                neighbor.g = g
+                                new_path = True
+                        else:
+                            neighbor.g_cost = g
+                            new_path = True
+                            open_set.append(neighbor)
+
+                        if new_path:
+                                neighbor.h_cost = self.heuristic(neighbor, end_node)
+                                neighbor.f_cost = neighbor.g_cost + neighbor.h_cost
+                                neighbor.previous_node = current_node     
+
+    def heuristic(self, a, b):
+        return math.sqrt((a.x - b.x)**2 + abs(a.y - b.y)**2)
