@@ -21,7 +21,7 @@ class MortarMayhemEnv(gym.Env):
                 "agent_speed": 10.0 * SCALE,
                 "arena_size": 5,
                 "allowed_commands": 4,
-                "command_count": 5,
+                "command_count": [5],
                 "command_show_duration": 3,
                 "command_show_delay": 1,
                 "explosion_duration": 6,
@@ -125,7 +125,8 @@ class MortarMayhemEnv(gym.Env):
     def _generate_commands(self, start_pos):
         simulated_pos = start_pos
         commands = []
-        for i in range(self.reset_params["command_count"]):
+        self.num_commands = self.np_random.choice(self.reset_params["command_count"])
+        for i in range(self.num_commands):
             # Retrieve valid commands (we cannot walk on to a wall)
             valid_commands = self._get_valid_commands(simulated_pos)            
             # Sample one command from the available ones
@@ -225,7 +226,7 @@ class MortarMayhemEnv(gym.Env):
 
             # Run the verification logic on whether the agent succeeded on moving to the target tile
             if verify and not self.arena.tiles_on:
-                if self._current_command < self.reset_params["command_count"]:
+                if self._current_command < self.num_commands:
                     self._current_command += 1
 
                     # Turn on the death tiles
@@ -241,7 +242,7 @@ class MortarMayhemEnv(gym.Env):
                         done = True
                         reward += self.reset_params["reward_command_failure"]
                 # Finish the episode once all commands are completed
-                if self._current_command >= self.reset_params["command_count"]:
+                if self._current_command >= self.num_commands:
                     # All commands completed!
                     done = True
                     reward += self.reset_params["reward_episode_success"]
@@ -253,7 +254,7 @@ class MortarMayhemEnv(gym.Env):
                     # Turn death tiles off
                     self.arena.toggle_tiles()
                     self._command_verify_step = 0
-                    if self._current_command < self.reset_params["command_count"]:
+                    if self._current_command < self.num_commands:
                         # Update target position
                         self._target_pos = (self._target_pos[0] + Command.COMMANDS[self._commands[self._current_command]][0],
                                             self._target_pos[1] + Command.COMMANDS[self._commands[self._current_command]][1])
