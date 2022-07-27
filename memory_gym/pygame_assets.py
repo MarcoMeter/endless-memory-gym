@@ -363,10 +363,13 @@ class Node():
         if self.y > 0:
             self.neighbors.append(grid[self.x][self.y-1])
 
+    def draw_to_surface(self, surface, tile_dim, color):
+        pygame.draw.rect(surface, color, (self.x * tile_dim, self.y * tile_dim, tile_dim, tile_dim))
+
 class MysteryPath():
-    def __init__(self, num_columns, num_rows, start_position, end_position) -> None:
+    def __init__(self, num_columns, num_rows, start_position, end_position, rng) -> None:
         path_found = False
-        grid = []
+        self.grid = []
         open_set, closed_set = [], []
         self.path = []
 
@@ -375,15 +378,15 @@ class MysteryPath():
             column = []
             for j in range(num_rows):
                 column.append(Node(i,j))
-            grid.append(column)
+            self.grid.append(column)
 
         # Set neighbors
         for i in range(num_columns):
             for j in range(num_rows):
-                grid[i][j].add_neighbors(grid, num_columns, num_rows)
+                self.grid[i][j].add_neighbors(self.grid, num_columns, num_rows)
 
-        start_node = grid[start_position[0]][start_position[1]]
-        end_node = grid[end_position[0]][end_position[1]]
+        start_node = self.grid[start_position[0]][start_position[1]]
+        end_node = self.grid[end_position[0]][end_position[1]]
 
         # Add start node to open set
         open_set.append(start_node)
@@ -400,6 +403,7 @@ class MysteryPath():
 
                 # If the end node is reached, trace back the nodes to retrieve the path
                 if current_node == end_node:
+                    self.path.append(end_node)
                     temp = current_node
                     while temp.previous_node:
                         self.path.append(temp.previous_node)
@@ -412,7 +416,7 @@ class MysteryPath():
                     for neighbor in current_node.neighbors:
                         if neighbor in closed_set:
                             continue
-                        g = current_node.g_cost + 1
+                        g = current_node.g_cost + 1 + rng.integers(0, 15)
 
                         new_path = False
                         if neighbor in open_set:
@@ -431,3 +435,13 @@ class MysteryPath():
 
     def heuristic(self, a, b):
         return math.sqrt((a.x - b.x)**2 + abs(a.y - b.y)**2)
+
+    def draw_to_surface(self, surface, tile_dim):
+        for n, node in enumerate(self.path):
+            if n == 0:
+                color = (0, 255, 0)
+            elif n == len(self.path) - 1:
+                color = (0, 0, 255)
+            else:
+                color = (255, 255, 255)
+            node.draw_to_surface(surface, tile_dim, color)

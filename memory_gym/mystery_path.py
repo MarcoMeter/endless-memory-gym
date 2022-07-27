@@ -5,7 +5,7 @@ import pygame
 
 from argparse import ArgumentParser
 from gym import  spaces
-from memory_gym.pygame_assets import CharacterController, Command, MortarArena
+from memory_gym.pygame_assets import CharacterController, MysteryPath
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 1.0
@@ -91,16 +91,33 @@ class MysteryPathEnv(gym.Env):
         # Track all rewards during one episode
         self.episode_rewards = []
 
-        # Setup the bg
-        self.bg = pygame.Surface((self.screen_dim, self.screen_dim))
-        self.bg.fill(0)
+        # Setup path
+        # Determine the start position on the screen's extent
+        choice = self.np_random.choice([0, 1, 2, 3])
+        if choice == 0:
+            start = (0, self.np_random.integers(0, 7))
+            end = (6, self.np_random.integers(0, 7))
+        elif choice == 1:
+            start = (6, self.np_random.integers(0, 7))
+            end = (0, self.np_random.integers(0, 7))
+        elif choice == 2:
+            start = (self.np_random.integers(0, 7), 0)
+            end = (self.np_random.integers(0, 7), 6)
+        else:
+            start = (self.np_random.integers(0, 7), 6)
+            end = (self.np_random.integers(0, 7), 0)
+        path = MysteryPath(7, 7, start, end, self.np_random)
+        self.path_surface = pygame.Surface((self.screen_dim, self.screen_dim))
+        self.path_surface.fill(0)
+        path.draw_to_surface(self.path_surface, self.screen_dim // 7)
+
 
         # Setup the agent and sample its position
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
-        self.agent.rect.center = (self.screen_dim // 2, self.screen_dim // 2)
+        self.agent.rect.center = (start[0] * self.screen_dim // 7 + self.agent.radius, start[1] * self.screen_dim // 7 + self.agent.radius)
 
         # Draw
-        self._draw_surfaces([(self.bg, (0, 0)), (self.agent.surface, self.agent.rect)])
+        self._draw_surfaces([(self.path_surface, (0, 0)), (self.agent.surface, self.agent.rect)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
@@ -126,7 +143,7 @@ class MysteryPathEnv(gym.Env):
             info = {}
 
         # Draw
-        self._draw_surfaces([(self.bg, (0, 0)), (self.rotated_agent_surface, self.rotated_agent_rect)])
+        self._draw_surfaces([(self.path_surface, (0, 0)), (self.rotated_agent_surface, self.rotated_agent_rect)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
@@ -150,7 +167,8 @@ def main():
 
     env = MysteryPathEnv(headless = False)
     reset_params = {}
-    vis_obs = env.reset(seed = options.seed, options = reset_params)
+    seed = options.seed
+    vis_obs = env.reset(seed = seed, options = reset_params)
     img = env.render(mode = "rgb_array")
     done = False
 
@@ -165,6 +183,13 @@ def main():
             actions[1] = 2
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             actions[0] = 1
+        if keys[pygame.K_PAGEDOWN] or keys[pygame.K_PAGEUP]:
+            if keys[pygame.K_PAGEUP]:
+                seed += 1
+            if keys[pygame.K_PAGEDOWN]:
+                seed -= 1
+            vis_obs = env.reset(seed = seed, options = reset_params)
+            img = env.render(mode = "rgb_array")
         vis_obs, reward, done, info = env.step(actions)
         img = env.render(mode = "rgb_array")
 
