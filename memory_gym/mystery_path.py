@@ -39,7 +39,6 @@ class MysteryPathEnv(gym.Env):
         if headless:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
-            pygame.event.set_allowed(None)
         else:
             pygame.display.set_caption("Environment")
 
@@ -48,6 +47,8 @@ class MysteryPathEnv(gym.Env):
         self.screen_dim = int(336 * SCALE)
         self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
         self.clock = pygame.time.Clock()
+        if headless:
+            pygame.event.set_allowed(None)
 
         # Init debug window
         self.debug_window = None

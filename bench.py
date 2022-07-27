@@ -3,8 +3,9 @@ import gym
 import time
 import numpy as np
 
-# env = gym.make("SearingSpotlights-v0")
-env = gym.make("MortarMayhem-v0")
+env = gym.make("SearingSpotlights-v0")
+# env = gym.make("MortarMayhem-v0")
+# env = gym.make("MysteryPath-v0")
 
 def run():
     fps_list = []
