@@ -45,10 +45,18 @@ class MortarMayhemEnv(gym.Env):
         if headless:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
+            pygame.event.set_allowed(None)
         else:
             pygame.display.set_caption("Environment")
 
+        # Init PyGame screen
+        pygame.init()
         self.screen_dim = int(336 * SCALE)
+        self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
+        self.clock = pygame.time.Clock()
+
+        # Init debug window
+        self.debug_window = None      
 
         # Setup observation and action space
         self.action_space = spaces.MultiDiscrete([3, 3])
@@ -58,17 +66,7 @@ class MortarMayhemEnv(gym.Env):
                     shape = [self.screen_dim, self.screen_dim, 3],
                     dtype = np.float32)
 
-        # Init PyGame screen
-        pygame.init()
-        self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
-
-        # Init debug window
-        self.debug_window = None
-        
-        if headless:
-            pygame.event.set_allowed(None)
-        self.clock = pygame.time.Clock()
-
+        # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
     def _draw_surfaces(self, surfaces):

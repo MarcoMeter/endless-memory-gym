@@ -63,10 +63,18 @@ class SearingSpotlightsEnv(gym.Env):
         if headless:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
+            pygame.event.set_allowed(None)
         else:
             pygame.display.set_caption("Environment")
 
+        # Init PyGame screen
+        pygame.init()
         self.screen_dim = int(336 * SCALE)
+        self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
+        self.clock = pygame.time.Clock()
+
+        # Init debug window
+        self.debug_window = None
 
         # Setup observation and action space
         self.action_space = spaces.MultiDiscrete([3, 3])
@@ -76,18 +84,7 @@ class SearingSpotlightsEnv(gym.Env):
                     shape = [self.screen_dim, self.screen_dim, 3],
                     dtype = np.float32)
 
-        # Init PyGame screen
-        pygame.init()
-        self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
-
-        # Init debug window
-        self.debug_window = None
-        
-        if headless:
-            pygame.event.set_allowed(None)
-        self.clock = pygame.time.Clock()
-
-        # Initialize surfaces
+        # Environment members
         # Tiled background surface
         self.blue_background_surface = get_tiled_background_surface(self.screen, self.screen_dim, (0, 0, 255), SCALE)
         self.red_background_surface = get_tiled_background_surface(self.screen, self.screen_dim, (255, 0, 0), SCALE)

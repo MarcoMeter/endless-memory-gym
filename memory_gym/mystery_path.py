@@ -39,10 +39,18 @@ class MysteryPathEnv(gym.Env):
         if headless:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
+            pygame.event.set_allowed(None)
         else:
             pygame.display.set_caption("Environment")
 
+        # Init PyGame screen
+        pygame.init()
         self.screen_dim = int(336 * SCALE)
+        self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
+        self.clock = pygame.time.Clock()
+
+        # Init debug window
+        self.debug_window = None
 
         # Setup observation and action space
         self.action_space = spaces.MultiDiscrete([3, 3])
@@ -51,19 +59,11 @@ class MysteryPathEnv(gym.Env):
                     high = 1.0,
                     shape = [self.screen_dim, self.screen_dim, 3],
                     dtype = np.float32)
-
-        # Init PyGame screen
-        pygame.init()
-        self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
-
-        # Init debug window
-        self.debug_window = None
         
-        if headless:
-            pygame.event.set_allowed(None)
-        self.clock = pygame.time.Clock()
-
+        # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
+        self.grid_dim = 7
+        self.tile_dim = self.screen_dim / self.grid_dim
 
     def _draw_surfaces(self, surfaces):
         # Draw all surfaces
@@ -86,29 +86,31 @@ class MysteryPathEnv(gym.Env):
         self.episode_rewards = []
 
         # Setup path
-        # Determine the start position on the screen's extent
-        choice = self.np_random.choice([0, 1, 2, 3])
-        if choice == 0:
-            start = (0, self.np_random.integers(0, 7))
-            end = (6, self.np_random.integers(0, 7))
-        elif choice == 1:
-            start = (6, self.np_random.integers(0, 7))
-            end = (0, self.np_random.integers(0, 7))
-        elif choice == 2:
-            start = (self.np_random.integers(0, 7), 0)
-            end = (self.np_random.integers(0, 7), 6)
+        # Determine the start and end position on the screen's extent
+        cardinal_origin = self.np_random.choice(self.reset_params["cardinal_origin_choice"])
+        if cardinal_origin == 0:
+            start = (0, self.np_random.integers(0, self.grid_dim))
+            end = (self.grid_dim - 1, self.np_random.integers(0, self.grid_dim))
+        elif cardinal_origin == 1:
+            start = (self.grid_dim - 1, self.np_random.integers(0, self.grid_dim))
+            end = (0, self.np_random.integers(0, self.grid_dim))
+        elif cardinal_origin == 2:
+            start = (self.np_random.integers(0, self.grid_dim), 0)
+            end = (self.np_random.integers(0, self.grid_dim), self.grid_dim - 1)
         else:
-            start = (self.np_random.integers(0, 7), 6)
-            end = (self.np_random.integers(0, 7), 0)
-        path = MysteryPath(7, 7, start, end, self.np_random)
+            start = (self.np_random.integers(0, self.grid_dim), self.grid_dim - 1)
+            end = (self.np_random.integers(0, self.grid_dim), 0)
+        
+        # Procedurally generate the mystery path using A*
+        path = MysteryPath(self.grid_dim, self.grid_dim, start, end, self.np_random)
         self.path_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.path_surface.fill(0)
-        path.draw_to_surface(self.path_surface, self.screen_dim // 7)
-
+        path.draw_to_surface(self.path_surface, self.tile_dim)
 
         # Setup the agent and sample its position
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
-        self.agent.rect.center = (start[0] * self.screen_dim // 7 + self.agent.radius, start[1] * self.screen_dim // 7 + self.agent.radius)
+        # Place the agent on the path's starting position
+        self.agent.rect.center = (start[0] * self.tile_dim + self.agent.radius, start[1] * self.tile_dim + self.agent.radius)
 
         # Draw
         self._draw_surfaces([(self.path_surface, (0, 0)), (self.agent.surface, self.agent.rect)])
