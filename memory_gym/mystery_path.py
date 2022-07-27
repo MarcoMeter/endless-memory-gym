@@ -19,16 +19,12 @@ class MysteryPathEnv(gym.Env):
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 10.0 * SCALE,
-                "arena_size": 5,
-                "allowed_commands": 4,
-                "command_count": 5,
-                "command_show_duration": 3,
-                "command_show_delay": 1,
-                "explosion_duration": 6,
-                "explosion_delay": 18,
-                "reward_command_failure": -0.1,
-                "reward_command_success": 0.1,
-                "reward_episode_success": 0.0
+                "cardinal_origin_choice": [0, 1, 2, 3],
+                "show_origin": True,
+                "show_goal": True,
+                "reward_goal": 1.0,
+                "reward_fall_off": 0.0,
+                "reward_path_progress": 0.0
             }
 
     def process_reset_params(reset_params):
@@ -37,8 +33,6 @@ class MysteryPathEnv(gym.Env):
             for k, v in reset_params.items():
                 assert k in cloned_params.keys(), "Provided reset parameter (" + str(k) + ") is not valid. Check spelling."
                 cloned_params[k] = v
-        assert cloned_params["allowed_commands"] >= 4 and cloned_params["allowed_commands"] <= 9
-        assert cloned_params["arena_size"] >= 2 and cloned_params["arena_size"] <= 6
         return cloned_params
 
     def __init__(self, headless = True) -> None:

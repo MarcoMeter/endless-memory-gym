@@ -347,11 +347,12 @@ class MortarArena():
                     self.surface.blit(tile.surface, tile.global_position)
 
 class Node():
-    def __init__(self, i, j):
+    def __init__(self, i, j, is_wall = False):
         self.x, self.y = i, j
         self.f_cost, self.g_cost, self.h_cost = 0, 0, 0
         self.neighbors = []
         self.previous_node = None
+        self.is_wall = is_wall
 
     def add_neighbors(self, grid, num_columns, num_rows):
         if self.x < num_columns - 1:
@@ -364,7 +365,9 @@ class Node():
             self.neighbors.append(grid[self.x][self.y-1])
 
     def draw_to_surface(self, surface, tile_dim, color):
-        pygame.draw.rect(surface, color, (self.x * tile_dim, self.y * tile_dim, tile_dim, tile_dim))
+        if self.is_wall:
+            color = (255, 0, 0)
+        pygame.draw.rect(surface, color, (self.x * tile_dim, self.y * tile_dim, tile_dim, tile_dim), width=4)
 
 class MysteryPath():
     def __init__(self, num_columns, num_rows, start_position, end_position, rng) -> None:
@@ -372,12 +375,20 @@ class MysteryPath():
         self.grid = []
         open_set, closed_set = [], []
         self.path = []
+        self.wall_nodes = []
 
         # Instantiate all nodes
         for i in range(num_columns):
             column = []
             for j in range(num_rows):
-                column.append(Node(i,j))
+                is_wall = False
+                if i > 0 and i < num_columns - 2 and j > 0 and j < num_rows - 2:
+                    if rng.integers(0, 100) < 33:
+                        is_wall = True
+                node = Node(i,j,is_wall)
+                column.append(node)
+                if is_wall:
+                    self.wall_nodes.append(node)
             self.grid.append(column)
 
         # Set neighbors
@@ -414,9 +425,9 @@ class MysteryPath():
                     closed_set.append(current_node)
 
                     for neighbor in current_node.neighbors:
-                        if neighbor in closed_set:
+                        if neighbor in closed_set or neighbor.is_wall:
                             continue
-                        g = current_node.g_cost + 1 + rng.integers(0, 15)
+                        g = current_node.g_cost + rng.integers(1, 9)#g_cost_noise[current_node.x, current_node.y]
 
                         new_path = False
                         if neighbor in open_set:
@@ -444,4 +455,7 @@ class MysteryPath():
                 color = (0, 0, 255)
             else:
                 color = (255, 255, 255)
+            node.draw_to_surface(surface, tile_dim, color)
+        
+        for node in self.wall_nodes:
             node.draw_to_surface(surface, tile_dim, color)
