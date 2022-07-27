@@ -30,10 +30,10 @@ class GridPositionSampler():
         return (x * self.cell_dim, y * self.cell_dim)
 
 class CharacterController():
-    def __init__(self, screen_dim, speed, scale) -> None:
+    def __init__(self, screen_dim, speed, scale, rotation = 0) -> None:
         self.screen_dim = screen_dim
         self.speed = speed
-        self.rotation = 180
+        self.rotation = rotation
         # Body
         self.radius = int(25 * scale)
         body_color = (250, 204, 153)
@@ -51,7 +51,6 @@ class CharacterController():
         self.surface.set_colorkey(255)
         self.rect = self.surface.get_rect()
         self.rect.center = (0, 0)
-        self.rotation = 0
         # Draw body
         pygame.draw.circle(self.surface, body_color, (self.radius + hand_radius // 2, self.radius + hand_radius // 2), self.radius)
         # Draw hands
@@ -115,7 +114,6 @@ class CharacterController():
             self.rect.center = (x, y)
 
         return self.rotate(self.rotation)
-
 
 class Spotlight():
     def __init__(self, dim, radius, speed, rng) -> None:

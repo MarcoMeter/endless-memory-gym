@@ -233,7 +233,8 @@ class SearingSpotlightsEnv(gym.Env):
         self.episode_rewards = []
 
         # Setup agent
-        self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
+        rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
+        self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
         spawn_pos = self.grid_sampler.sample(5)
         spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
         self.agent.rect.center = spawn_pos

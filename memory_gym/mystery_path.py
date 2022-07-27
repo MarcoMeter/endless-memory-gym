@@ -119,7 +119,8 @@ class MysteryPathEnv(gym.Env):
         self.mystery_path.draw_to_surface(self.path_surface, self.tile_dim, self.reset_params["show_origin"], self.reset_params["show_goal"])
 
         # Setup the agent and sample its position
-        self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
+        rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
+        self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
         # Place the agent on the path's starting position
         self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
