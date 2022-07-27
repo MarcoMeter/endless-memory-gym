@@ -151,6 +151,10 @@ class MysteryPathEnv(gym.Env):
             for node in self.mystery_path.path:
                 if self.normalized_agent_position == (node.x, node.y):
                     on_path = True
+                    if not node.visited and not (node.x, node.y) == self.start and not (node.x, node.y) == self.end:
+                        # Reward the agent for reaching a tile that it has not visisted before
+                        reward += self.reset_params["reward_path_progress"]
+                        node.visited = True
                     break
             if not on_path:
                 self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
