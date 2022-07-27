@@ -33,8 +33,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "light_dim_off_duration": 10,
                 "light_threshold": 255,
                 # Coin Parameters
-                "min_num_coins": 2,
-                "max_num_coins": 5,
+                "num_coins": [2, 3, 4, 5],
                 "coin_scale": 1.5 * SCALE,
                 # Exit Parameters
                 "use_exit": True,
@@ -180,7 +179,7 @@ class SearingSpotlightsEnv(gym.Env):
         self.coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.coin_surface.fill(255)
         self.coin_surface.set_colorkey(255)
-        for _ in range(self.np_random.integers(self.reset_params["min_num_coins"], self.reset_params["max_num_coins"] + 1)):
+        for _ in range(self.num_coins):
             spawn_pos = self.grid_sampler.sample(2)
             spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
             coin = Coin(self.reset_params["coin_scale"], spawn_pos)
@@ -251,7 +250,8 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Spawn coin and exit entities if applicable
         self.coins = []
-        if self.reset_params["min_num_coins"] > 0:
+        self.num_coins = self.np_random.choice(self.reset_params["num_coins"]) if len(self.reset_params["num_coins"]) > 0 else 0
+        if self.num_coins > 0:
             self._spawn_coins()
         else:
             self.coin_surface = None
@@ -289,7 +289,7 @@ class SearingSpotlightsEnv(gym.Env):
         r, spotlights_done, self.bg = self._step_spotlight_task()
         reward += r
         # Coin collection task
-        if self.reset_params["min_num_coins"] > 0:
+        if self.num_coins > 0:
             r, coins_done = self._step_coin_task()
             reward += r
         else:
@@ -312,7 +312,7 @@ class SearingSpotlightsEnv(gym.Env):
                 else:
                     done = False
             else:
-                if self.reset_params["min_num_coins"] > 0:
+                if self.num_coins > 0:
                     done = True
 
         # Draw all surfaces
