@@ -74,6 +74,12 @@ class MysteryPathEnv(gym.Env):
 
     def _build_debug_surface(self):
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
+        surface.fill(0)
+        self.mystery_path.draw_to_surface(surface, self.tile_dim, True, True, True, True)
+        if self.rotated_agent_surface:
+            surface.blit(self.rotated_agent_surface, self.rotated_agent_rect)
+        else:
+            surface.blit(self.agent.surface, self.agent.rect)
         return pygame.transform.scale(surface, (336, 336))
 
     def _normalize_agent_position(self, agent_position):
@@ -81,6 +87,7 @@ class MysteryPathEnv(gym.Env):
 
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
+        self.current_seed = seed
 
         # Check reset parameters for completeness and errors
         self.reset_params = MysteryPathEnv.process_reset_params(options)
@@ -170,6 +177,21 @@ class MysteryPathEnv(gym.Env):
         if mode == "rgb_array":
             self.clock.tick(MysteryPathEnv.metadata["render_fps"])
             return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        elif mode == "debug_rgb_array":
+            # Create debug window if it doesn't exist yet
+            if self.debug_window is None:
+                self.debug_window = Window(size = (336, 336))
+                self.debug_window.show()
+                self.renderer = Renderer(self.debug_window)
+            
+            self.debug_window.title = "seed " + str(self.current_seed)
+            self.clock.tick(MysteryPathEnv.metadata["render_fps"])
+
+            debug_surface = self._build_debug_surface()
+            texture = Texture.from_surface(self.renderer, debug_surface)
+            texture.draw(dstrect=(0, 0))
+            self.renderer.present()
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
         if self.debug_window is not None:
@@ -185,7 +207,7 @@ def main():
     reset_params = {}
     seed = options.seed
     vis_obs = env.reset(seed = seed, options = reset_params)
-    img = env.render(mode = "rgb_array")
+    img = env.render(mode = "debug_rgb_array")
     done = False
 
     while not done:
@@ -206,9 +228,9 @@ def main():
                 if not seed <= 0:
                     seed -= 1
             vis_obs = env.reset(seed = seed, options = reset_params)
-            img = env.render(mode = "rgb_array")
+            img = env.render(mode = "debug_rgb_array")
         vis_obs, reward, done, info = env.step(actions)
-        img = env.render(mode = "rgb_array")
+        img = env.render(mode = "debug_rgb_array")
 
         # Process event-loop
         for event in pygame.event.get():
