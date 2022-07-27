@@ -157,6 +157,7 @@ class MortarMayhemEnv(gym.Env):
 
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
+        self.current_seed = seed
 
         # Check reset parameters for completeness and errors
         self.reset_params = MortarMayhemEnv.process_reset_params(options)
@@ -303,6 +304,7 @@ class MortarMayhemEnv(gym.Env):
                 self.debug_window.show()
                 self.renderer = Renderer(self.debug_window)
             
+            self.debug_window.title = "seed " + str(self.current_seed)
             self.clock.tick(fps)
 
             debug_surface = self._build_debug_surface()
@@ -323,6 +325,7 @@ def main():
 
     env = MortarMayhemEnv(headless = False)
     reset_params = {}
+    seed = options.seed
     vis_obs = env.reset(seed = options.seed, options = reset_params)
     img = env.render(mode = "debug_rgb_array")
     done = False
@@ -338,6 +341,14 @@ def main():
             actions[1] = 2
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             actions[0] = 1
+        if keys[pygame.K_PAGEDOWN] or keys[pygame.K_PAGEUP]:
+            if keys[pygame.K_PAGEUP]:
+                seed += 1
+            if keys[pygame.K_PAGEDOWN]:
+                if not seed <= 0:
+                    seed -= 1
+            vis_obs = env.reset(seed = seed, options = reset_params)
+            img = env.render(mode = "debug_rgb_array")
         vis_obs, reward, done, info = env.step(actions)
         img = env.render(mode = "debug_rgb_array")
 

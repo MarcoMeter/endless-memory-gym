@@ -203,7 +203,8 @@ def main():
             if keys[pygame.K_PAGEUP]:
                 seed += 1
             if keys[pygame.K_PAGEDOWN]:
-                seed -= 1
+                if not seed <= 0:
+                    seed -= 1
             vis_obs = env.reset(seed = seed, options = reset_params)
             img = env.render(mode = "rgb_array")
         vis_obs, reward, done, info = env.step(actions)
