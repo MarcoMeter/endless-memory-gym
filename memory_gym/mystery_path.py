@@ -8,7 +8,7 @@ from gym import  spaces
 from memory_gym.pygame_assets import CharacterController, MysteryPath
 from pygame._sdl2 import Window, Texture, Renderer
 
-SCALE = 1.0
+SCALE = 0.25
 
 class MysteryPathEnv(gym.Env):
     metadata = {
