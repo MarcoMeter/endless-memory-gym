@@ -367,7 +367,7 @@ class Node():
     def draw_to_surface(self, surface, tile_dim, color):
         if self.is_wall:
             color = (255, 0, 0)
-        pygame.draw.rect(surface, color, (self.x * tile_dim, self.y * tile_dim, tile_dim, tile_dim), width=4)
+        pygame.draw.rect(surface, color, (self.x * tile_dim, self.y * tile_dim, tile_dim, tile_dim))
 
 class MysteryPath():
     def __init__(self, num_columns, num_rows, start_position, end_position, rng) -> None:
@@ -447,15 +447,18 @@ class MysteryPath():
     def heuristic(self, a, b):
         return math.sqrt((a.x - b.x)**2 + abs(a.y - b.y)**2)
 
-    def draw_to_surface(self, surface, tile_dim):
+    def draw_to_surface(self, surface, tile_dim, show_origin, show_goal, show_path = False, show_walls = False):
         for n, node in enumerate(self.path):
-            if n == 0:
+            if n == 0 and show_goal:
                 color = (0, 255, 0)
-            elif n == len(self.path) - 1:
+                node.draw_to_surface(surface, tile_dim, color)
+            elif n == len(self.path) - 1 and show_origin:
                 color = (0, 0, 255)
-            else:
+                node.draw_to_surface(surface, tile_dim, color)
+            elif n > 0 and n < len(self.path) - 1 and show_path:
                 color = (255, 255, 255)
-            node.draw_to_surface(surface, tile_dim, color)
+                node.draw_to_surface(surface, tile_dim, color)
         
-        for node in self.wall_nodes:
-            node.draw_to_surface(surface, tile_dim, color)
+        if show_walls:
+            for node in self.wall_nodes:
+                node.draw_to_surface(surface, tile_dim, color)

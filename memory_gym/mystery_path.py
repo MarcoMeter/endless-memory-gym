@@ -76,6 +76,9 @@ class MysteryPathEnv(gym.Env):
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
         return pygame.transform.scale(surface, (336, 336))
 
+    def _normalize_agent_position(self, agent_position):
+            return (agent_position[0] // self.tile_dim, agent_position[1] // self.tile_dim)
+
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
 
@@ -89,28 +92,29 @@ class MysteryPathEnv(gym.Env):
         # Determine the start and end position on the screen's extent
         cardinal_origin = self.np_random.choice(self.reset_params["cardinal_origin_choice"])
         if cardinal_origin == 0:
-            start = (0, self.np_random.integers(0, self.grid_dim))
-            end = (self.grid_dim - 1, self.np_random.integers(0, self.grid_dim))
+            self.start = (0, self.np_random.integers(0, self.grid_dim))
+            self.end = (self.grid_dim - 1, self.np_random.integers(0, self.grid_dim))
         elif cardinal_origin == 1:
-            start = (self.grid_dim - 1, self.np_random.integers(0, self.grid_dim))
-            end = (0, self.np_random.integers(0, self.grid_dim))
+            self.start = (self.grid_dim - 1, self.np_random.integers(0, self.grid_dim))
+            self.end = (0, self.np_random.integers(0, self.grid_dim))
         elif cardinal_origin == 2:
-            start = (self.np_random.integers(0, self.grid_dim), 0)
-            end = (self.np_random.integers(0, self.grid_dim), self.grid_dim - 1)
+            self.start = (self.np_random.integers(0, self.grid_dim), 0)
+            self.end = (self.np_random.integers(0, self.grid_dim), self.grid_dim - 1)
         else:
-            start = (self.np_random.integers(0, self.grid_dim), self.grid_dim - 1)
-            end = (self.np_random.integers(0, self.grid_dim), 0)
+            self.start = (self.np_random.integers(0, self.grid_dim), self.grid_dim - 1)
+            self.end = (self.np_random.integers(0, self.grid_dim), 0)
         
         # Procedurally generate the mystery path using A*
-        path = MysteryPath(self.grid_dim, self.grid_dim, start, end, self.np_random)
+        self.mystery_path = MysteryPath(self.grid_dim, self.grid_dim, self.start, self.end, self.np_random)
         self.path_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.path_surface.fill(0)
-        path.draw_to_surface(self.path_surface, self.tile_dim)
+        self.mystery_path.draw_to_surface(self.path_surface, self.tile_dim, self.reset_params["show_origin"], self.reset_params["show_goal"])
 
         # Setup the agent and sample its position
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
         # Place the agent on the path's starting position
-        self.agent.rect.center = (start[0] * self.tile_dim + self.agent.radius, start[1] * self.tile_dim + self.agent.radius)
+        self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
+        self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
 
         # Draw
         self._draw_surfaces([(self.path_surface, (0, 0)), (self.agent.surface, self.agent.rect)])
@@ -126,6 +130,22 @@ class MysteryPathEnv(gym.Env):
 
         # Move the agent's controlled character
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.screen.get_rect())
+
+        # Check whether the agent reached the goal
+        self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
+        if self.normalized_agent_position == self.end:
+            reward += self.reset_params["reward_goal"]
+            done = True
+        else:
+            # Check whether the agent fell off the path
+            on_path = False
+            for node in self.mystery_path.path:
+                if self.normalized_agent_position == (node.x, node.y):
+                    on_path = True
+                    break
+            if not on_path:
+                self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
+                reward += self.reset_params["reward_fall_off"]
 
         # Track all rewards
         self.episode_rewards.append(reward)
