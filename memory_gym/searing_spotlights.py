@@ -163,14 +163,14 @@ class SearingSpotlightsEnv(gym.Env):
 
         if spotlight_hit > 0:
             bg = self.red_background_surface
-            self.agent_health -= self.reset_params["spot_damage"]
+            self.current_agent_health -= self.reset_params["spot_damage"]
             reward += self.reset_params["reward_inside_spotlight"]
         else:
             bg = self.blue_background_surface
             reward += self.reset_params["reward_outside_spotlight"]
 
         # Determine done
-        if self.agent_health <= 0:
+        if self.current_agent_health <= 0:
             done = True
 
         return reward, done, bg
@@ -239,6 +239,7 @@ class SearingSpotlightsEnv(gym.Env):
         spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
         self.agent.rect.center = spawn_pos
         self.agent_health = self.reset_params["agent_health"]
+        self.current_agent_health = self.agent_health
 
         # Setup spotlights
         self.spawn_intervals = self._compute_spawn_intervals(self.reset_params)
@@ -326,7 +327,8 @@ class SearingSpotlightsEnv(gym.Env):
         if done:
             info = {
                 "reward": sum(self.episode_rewards),
-                "length": len(self.episode_rewards)
+                "length": len(self.episode_rewards),
+                "agent_health": self.current_agent_health,
             }
         else:
             info = {}
@@ -403,6 +405,7 @@ def main():
 
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))
+    print("agent health: " + str(info["agent_health"]))
 
     env.close()
     exit()
