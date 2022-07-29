@@ -229,6 +229,7 @@ class SearingSpotlightsEnv(gym.Env):
                 self.coins.remove(coin)
                 reward += self.reset_params["reward_coin"]
                 update_coin_surface = True
+                self.coins_collected += 1
         # Redraw coins if at least one was collected
         if update_coin_surface:
             self.coin_surface.fill(255)
@@ -278,6 +279,7 @@ class SearingSpotlightsEnv(gym.Env):
                                                             self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random))
 
         # Spawn coin and exit entities if applicable
+        self.coins_collected = 0
         self.coins = []
         self.num_coins = self.np_random.choice(self.reset_params["num_coins"]) if len(self.reset_params["num_coins"]) > 0 else 0
         if self.num_coins > 0:
@@ -324,6 +326,7 @@ class SearingSpotlightsEnv(gym.Env):
         else:
             coins_done = True
         # Exit task
+        exit_success = 0
         if self.reset_params["use_exit"]:
             r, exit_done = self._step_exit_task(coins_done)
             reward += r
@@ -338,6 +341,7 @@ class SearingSpotlightsEnv(gym.Env):
             if self.reset_params["use_exit"]:
                 if exit_done:
                     done = True
+                    exit_success = 1
                 else:
                     done = False
             else:
@@ -356,6 +360,8 @@ class SearingSpotlightsEnv(gym.Env):
                 "reward": sum(self.episode_rewards),
                 "length": len(self.episode_rewards),
                 "agent_health": self.current_agent_health / self.agent_health,
+                "coins_collected": self.coins_collected / self.num_coins,
+                "exit_success": exit_success,
             }
         else:
             info = {}
@@ -433,6 +439,8 @@ def main():
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))
     print("agent health: " + str(info["agent_health"]))
+    print("coins collected: " + str(info["coins_collected"]))
+    print("exit success: " + str(bool(info["exit_success"])))
 
     env.close()
     exit()
