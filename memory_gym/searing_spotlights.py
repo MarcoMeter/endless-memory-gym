@@ -93,8 +93,16 @@ class SearingSpotlightsEnv(gym.Env):
         self.spotlight_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.spotlight_surface.set_colorkey((255, 255, 255))
 
+        # Agent health surface
+        self.health_surface = pygame.Surface((self.screen_dim, 16 * SCALE))
+        pygame.draw.rect(self.health_surface, (0, 255, 0), self.health_surface.get_rect())
+
+        # Agent boundaries
+        self.walkable_rect = pygame.Rect(0, 16 * SCALE, self.screen_dim, self.screen_dim - 16 * SCALE)
+
         # Init grid spawner
         self.grid_sampler = GridPositionSampler(self.screen_dim, self.screen_dim // 24)
+        # self.grid_sampler = GridPositionSampler(self.screen_dim - 16 * SCALE, self.screen_dim // 24)
 
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
@@ -130,6 +138,7 @@ class SearingSpotlightsEnv(gym.Env):
             surfs.append((self.rotated_agent_surface, self.rotated_agent_rect))
         else:
             surfs.append((self.agent.surface, self.agent.rect))
+        surfs.append((self.health_surface, (0, 0)))
         # Blit all surfaces
         for surf, rect in surfs:
             surface.blit(surf, rect)
@@ -165,6 +174,8 @@ class SearingSpotlightsEnv(gym.Env):
             bg = self.red_background_surface
             self.current_agent_health -= self.reset_params["spot_damage"]
             reward += self.reset_params["reward_inside_spotlight"]
+            width = int(self.screen_dim * (1 - self.current_agent_health / self.agent_health))
+            pygame.draw.rect(self.health_surface, (255, 0, 0), (0, 0, width, 16 * SCALE))
         else:
             bg = self.blue_background_surface
             reward += self.reset_params["reward_outside_spotlight"]
@@ -175,6 +186,20 @@ class SearingSpotlightsEnv(gym.Env):
 
         return reward, done, bg
 
+    def _process_spawn_pos(self, spawn_pos, offset = 30):
+        x = spawn_pos[0]
+        y = spawn_pos[1]
+        offset = int(offset * SCALE)
+        if x < offset:
+            x = offset
+        elif x > self.screen_dim - offset:
+            x = self.screen_dim - offset
+        if y < offset:
+            y = offset
+        elif y > self.screen_dim - offset:
+            y = self.screen_dim - offset
+        return (x, y)
+
     def _spawn_coins(self):
         self.coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.coin_surface.fill(255)
@@ -182,6 +207,7 @@ class SearingSpotlightsEnv(gym.Env):
         for _ in range(self.num_coins):
             spawn_pos = self.grid_sampler.sample(2)
             spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
+            spawn_pos = self._process_spawn_pos(spawn_pos)
             coin = Coin(self.reset_params["coin_scale"], spawn_pos)
             coin.draw(self.coin_surface)
             self.coins.append(coin)
@@ -189,6 +215,7 @@ class SearingSpotlightsEnv(gym.Env):
     def _spawn_exit(self):
         spawn_pos = self.grid_sampler.sample(3)
         spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
+        spawn_pos = self._process_spawn_pos(spawn_pos)
         self.exit = Exit(spawn_pos, self.reset_params["exit_scale"])
         self.exit.draw(open=False)
 
@@ -265,7 +292,7 @@ class SearingSpotlightsEnv(gym.Env):
         # Draw initially all surfaces
         self.bg = self.blue_background_surface
         self._draw_surfaces([(self.bg, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
-                            (self.agent.surface, self.agent.rect), (self.spotlight_surface, (0, 0))])
+                            (self.agent.surface, self.agent.rect), (self.spotlight_surface, (0, 0)), (self.health_surface, (0, 0))])
 
         # Show spawn mask for debugging purposes
         # import matplotlib.pyplot as plt
@@ -279,7 +306,7 @@ class SearingSpotlightsEnv(gym.Env):
 
     def step(self, action):
         # Move the agent's controlled character
-        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.screen.get_rect())
+        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.walkable_rect)
 
         # Dim light untill off
         if self.spotlight_surface.get_alpha() <= self.reset_params["light_threshold"]:
@@ -319,7 +346,7 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Draw all surfaces
         self._draw_surfaces([(self.bg, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
-                            (self.rotated_agent_surface, self.rotated_agent_rect), (self.spotlight_surface, (0, 0))])
+                            (self.rotated_agent_surface, self.rotated_agent_rect), (self.spotlight_surface, (0, 0)), (self.health_surface, (0, 0))])
 
         # Track all rewards
         self.episode_rewards.append(reward)
