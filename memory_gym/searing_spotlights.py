@@ -328,7 +328,7 @@ class SearingSpotlightsEnv(gym.Env):
             info = {
                 "reward": sum(self.episode_rewards),
                 "length": len(self.episode_rewards),
-                "agent_health": self.current_agent_health,
+                "agent_health": self.current_agent_health / self.agent_health,
             }
         else:
             info = {}
