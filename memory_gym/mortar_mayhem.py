@@ -20,7 +20,7 @@ class MortarMayhemEnv(gym.Env):
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 10.0 * SCALE,
                 "arena_size": 5,
-                "allowed_commands": 4,
+                "allowed_commands": 9,
                 "command_count": [5],
                 "command_show_duration": 3,
                 "command_show_delay": 1,
@@ -208,6 +208,7 @@ class MortarMayhemEnv(gym.Env):
     def step(self, action):
         reward = 0
         done = False
+        success = 0
         command = None
 
         # Show each command one by one, while the agent cannot move
@@ -245,6 +246,7 @@ class MortarMayhemEnv(gym.Env):
                 if self._current_command >= self.num_commands:
                     # All commands completed!
                     done = True
+                    success = 1
                     reward += self.reset_params["reward_episode_success"]
                 self._command_steps = 0
 
@@ -274,7 +276,9 @@ class MortarMayhemEnv(gym.Env):
         if done:
             info = {
                 "reward": sum(self.episode_rewards),
-                "length": len(self.episode_rewards)
+                "length": len(self.episode_rewards),
+                "success": success,
+                "commands_completed": (self._current_command - 1 + success) / self.num_commands,
             }
         else:
             info = {}
@@ -362,6 +366,8 @@ def main():
 
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))
+    print("success: " + str(bool(info["success"])))
+    print("commands completed: " + str(info["commands_completed"]))
 
     env.close()
     exit()

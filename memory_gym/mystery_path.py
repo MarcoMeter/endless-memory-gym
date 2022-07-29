@@ -124,6 +124,7 @@ class MysteryPathEnv(gym.Env):
         # Place the agent on the path's starting position
         self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
+        self.num_fails = 0
 
         # Draw
         self._draw_surfaces([(self.path_surface, (0, 0)), (self.agent.surface, self.agent.rect)])
@@ -136,6 +137,7 @@ class MysteryPathEnv(gym.Env):
     def step(self, action):
         reward = 0
         done = False
+        success = 0
 
         # Move the agent's controlled character
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.screen.get_rect())
@@ -145,6 +147,7 @@ class MysteryPathEnv(gym.Env):
         if self.normalized_agent_position == self.end:
             reward += self.reset_params["reward_goal"]
             done = True
+            success = 1
         else:
             # Check whether the agent fell off the path
             on_path = False
@@ -159,6 +162,7 @@ class MysteryPathEnv(gym.Env):
             if not on_path:
                 self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
                 reward += self.reset_params["reward_fall_off"]
+                self.num_fails += 1
 
         # Track all rewards
         self.episode_rewards.append(reward)
@@ -166,7 +170,9 @@ class MysteryPathEnv(gym.Env):
         if done:
             info = {
                 "reward": sum(self.episode_rewards),
-                "length": len(self.episode_rewards)
+                "length": len(self.episode_rewards),
+                "success": success,
+                "num_fails": self.num_fails,
             }
         else:
             info = {}
@@ -246,6 +252,8 @@ def main():
 
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))
+    print("success: " + str(bool(info["success"])))
+    print("num fails: " + str(info["num_fails"]))
 
     env.close()
     exit()
