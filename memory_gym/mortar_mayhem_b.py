@@ -149,8 +149,6 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
         # Retrieve the encoded commands for the observation space
         self._commands_one_hot = self._encode_commands_one_hot(self._commands)
-        print(self._commands_one_hot)
-        print(self._commands)
 
         return {"visual_observation": vis_obs, "vector_observation": self._commands_one_hot}
 
