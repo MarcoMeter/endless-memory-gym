@@ -93,10 +93,6 @@ class SearingSpotlightsEnv(gym.Env):
         self.spotlight_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.spotlight_surface.set_colorkey((255, 255, 255))
 
-        # Agent health surface
-        self.health_surface = pygame.Surface((self.screen_dim, 16 * SCALE))
-        pygame.draw.rect(self.health_surface, (0, 255, 0), self.health_surface.get_rect())
-
         # Agent boundaries
         self.walkable_rect = pygame.Rect(0, 16 * SCALE, self.screen_dim, self.screen_dim - 16 * SCALE)
 
@@ -268,6 +264,9 @@ class SearingSpotlightsEnv(gym.Env):
         self.agent.rect.center = spawn_pos
         self.agent_health = self.reset_params["agent_health"]
         self.current_agent_health = self.agent_health
+        # Agent health surface
+        self.health_surface = pygame.Surface((self.screen_dim, 16 * SCALE))
+        pygame.draw.rect(self.health_surface, (0, 255, 0), self.health_surface.get_rect())
 
         # Setup spotlights
         self.spawn_intervals = self._compute_spawn_intervals(self.reset_params)
