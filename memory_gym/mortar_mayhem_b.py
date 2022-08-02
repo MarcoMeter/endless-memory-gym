@@ -10,7 +10,6 @@ from requests import head
 from memory_gym.character_controller import CharacterController
 from memory_gym.mortar_mayhem import MortarMayhemEnv
 from memory_gym.pygame_assets import Command, MortarArena
-from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
@@ -30,7 +29,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
                 "command_show_delay": 1,
                 "explosion_duration": 6,
                 "explosion_delay": 18,
-                "reward_command_failure": -0.1,
+                "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,
                 "reward_episode_success": 0.0
             }

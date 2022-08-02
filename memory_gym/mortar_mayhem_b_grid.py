@@ -9,34 +9,32 @@ from gym.utils import seeding
 from requests import head
 from memory_gym.character_controller import GridCharacterController
 from memory_gym.mortar_mayhem import MortarMayhemEnv
-from memory_gym.pygame_assets import Command, GridPosition, MortarArena
-from pygame._sdl2 import Window, Texture, Renderer
+from memory_gym.pygame_assets import Command, MortarArena
 
 SCALE = 0.25
 
 class GridMortarMayhemTaskBEnv(MortarMayhemEnv):
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
-        "render_fps": 2,
+        "render_fps": 1,
     }
 
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
-                "agent_speed": 10.0 * SCALE,
                 "arena_size": 5,
-                "allowed_commands": 9,
-                "command_count": [5],
+                "allowed_commands": 5,
+                "command_count": [10],
                 "command_show_duration": 3,
                 "command_show_delay": 1,
-                "explosion_duration": 6,
-                "explosion_delay": 18,
-                "reward_command_failure": -0.1,
+                "explosion_duration": 2,
+                "explosion_delay": 5,
+                "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,
                 "reward_episode_success": 0.0
             }
 
     def process_reset_params(reset_params):
-        cloned_params = MortarMayhemEnv.default_reset_parameters.copy()
+        cloned_params = GridMortarMayhemTaskBEnv.default_reset_parameters.copy()
         if reset_params is not None:
             for k, v in reset_params.items():
                 assert k in cloned_params.keys(), "Provided reset parameter (" + str(k) + ") is not valid. Check spelling."
@@ -112,7 +110,7 @@ class GridMortarMayhemTaskBEnv(MortarMayhemEnv):
         self.current_seed = seed
 
         # Check reset parameters for completeness and errors
-        self.reset_params = MortarMayhemEnv.process_reset_params(options)
+        self.reset_params = GridMortarMayhemTaskBEnv.process_reset_params(options)
 
         # Track all rewards during one episode
         self.episode_rewards = []
