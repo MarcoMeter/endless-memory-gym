@@ -5,7 +5,8 @@ import pygame
 
 from argparse import ArgumentParser
 from gym import  spaces
-from memory_gym.pygame_assets import CharacterController, Command, MortarArena
+from memory_gym.character_controller import CharacterController
+from memory_gym.pygame_assets import Command, MortarArena
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25

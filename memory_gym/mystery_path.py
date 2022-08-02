@@ -5,7 +5,8 @@ import pygame
 
 from argparse import ArgumentParser
 from gym import  spaces
-from memory_gym.pygame_assets import CharacterController, MysteryPath
+from memory_gym.character_controller import CharacterController
+from memory_gym.pygame_assets import MysteryPath
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
