@@ -25,8 +25,6 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
                 "arena_size": 5,
                 "allowed_commands": 9,
                 "command_count": [5],
-                "command_show_duration": 3,
-                "command_show_delay": 1,
                 "explosion_duration": 6,
                 "explosion_delay": 18,
                 "reward_command_failure": 0.0,
