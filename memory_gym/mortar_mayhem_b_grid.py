@@ -24,7 +24,6 @@ class GridMortarMayhemTaskBEnv(MortarMayhemEnv):
                 "arena_size": 5,
                 "allowed_commands": 5,
                 "command_count": [10],
-                "command_show_duration": 3,
                 "command_show_delay": 1,
                 "explosion_duration": 2,
                 "explosion_delay": 5,
