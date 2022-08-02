@@ -258,6 +258,16 @@ class MortarArena():
                     tile.toggle_color(on = self.tiles_on)
                     self.surface.blit(tile.surface, tile.global_position)
 
+    def to_grid(self):
+        grid = [[] for _ in range(self.arena_size)]
+        translate_x = self.rect.center[0] - self.local_center[0] + self.tile_dim // 2
+        translate_y = self.rect.center[1] - self.local_center[1] + self.tile_dim // 2
+        for i in range(self.arena_size):
+            for j in range(self.arena_size):
+                tile = self.tiles[i][j]
+                grid[i].append(GridPosition(tile.global_position[0] + translate_x, tile.global_position[1] + translate_y, i, j))
+        return grid
+
 class Node():
     def __init__(self, i, j, is_wall = False):
         self.x, self.y = i, j
@@ -375,3 +385,10 @@ class MysteryPath():
         if show_walls:
             for node in self.wall_nodes:
                 node.draw_to_surface(surface, tile_dim, color)
+
+class GridPosition():
+    def __init__(self, x, y, i, j) -> None:
+        self.x = x
+        self.y = y
+        self.i = i
+        self.j = j

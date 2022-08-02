@@ -91,13 +91,12 @@ class CharacterController():
 
 class CardinalDirection(Enum):
     NORTH = 0
-    EAST = 1
+    WEST = 1
     SOUTH = 2
-    WEST = 3
+    EAST = 3
 
 class GridCharacterController():
-    def __init__(self, screen_dim, scale, grid_index_position, grid, rotation = 0) -> None:
-        self.screen_dim = screen_dim
+    def __init__(self, scale, grid_index_position, grid, rotation = 0) -> None:
         self.rotation = rotation
         self.grid = grid
         self.grid_position = grid_index_position
@@ -118,7 +117,8 @@ class GridCharacterController():
         self.surface.fill(255)
         self.surface.set_colorkey(255)
         self.rect = self.surface.get_rect()
-        self.rect.center = (0, 0)
+        grid_position = self.grid[int(self.grid_position[0])][int(self.grid_position[1])]
+        self.rect.center = (grid_position.x ,grid_position.y)
         # Draw body
         pygame.draw.circle(self.surface, body_color, (self.radius + hand_radius // 2, self.radius + hand_radius // 2), self.radius)
         # Draw hands
@@ -140,19 +140,24 @@ class GridCharacterController():
             self.rotation = (self.rotation + 90) % 360
         if action[0] == 2:  # rotate right
             self.rotation = (self.rotation - 90) % 360
+        self.face_direction = CardinalDirection(self.rotation // 90)
         if action[0] == 3:  # move forward
+            x = self.grid_position[0]
+            y = self.grid_position[1]
             if self.face_direction == CardinalDirection.NORTH:
-                if self.grid_position[1] > 0:
-                    self.grid_position[1] -= 1
+                if y > 0:
+                    y -= 1
             elif self.face_direction == CardinalDirection.EAST:
-                if self.grid_position[0] < len(self.grid) - 1:
-                    self.grid_position[0] += 1
+                if x < len(self.grid) - 1:
+                    x += 1
             elif self.face_direction == CardinalDirection.SOUTH:
-                if self.grid_position[1] < len(self.grid) - 1:
-                    self.grid_position[1] += 1
+                if y < len(self.grid) - 1:
+                    y += 1
             elif self.face_direction == CardinalDirection.WEST:
-                if self.grid_position[0] > 0:
-                    self.grid_position[0] -= 1
-            self.rect.center = self.grid[self.grid_position[0]][self.grid_position[1]]
+                if x > 0:
+                    x -= 1
+            self.grid_position = (x, y)
+            grid_position = self.grid[int(x)][int(y)]
+            self.rect.center = (grid_position.x, grid_position.y)
 
         return self.rotate(self.rotation)
