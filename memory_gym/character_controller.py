@@ -161,3 +161,8 @@ class GridCharacterController():
             self.rect.center = (grid_position.x, grid_position.y)
 
         return self.rotate(self.rotation)
+
+    def reset_position(self, grid_index_position):
+        grid_position = self.grid[int(grid_index_position[0])][int(grid_index_position[1])]
+        self.grid_position = grid_index_position
+        self.rect.center = (grid_position.x, grid_position.y)

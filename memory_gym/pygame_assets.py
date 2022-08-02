@@ -386,6 +386,14 @@ class MysteryPath():
             for node in self.wall_nodes:
                 node.draw_to_surface(surface, tile_dim, color)
 
+    def to_grid(self, cell_dim):
+        size = len(self.grid)
+        cells = [[] for _ in range(size)]
+        for i in range(size):
+            for j in range(size):
+                cells[i].append(GridPosition(cell_dim * i + cell_dim // 2, cell_dim * j + cell_dim // 2, i, j))
+        return cells
+
 class GridPosition():
     def __init__(self, x, y, i, j) -> None:
         self.x = x

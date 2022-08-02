@@ -5,6 +5,7 @@ from memory_gym.mortar_mayhem_grid import GridMortarMayhemEnv
 from memory_gym.mortar_mayhem_b import MortarMayhemTaskBEnv
 from memory_gym.mortar_mayhem_b_grid import GridMortarMayhemTaskBEnv
 from memory_gym.mystery_path import MysteryPathEnv
+from memory_gym.mystery_path_grid import GridMysteryPathEnv
 
 register(
      id="SearingSpotlights-v0",
@@ -40,4 +41,10 @@ register(
      id="MysteryPath-v0",
      entry_point="memory_gym.mystery_path:MysteryPathEnv",
      max_episode_steps=512,
+)
+
+register(
+     id="MysteryPath-Grid-v0",
+     entry_point="memory_gym.mystery_path_grid:GridMysteryPathEnv",
+     max_episode_steps=128,
 )
