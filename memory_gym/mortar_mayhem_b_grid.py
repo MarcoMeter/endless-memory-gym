@@ -8,12 +8,12 @@ from gym import  spaces
 from gym.utils import seeding
 from requests import head
 from memory_gym.character_controller import GridCharacterController
-from memory_gym.mortar_mayhem import MortarMayhemEnv
+from memory_gym.mortar_mayhem_grid import GridMortarMayhemEnv
 from memory_gym.pygame_assets import Command, MortarArena
 
 SCALE = 0.25
 
-class GridMortarMayhemTaskBEnv(MortarMayhemEnv):
+class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
         "render_fps": 1,
