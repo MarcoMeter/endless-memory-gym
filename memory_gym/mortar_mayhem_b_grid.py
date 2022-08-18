@@ -39,6 +39,8 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
                 cloned_params[k] = v
         assert cloned_params["allowed_commands"] >= 4 and cloned_params["allowed_commands"] <= 9
         assert cloned_params["arena_size"] >= 2 and cloned_params["arena_size"] <= 6
+        assert max(cloned_params["command_count"]) <= 20, "20 commands are allowed at maximum"
+        print(cloned_params["command_count"])
         return cloned_params
 
     def __init__(self, headless = True) -> None:
@@ -60,6 +62,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         self.debug_window = None
 
         # Setup observation and action space
+        self.max_num_commands = 20
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Dict(
             {
@@ -69,9 +72,9 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
                     shape = [self.screen_dim, self.screen_dim, 3],
                     dtype = np.float32),
                 "vector_observation": spaces.Box(
-                    low = np.zeros((10 * 9), dtype=np.float32),
-                    high = np.ones((10 * 9), dtype=np.float32),
-                    shape = (10 * 9, ),
+                    low = np.zeros((self.max_num_commands * 9), dtype=np.float32),
+                    high = np.ones((self.max_num_commands * 9), dtype=np.float32),
+                    shape = (self.max_num_commands * 9, ),
                     dtype = np.float32)
             }
         )
@@ -80,7 +83,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
     def _encode_commands_one_hot(self, commands):
-        one_hot_commands = np.zeros((10 * 9), dtype = np.float32)
+        one_hot_commands = np.zeros((self.max_num_commands * 9), dtype = np.float32)
         for c, command in enumerate(commands):
             if command == "stay":
                 one_hot_commands[9 * c + 0] = 1.0
