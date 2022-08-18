@@ -36,13 +36,16 @@ class SearingSpotlightsEnv(gym.Env):
                 # Coin Parameters
                 "num_coins": [2, 3, 4, 5],
                 "coin_scale": 1.5 * SCALE,
+                "coins_visible": False,
                 # Exit Parameters
                 "use_exit": True,
                 "exit_scale": 2.0 * SCALE,
+                "exit_visible": False,
                 # Agent Parameters
                 "agent_speed": 10.0 * SCALE,
                 "agent_health": 100,
                 "agent_scale": 1.0 * SCALE,
+                "agent_visible": False,
                 # Reward Function
                 "reward_inside_spotlight": -0.01,
                 "reward_outside_spotlight": 0.0,
@@ -293,8 +296,24 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Draw initially all surfaces
         self.bg = self.blue_background_surface
-        self._draw_surfaces([(self.bg, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
-                            (self.agent.surface, self.agent.rect), (self.spotlight_surface, (0, 0)), (self.health_surface, (0, 0))])
+        surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.health_surface, (0, 0))]
+        spot_surface_id = 1
+        if self.reset_params["coins_visible"]:
+            surfaces.insert(spot_surface_id + 1, (self.coin_surface, (0, 0)))
+        else:
+            surfaces.insert(spot_surface_id, (self.coin_surface, (0, 0)))
+            spot_surface_id += 1
+        if self.reset_params["exit_visible"]:
+            surfaces.insert(spot_surface_id + 2, (self.exit.surface, self.exit.rect))
+        else:
+            surfaces.insert(spot_surface_id, (self.exit.surface, self.exit.rect))
+            spot_surface_id += 1
+        if self.reset_params["agent_visible"]:
+            surfaces.insert(spot_surface_id + 3, (self.rotated_agent_surface, self.rotated_agent_rect))
+        else:
+            surfaces.insert(spot_surface_id, (self.rotated_agent_surface, self.rotated_agent_rect))
+            spot_surface_id += 1
+        self._draw_surfaces(surfaces)
 
         # Show spawn mask for debugging purposes
         # import matplotlib.pyplot as plt
@@ -349,8 +368,24 @@ class SearingSpotlightsEnv(gym.Env):
                     done = True
 
         # Draw all surfaces
-        self._draw_surfaces([(self.bg, (0, 0)), (self.coin_surface, (0, 0)), (self.exit.surface, self.exit.rect),
-                            (self.rotated_agent_surface, self.rotated_agent_rect), (self.spotlight_surface, (0, 0)), (self.health_surface, (0, 0))])
+        surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.health_surface, (0, 0))]
+        spot_surface_id = 1
+        if self.reset_params["coins_visible"]:
+            surfaces.insert(spot_surface_id + 1, (self.coin_surface, (0, 0)))
+        else:
+            surfaces.insert(spot_surface_id, (self.coin_surface, (0, 0)))
+            spot_surface_id += 1
+        if self.reset_params["exit_visible"]:
+            surfaces.insert(spot_surface_id + 2, (self.exit.surface, self.exit.rect))
+        else:
+            surfaces.insert(spot_surface_id, (self.exit.surface, self.exit.rect))
+            spot_surface_id += 1
+        if self.reset_params["agent_visible"]:
+            surfaces.insert(spot_surface_id + 3, (self.rotated_agent_surface, self.rotated_agent_rect))
+        else:
+            surfaces.insert(spot_surface_id, (self.rotated_agent_surface, self.rotated_agent_rect))
+            spot_surface_id += 1
+        self._draw_surfaces(surfaces)
 
         # Track all rewards
         self.episode_rewards.append(reward)
