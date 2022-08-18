@@ -40,7 +40,6 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         assert cloned_params["allowed_commands"] >= 4 and cloned_params["allowed_commands"] <= 9
         assert cloned_params["arena_size"] >= 2 and cloned_params["arena_size"] <= 6
         assert max(cloned_params["command_count"]) <= 20, "20 commands are allowed at maximum"
-        print(cloned_params["command_count"])
         return cloned_params
 
     def __init__(self, headless = True) -> None:
