@@ -6,7 +6,6 @@ import pygame
 from argparse import ArgumentParser
 from gym import  spaces
 from gym.utils import seeding
-from requests import head
 from memory_gym.character_controller import GridCharacterController
 from memory_gym.mortar_mayhem_grid import GridMortarMayhemEnv
 from memory_gym.pygame_assets import Command, MortarArena
