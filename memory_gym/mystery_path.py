@@ -82,6 +82,7 @@ class MysteryPathEnv(gym.Env):
             surface.blit(self.rotated_agent_surface, self.rotated_agent_rect)
         else:
             surface.blit(self.agent.surface, self.agent.rect)
+        surface.blit(self.fall_off_surface, self.fall_off_rect)
         return pygame.transform.scale(surface, (336, 336))
 
     def _normalize_agent_position(self, agent_position):
@@ -118,6 +119,16 @@ class MysteryPathEnv(gym.Env):
         self.path_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.path_surface.fill(0)
         self.mystery_path.draw_to_surface(self.path_surface, self.tile_dim, self.reset_params["show_origin"], self.reset_params["show_goal"])
+
+        # Fall off surface to indicate that the agent lost the path
+        dim = 40 * SCALE
+        self.fall_off_surface = pygame.Surface((dim, dim))
+        self.fall_off_rect = self.fall_off_surface.get_rect()
+        self.fall_off_surface.fill(0)
+        self.fall_off_surface.set_colorkey(0)
+        pygame.draw.line(self.fall_off_surface, (255, 0, 0), (0, 0), (dim - 1, dim - 1), int(12 * SCALE))
+        pygame.draw.line(self.fall_off_surface, (255, 0, 0), (dim - 1, 0), (0, dim - 1), int(12 * SCALE))
+        self.fall_off_surface.set_alpha(0)
 
         # Setup the agent and sample its position
         rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
@@ -164,6 +175,10 @@ class MysteryPathEnv(gym.Env):
                 self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
                 reward += self.reset_params["reward_fall_off"]
                 self.num_fails += 1
+                self.fall_off_surface.set_alpha(255)
+            else:
+                self.fall_off_surface.set_alpha(0)
+            self.fall_off_rect.center = self.rotated_agent_rect.center
 
         # Track all rewards
         self.episode_rewards.append(reward)
@@ -179,7 +194,7 @@ class MysteryPathEnv(gym.Env):
             info = {}
 
         # Draw
-        self._draw_surfaces([(self.path_surface, (0, 0)), (self.rotated_agent_surface, self.rotated_agent_rect)])
+        self._draw_surfaces([(self.path_surface, (0, 0)), (self.rotated_agent_surface, self.rotated_agent_rect), (self.fall_off_surface, self.fall_off_rect)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
