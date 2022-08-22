@@ -25,7 +25,8 @@ class MysteryPathEnv(gym.Env):
                 "show_goal": True,
                 "reward_goal": 1.0,
                 "reward_fall_off": 0.0,
-                "reward_path_progress": 0.0
+                "reward_path_progress": 0.0,
+                "reward_step": 0.0
             }
 
     def process_reset_params(reset_params):
@@ -185,6 +186,8 @@ class MysteryPathEnv(gym.Env):
                 self.fall_off_surface.set_alpha(0)
                 self.is_off_path = False
             self.fall_off_rect.center = self.rotated_agent_rect.center
+
+        reward += self.reset_params["reward_step"]
 
         # Track all rewards
         self.episode_rewards.append(reward)
