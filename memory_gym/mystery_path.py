@@ -136,6 +136,7 @@ class MysteryPathEnv(gym.Env):
         # Place the agent on the path's starting position
         self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
+        self.is_off_path = False
         self.num_fails = 0
 
         # Draw
@@ -152,7 +153,10 @@ class MysteryPathEnv(gym.Env):
         success = 0
 
         # Move the agent's controlled character
-        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.screen.get_rect())
+        if not self.is_off_path:
+            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.screen.get_rect())
+        else:
+            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step([0, 0], self.screen.get_rect())
 
         # Check whether the agent reached the goal
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
@@ -176,8 +180,10 @@ class MysteryPathEnv(gym.Env):
                 reward += self.reset_params["reward_fall_off"]
                 self.num_fails += 1
                 self.fall_off_surface.set_alpha(255)
+                self.is_off_path = True
             else:
                 self.fall_off_surface.set_alpha(0)
+                self.is_off_path = False
             self.fall_off_rect.center = self.rotated_agent_rect.center
 
         # Track all rewards
