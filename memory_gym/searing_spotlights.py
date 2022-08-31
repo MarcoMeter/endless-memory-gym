@@ -32,7 +32,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "spot_damage": 1.0,
                 "visual_feedback": True,
                 # Light Parameters
-                "light_dim_off_duration": 10,
+                "light_dim_off_duration": 0,
                 "light_threshold": 255,
                 # Coin Parameters
                 "num_coins": [2, 3, 4, 5],
@@ -182,6 +182,7 @@ class SearingSpotlightsEnv(gym.Env):
             else:
                 bg = self.blue_background_surface
         else:
+            bg = self.blue_background_surface
             reward += self.reset_params["reward_outside_spotlight"]
 
         # Determine done
@@ -335,7 +336,10 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Dim light untill off
         if self.spotlight_surface.get_alpha() <= self.reset_params["light_threshold"]:
-            self.spotlight_surface.set_alpha(self.spotlight_surface.get_alpha() + int(255 / self.reset_params["light_dim_off_duration"]))
+            if self.reset_params["light_dim_off_duration"] > 0:
+                self.spotlight_surface.set_alpha(self.spotlight_surface.get_alpha() + int(255 / self.reset_params["light_dim_off_duration"]))
+            else:
+                self.spotlight_surface.set_alpha(255)
 
         # Process tasks
         # Spotlight task
