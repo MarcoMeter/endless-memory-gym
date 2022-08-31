@@ -25,6 +25,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
                 "command_count": [10],
                 "explosion_duration": 2,
                 "explosion_delay": 5,
+                "visual_feedback": True,
                 "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,
                 "reward_episode_success": 0.0
@@ -170,7 +171,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
                 self._current_command += 1
 
                 # Turn on the death tiles
-                self.arena.toggle_tiles(self._target_pos)
+                self.arena.toggle_tiles(self._target_pos, self.reset_params["visual_feedback"])
 
                 # Check if the agent is on the target position
                 if self.normalized_agent_position == self._target_pos:
@@ -193,7 +194,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         if self.arena.tiles_on:
             if self._command_verify_step % self.reset_params["explosion_duration"] == 0 and self._command_verify_step > 0:
                 # Turn death tiles off
-                self.arena.toggle_tiles()
+                self.arena.toggle_tiles(None, self.reset_params["visual_feedback"])
                 self._command_verify_step = 0
                 if self._current_command < self.num_commands:
                     # Update target position
