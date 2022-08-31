@@ -22,6 +22,7 @@ class GridMysteryPathEnv(gym.Env):
                 "cardinal_origin_choice": [0, 1, 2, 3],
                 "show_origin": True,
                 "show_goal": True,
+                "visual_feedback": True,
                 "reward_goal": 1.0,
                 "reward_fall_off": 0.0,
                 "reward_path_progress": 0.0,
@@ -181,7 +182,8 @@ class GridMysteryPathEnv(gym.Env):
                 self.agent.reset_position(self._normalize_agent_position(start_pos))
                 reward += self.reset_params["reward_fall_off"]
                 self.num_fails += 1
-                self.fall_off_surface.set_alpha(255)
+                if self.reset_params["visual_feedback"]:
+                    self.fall_off_surface.set_alpha(255)
                 self.is_off_path = True
             else:
                 self.fall_off_surface.set_alpha(0)

@@ -30,6 +30,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "spot_min_speed": 0.0025,
                 "spot_max_speed": 0.0075,
                 "spot_damage": 1.0,
+                "visual_feedback": True,
                 # Light Parameters
                 "light_dim_off_duration": 10,
                 "light_threshold": 255,
@@ -171,13 +172,16 @@ class SearingSpotlightsEnv(gym.Env):
                     spotlight_hit += 1
 
         if spotlight_hit > 0:
-            bg = self.red_background_surface
             self.current_agent_health -= self.reset_params["spot_damage"]
             reward += self.reset_params["reward_inside_spotlight"]
             width = int(self.screen_dim * (1 - self.current_agent_health / self.agent_health))
             pygame.draw.rect(self.health_surface, (255, 0, 0), (0, 0, width, 16 * SCALE))
+            # Render the background tiles in red if visual feedback is desired
+            if self.reset_params["visual_feedback"]:
+                bg = self.red_background_surface
+            else:
+                bg = self.blue_background_surface
         else:
-            bg = self.blue_background_surface
             reward += self.reset_params["reward_outside_spotlight"]
 
         # Determine done
