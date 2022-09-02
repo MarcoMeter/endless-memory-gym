@@ -50,6 +50,7 @@ class SearingSpotlightsEnv(gym.Env):
                 # Reward Function
                 "reward_inside_spotlight": -0.01,
                 "reward_outside_spotlight": 0.0,
+                "reward_death": 0.0,
                 "reward_exit": 1.0,
                 "reward_max_steps": 0.0,
                 "reward_coin": 0.0,
@@ -188,6 +189,7 @@ class SearingSpotlightsEnv(gym.Env):
         # Determine done
         if self.current_agent_health <= 0:
             done = True
+            reward += self.reset_params["reward_death"]
 
         return reward, done, bg
 
