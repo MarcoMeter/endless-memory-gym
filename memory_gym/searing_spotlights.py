@@ -47,6 +47,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "agent_health": 20,
                 "agent_scale": 1.0 * SCALE,
                 "agent_visible": False,
+                "sample_agent_position": True,
                 # Reward Function
                 "reward_inside_spotlight": 0.0,
                 "reward_outside_spotlight": 0.0,
@@ -271,8 +272,12 @@ class SearingSpotlightsEnv(gym.Env):
         self.last_action = [0, 0]   # The agent shall sense its last action to potentially infer its postion from its past actions
         rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
         self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
-        spawn_pos = self.grid_sampler.sample(5)
-        spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
+        if self.reset_params["sample_agent_position"]:
+            spawn_pos = self.grid_sampler.sample(5)
+            spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
+        else:
+            spawn_pos = (self.screen_dim // 2, self.screen_dim // 2)
+            self.grid_sampler.block_spawn_position(spawn_pos)
         self.agent.rect.center = spawn_pos
         self.agent_health = self.reset_params["agent_health"]
         self.current_agent_health = self.agent_health

@@ -29,6 +29,13 @@ class GridPositionSampler():
                         max(0, y - block_radius) : y + block_radius] = True
         return (x * self.cell_dim, y * self.cell_dim)
 
+    def block_spawn_position(self, pos, block_radius = 3):
+        x = pos[0] // self.cell_dim
+        y = pos[1] // self.cell_dim
+        self.spawn_mask[max(0, x - block_radius) : x + block_radius,
+                        max(0, y - block_radius) : y + block_radius] = True
+
+
 class Spotlight():
     def __init__(self, dim, radius, speed, rng) -> None:
         self.speed = speed
