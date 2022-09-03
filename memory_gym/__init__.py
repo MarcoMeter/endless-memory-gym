@@ -1,5 +1,6 @@
 from gym.envs.registration import register
 from memory_gym.searing_spotlights import SearingSpotlightsEnv
+from memory_gym.searing_spotlights_sanity import SearingSpotlightsSanityEnv
 from memory_gym.mortar_mayhem import MortarMayhemEnv
 from memory_gym.mortar_mayhem_grid import GridMortarMayhemEnv
 from memory_gym.mortar_mayhem_b import MortarMayhemTaskBEnv
@@ -9,6 +10,12 @@ from memory_gym.mystery_path_grid import GridMysteryPathEnv
 
 register(
      id="SearingSpotlights-v0",
+     entry_point="memory_gym.searing_spotlights:SearingSpotlightsEnv",
+     max_episode_steps=512,
+)
+
+register(
+     id="Sanity-v0",
      entry_point="memory_gym.searing_spotlights:SearingSpotlightsEnv",
      max_episode_steps=512,
 )
