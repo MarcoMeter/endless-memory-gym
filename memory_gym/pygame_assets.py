@@ -37,10 +37,11 @@ class GridPositionSampler():
 
 
 class Spotlight():
-    def __init__(self, dim, radius, speed, rng) -> None:
+    def __init__(self, dim, radius, speed, rng, has_border = False) -> None:
         self.speed = speed
         self.t = 0
         self.done = False
+        self.has_border = has_border
         # Center of the screen
         center = (dim // 2, dim // 2)
         # Length of the diagonal of the screen
@@ -71,7 +72,9 @@ class Spotlight():
     def draw(self, surface):
         lerp_target = self.target_location.lerp(self.offset_location, self.t)
         self.current_location = self.spawn_location.lerp(lerp_target, self.t)
-        pygame.draw.circle(surface, (255, 255, 255), (int(self.current_location.x), int(self.current_location.y)), self.radius)
+        pygame.draw.circle(surface, (255, 0, 0), (int(self.current_location.x), int(self.current_location.y)), self.radius)
+        if self.has_border:
+            pygame.draw.circle(surface, (255, 255, 255), (int(self.current_location.x), int(self.current_location.y)), self.radius, 1)
         self.t += self.speed
         if self.t >= 1.0:
             self.t = 1.0

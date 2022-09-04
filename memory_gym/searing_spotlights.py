@@ -31,6 +31,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "spot_max_speed": 0.0075,
                 "spot_damage": 1.0,
                 "visual_feedback": True,
+                "black_background": False,
                 # Light Parameters
                 "light_dim_off_duration": 0,
                 "light_threshold": 255,
@@ -98,7 +99,8 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Spotlight surface
         self.spotlight_surface = pygame.Surface((self.screen_dim, self.screen_dim))
-        self.spotlight_surface.set_colorkey((255, 255, 255))
+        self.spotlight_surface.fill(0)
+        self.spotlight_surface.set_colorkey((255, 0, 0))
 
         # Agent boundaries
         self.walkable_rect = pygame.Rect(0, 16 * SCALE, self.screen_dim, self.screen_dim - 16 * SCALE)
@@ -144,7 +146,8 @@ class SearingSpotlightsEnv(gym.Env):
         surfs.append((self.top_bar_surface, (0, 0)))
         # Blit all surfaces
         for surf, rect in surfs:
-            surface.blit(surf, rect)
+            if surf is not None:
+                surface.blit(surf, rect)
 
         return pygame.transform.scale(surface, (336, 336))
 
@@ -156,7 +159,8 @@ class SearingSpotlightsEnv(gym.Env):
         if self.spawn_intervals:
             if self.spawn_timer >= self.spawn_intervals[0]:
                 self.spotlights.append(Spotlight(self.screen_dim, self.np_random.integers(self.reset_params["spot_min_radius"], self.reset_params["spot_max_radius"] + 1),
-                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random))
+                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random, 
+                                                            self.reset_params["black_background"]))
                 self.spawn_intervals.pop()
                 self.spawn_timer = 0
 
@@ -186,6 +190,9 @@ class SearingSpotlightsEnv(gym.Env):
         else:
             bg = self.blue_background_surface
             reward += self.reset_params["reward_outside_spotlight"]
+
+        if self.reset_params["black_background"]:
+            bg.fill(0)
 
         # Determine done
         if self.current_agent_health <= 0:
@@ -303,7 +310,8 @@ class SearingSpotlightsEnv(gym.Env):
         self.spawn_timer = self.spawn_intervals[0] # ensure that the first spotlight is spawned right away
         for _ in range(self.reset_params["initial_spawns"]):
             self.spotlights.append(Spotlight(self.screen_dim, self.np_random.integers(self.reset_params["spot_min_radius"], self.reset_params["spot_max_radius"] + 1),
-                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random))
+                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random,
+                                                            self.reset_params["black_background"]))
 
         # Spawn coin and exit entities if applicable
         self.coins_collected = 0
@@ -320,6 +328,8 @@ class SearingSpotlightsEnv(gym.Env):
 
         # Draw initially all surfaces
         self.bg = self.blue_background_surface
+        if self.reset_params["black_background"]:
+            self.bg.fill(0)
         surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.top_bar_surface, (0, 0))]
         spot_surface_id = 1
         if self.reset_params["coins_visible"]:
@@ -496,6 +506,11 @@ def main():
             img = env.render(mode = "debug_rgb_array")
         vis_obs, reward, done, info = env.step(actions)
         img = env.render(mode = "debug_rgb_array")
+
+        if done:
+            done = False
+            vis_obs = env.reset(seed = options.seed, options = reset_params)
+            img = env.render(mode = "debug_rgb_array")
 
         # Process event-loop
         for event in pygame.event.get():
