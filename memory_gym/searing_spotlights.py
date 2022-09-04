@@ -307,7 +307,7 @@ class SearingSpotlightsEnv(gym.Env):
         else:
             self.spotlight_surface.set_alpha(255)
         self.spotlights = []
-        self.spawn_timer = self.spawn_intervals[0] # ensure that the first spotlight is spawned right away
+        self.spawn_timer = self.spawn_intervals[0] if self.spawn_intervals else 0 # ensure that the first spotlight is spawned right away
         for _ in range(self.reset_params["initial_spawns"]):
             self.spotlights.append(Spotlight(self.screen_dim, self.np_random.integers(self.reset_params["spot_min_radius"], self.reset_params["spot_max_radius"] + 1),
                                                             self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random,
