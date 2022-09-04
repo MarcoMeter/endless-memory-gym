@@ -16,7 +16,7 @@ register(
 
 register(
      id="Sanity-v0",
-     entry_point="memory_gym.searing_spotlights:SearingSpotlightsEnv",
+     entry_point="memory_gym.searing_spotlights_sanity:SearingSpotlightsSanityEnv",
      max_episode_steps=512,
 )
 
