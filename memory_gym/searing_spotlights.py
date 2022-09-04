@@ -305,7 +305,7 @@ class SearingSpotlightsEnv(gym.Env):
         if self.reset_params["light_dim_off_duration"] > 0:
             self.spotlight_surface.set_alpha(0)
         else:
-            self.spotlight_surface.set_alpha(255)
+            self.spotlight_surface.set_alpha(self.reset_params["light_threshold"])
         self.spotlights = []
         self.spawn_timer = self.spawn_intervals[0] if self.spawn_intervals else 0 # ensure that the first spotlight is spawned right away
         for _ in range(self.reset_params["initial_spawns"]):
@@ -373,7 +373,7 @@ class SearingSpotlightsEnv(gym.Env):
             if self.reset_params["light_dim_off_duration"] > 0:
                 self.spotlight_surface.set_alpha(self.spotlight_surface.get_alpha() + int(255 / self.reset_params["light_dim_off_duration"]))
             else:
-                self.spotlight_surface.set_alpha(255)
+                self.spotlight_surface.set_alpha(self.reset_params["light_threshold"])
 
         # Process tasks
         # Spotlight task
