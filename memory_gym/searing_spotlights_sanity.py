@@ -20,6 +20,7 @@ class SearingSpotlightsSanityEnv(gym.Env):
 
     default_reset_parameters = {
                 # Spotlight parameters
+                "max_steps": 512,
                 "initial_spawns": 4,
                 "num_spawns": 30,
                 "initial_spawn_interval": 30,
@@ -270,6 +271,7 @@ class SearingSpotlightsSanityEnv(gym.Env):
         super().reset(seed=seed)
         self.current_seed = seed
         self.reset_params = SearingSpotlightsSanityEnv.process_reset_params(options)
+        self.t = 0
 
         # Reset spawner
         self.grid_sampler.reset(self.np_random)
@@ -407,6 +409,10 @@ class SearingSpotlightsSanityEnv(gym.Env):
             else:
                 if self.num_coins > 0:
                     done = True
+        # Time limit
+        self.t += 1
+        if self.t == self.reset_params["max_steps"]:
+            done = True
 
         # Draw all surfaces
         surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.top_bar_surface, (0, 0))]

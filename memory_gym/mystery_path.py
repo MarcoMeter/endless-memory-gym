@@ -18,6 +18,7 @@ class MysteryPathEnv(gym.Env):
     }
 
     default_reset_parameters = {
+                "max_steps": 512,
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 10.0 * SCALE,
                 "cardinal_origin_choice": [0, 1, 2, 3],
@@ -93,6 +94,7 @@ class MysteryPathEnv(gym.Env):
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
         self.current_seed = seed
+        self.t = 0
 
         # Check reset parameters for completeness and errors
         self.reset_params = MysteryPathEnv.process_reset_params(options)
@@ -190,6 +192,11 @@ class MysteryPathEnv(gym.Env):
             self.fall_off_rect.center = self.rotated_agent_rect.center
 
         reward += self.reset_params["reward_step"]
+
+        # Time limit
+        self.t += 1
+        if self.t == self.reset_params["max_steps"]:
+            done = True
 
         # Track all rewards
         self.episode_rewards.append(reward)

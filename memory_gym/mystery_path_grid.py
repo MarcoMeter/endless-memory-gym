@@ -18,6 +18,7 @@ class GridMysteryPathEnv(gym.Env):
     }
 
     default_reset_parameters = {
+                "max_steps": 128,
                 "agent_scale": 1.0 * SCALE,
                 "cardinal_origin_choice": [0, 1, 2, 3],
                 "show_origin": True,
@@ -92,6 +93,7 @@ class GridMysteryPathEnv(gym.Env):
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
         self.current_seed = seed
+        self.t = 0
 
         # Check reset parameters for completeness and errors
         self.reset_params = GridMysteryPathEnv.process_reset_params(options)
@@ -194,6 +196,11 @@ class GridMysteryPathEnv(gym.Env):
 
         # Track all rewards
         self.episode_rewards.append(reward)
+
+        # Time limit
+        self.t += 1
+        if self.t == self.reset_params["max_steps"]:
+            done = True
 
         if done:
             info = {
