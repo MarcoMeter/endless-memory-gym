@@ -346,7 +346,7 @@ def main():
             # Quit
             if event.type == pygame.QUIT:
                 done = True
-        actions = [-1]
+        actions = [-1] if not env._command_visualization else [0]
         if keys == pygame.K_UP or keys == pygame.K_w:
             actions[0] = 3
         if keys == pygame.K_RIGHT or keys == pygame.K_d:
