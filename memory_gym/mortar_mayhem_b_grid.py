@@ -247,7 +247,7 @@ def main():
     done = False
 
     while not done:
-        actions = [0]
+        actions = [-1]
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] or keys[pygame.K_w]:
             actions[0] = 3
@@ -255,6 +255,8 @@ def main():
             actions[0] = 2
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             actions[0] = 1
+        if keys[pygame.K_SPACE]:
+            actions[0] = 0
         if keys[pygame.K_PAGEDOWN] or keys[pygame.K_PAGEUP]:
             if keys[pygame.K_PAGEUP]:
                 seed += 1
@@ -263,7 +265,9 @@ def main():
                     seed -= 1
             vis_obs = env.reset(seed = seed, options = reset_params)
             img = env.render(mode = "debug_rgb_array")
-        vis_obs, reward, done, info = env.step(actions)
+            
+        if actions[0] >= 0:
+            vis_obs, reward, done, info = env.step(actions)
         img = env.render(mode = "debug_rgb_array")
 
         # Process event-loop
