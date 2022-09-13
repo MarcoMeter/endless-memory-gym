@@ -337,30 +337,35 @@ def main():
     done = False
 
     while not done:
-        actions = [0]
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] or keys[pygame.K_w]:
+        # Process event-loop
+        keys = None
+        for event in pygame.event.get():
+            # Process key presses
+            if event.type == pygame.KEYDOWN:
+                keys = event.key
+            # Quit
+            if event.type == pygame.QUIT:
+                done = True
+        actions = [-1] if not env._command_visualization else [0]
+        if keys == pygame.K_UP or keys == pygame.K_w:
             actions[0] = 3
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if keys == pygame.K_RIGHT or keys == pygame.K_d:
             actions[0] = 2
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if keys == pygame.K_LEFT or keys == pygame.K_a:
             actions[0] = 1
-        if keys[pygame.K_PAGEDOWN] or keys[pygame.K_PAGEUP]:
-            if keys[pygame.K_PAGEUP]:
+        if keys == pygame.K_SPACE:
+            actions[0] = 0
+        if keys == pygame.K_PAGEDOWN or keys == pygame.K_PAGEUP:
+            if keys == pygame.K_PAGEUP:
                 seed += 1
-            if keys[pygame.K_PAGEDOWN]:
+            if keys == pygame.K_PAGEDOWN:
                 if not seed <= 0:
                     seed -= 1
             vis_obs = env.reset(seed = seed, options = reset_params)
             img = env.render(mode = "debug_rgb_array")
-        vis_obs, reward, done, info = env.step(actions)
-        img = env.render(mode = "debug_rgb_array")
-
-        # Process event-loop
-        for event in pygame.event.get():
-        # Quit
-            if event.type == pygame.QUIT:
-                done = True
+        if actions[0] >= 0:
+            vis_obs, reward, done, info = env.step(actions)
+            img = env.render(mode = "debug_rgb_array")
 
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))
