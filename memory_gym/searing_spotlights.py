@@ -33,6 +33,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "spot_damage": 1.0,
                 "visual_feedback": True,
                 "black_background": False,
+                "hide_checkboard": False,
                 # Light Parameters
                 "light_dim_off_duration": 0,
                 "light_threshold": 255,
@@ -270,6 +271,10 @@ class SearingSpotlightsEnv(gym.Env):
         self.current_seed = seed
         self.reset_params = SearingSpotlightsEnv.process_reset_params(options)
         self.t = 0
+
+        if self.reset_params["hide_checkboard"]:
+            self.blue_background_surface.fill((255, 255, 255))
+            self.red_background_surface.fill((255, 255, 255))
 
         # Reset spawner
         self.grid_sampler.reset(self.np_random)
