@@ -33,12 +33,12 @@ class SearingSpotlightsEnv(gym.Env):
                 "spot_damage": 1.0,
                 "visual_feedback": True,
                 "black_background": False,
-                "hide_checkboard": False,
+                "hide_chessboard": False,
                 # Light Parameters
                 "light_dim_off_duration": 0,
                 "light_threshold": 255,
                 # Coin Parameters
-                "num_coins": [2, 3, 4, 5],
+                "num_coins": [1],
                 "coin_scale": 1.5 * SCALE,
                 "coins_visible": False,
                 # Exit Parameters
@@ -272,7 +272,7 @@ class SearingSpotlightsEnv(gym.Env):
         self.reset_params = SearingSpotlightsEnv.process_reset_params(options)
         self.t = 0
 
-        if self.reset_params["hide_checkboard"]:
+        if self.reset_params["hide_chessboard"]:
             self.blue_background_surface.fill((255, 255, 255))
             self.red_background_surface.fill((255, 255, 255))
 
