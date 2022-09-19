@@ -1,4 +1,4 @@
-[[Installation](#-installation)]  [[Usage](#-usage)] [[Mortar Mayhem](#-mortar-mayhem)] [[Mystery Path](#-mystery-path)] [[Searing Spotlights](#-searing-spotlights)]
+[[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Searing Spotlights](#searing-spotlights)]
 
 # Memory Gym: Partially Observable Challenges for Memory-Based Agents
 
@@ -8,7 +8,7 @@ Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **
 - be robust to noise,
 - and be sample efficient.
 
-# Installation
+## Installation
 
 Major dependencies:
 - gym==0.24.1 (will be updated soon)
@@ -19,7 +19,7 @@ cd drl-memory-gym
 pip install -e .
 ```
 
-# Usage
+## Usage
 
 Executing the environment using random actions:
 ```python
@@ -62,13 +62,13 @@ You can also execute the python scripts directly, for example:
 python ./memory_gym/mortar_mayhem.py
 ```
 
-# Mortar Mayhem
+## Mortar Mayhem
 
 ![Mortar Mayhem Environment](/docs/assets/mm.jpg)
 
 Mortar Mayhem challenges the agent with a sequence of commands that the agent has to memorize and execute in the right order. During the beginning of the episode, each command is visualized one by one. Mortar Mayhem can be reduced to solely executing commands. In this case, the command sequence is always available as vector observation (one-hot encoded) and, therefore, is not visualized.
 
-## Reset Parameters
+### Reset Parameters
 
 | Parameter              | Default | Description                                                                                                                                       |
 |------------------------|--------:|---------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -86,13 +86,13 @@ Mortar Mayhem challenges the agent with a sequence of commands that the agent ha
 | reward_command_success |     0.1 | What reward to signal upon succeeding at the current command.                                                                                       |
 | reward_episode_success |     0.0 | What reward to signal if the entire command sequence is successfully solved by the agent.                                                         |
 
-# Mystery Path
+## Mystery Path
 
 ![Mystery Path Environment](/docs/assets/mp.jpg)
 
 Mystery Path procedurally generates an invisible path for the agent to cross from the origin to the goal. Per default, only the origin of the path is visible. Upon falling off the path, the agent has to restart from the origin. Note that the episode is not terminated by falling off. Hence, the agent has to memorize where it fell off and where it did not.
 
-## Reset Parameters
+### Reset Parameters
 
 | Parameter              |      Default | Explanation                                                                                                                 |
 |------------------------|-------------:|-----------------------------------------------------------------------------------------------------------------------------|
@@ -108,14 +108,14 @@ Mystery Path procedurally generates an invisible path for the agent to cross fro
 | reward_path_progress   |          0.0 | What reward to signal when making progress on the path. This is only signaled for reaching another tile for the first time. |
 | reward_step            |          0.0 | What reward to signal for each step.                                                                                        |
 
-# Searing Spotlights
+## Searing Spotlights
 
 ![Searing Spotlights Environment](/docs/assets/spots.jpg)
 
 Searing Spotlights is a pitch black surrounding to the agent. The environment is initially fully observable but the light is dimmed untill off during the first few frames. Only randomly moving spotlights unveil information on the environment's ground truth, while posing a threat to the agent. If spotted by spotlight, the agent looses health points. While the agent must avoid closing in spotlights, it further has to collect coins. After collecting all coins, the agent has to take the environment's exit.
 
 
-## Reset Parameters
+### Reset Parameters
 
 | Parameter                | Default | Explanation                                                                                                     |
 |--------------------------|--------:|-----------------------------------------------------------------------------------------------------------------|
