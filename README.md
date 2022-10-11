@@ -11,7 +11,7 @@ Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **
 ## Installation
 
 Major dependencies:
-- gym==0.24.1 (will be updated soon)
+- gym==0.26.2
 - PyGame
 ```console
 conda create -n memory-gym --python=3.7 --yes
