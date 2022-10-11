@@ -43,8 +43,9 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         assert max(cloned_params["command_count"]) <= 20, "20 commands are allowed at maximum"
         return cloned_params
 
-    def __init__(self, headless = True) -> None:
-        if headless:
+    def __init__(self, render_mode = None) -> None:
+        self.render_mode = render_mode
+        if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
         else:
@@ -55,7 +56,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         self.screen_dim = int(336 * SCALE)
         self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
         self.clock = pygame.time.Clock()
-        if headless:
+        if render_mode is None:
             pygame.event.set_allowed(None)
 
         # Init debug window
@@ -150,7 +151,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         # Retrieve the encoded commands for the observation space
         self._commands_one_hot = self._encode_commands_one_hot(self._commands)
 
-        return {"visual_observation": vis_obs, "vector_observation": self._commands_one_hot}
+        return {"visual_observation": vis_obs, "vector_observation": self._commands_one_hot}, {}
 
     def step(self, action):
         reward = 0
@@ -234,18 +235,18 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-        return {"visual_observation": vis_obs, "vector_observation": self._commands_one_hot}, reward, done, info
+        return {"visual_observation": vis_obs, "vector_observation": self._commands_one_hot}, reward, done, False, info
 
 def main():
     parser = ArgumentParser()
     parser.add_argument("--seed", type=int, help="The to be used seed for the environment's random number generator.", default=0)
     options = parser.parse_args()
 
-    env = MortarMayhemTaskBEnv(headless = False)
+    env = MortarMayhemTaskBEnv(render_mode = "debug_rgb_array")
     reset_params = {}
     seed = options.seed
-    vis_obs = env.reset(seed = options.seed, options = reset_params)
-    img = env.render(mode = "debug_rgb_array")
+    obs, reset_info = env.reset(seed = options.seed, options = reset_params)
+    img = env.render()
     done = False
 
     while not done:
@@ -265,10 +266,10 @@ def main():
             if keys[pygame.K_PAGEDOWN]:
                 if not seed <= 0:
                     seed -= 1
-            vis_obs = env.reset(seed = seed, options = reset_params)
-            img = env.render(mode = "debug_rgb_array")
-        vis_obs, reward, done, info = env.step(actions)
-        img = env.render(mode = "debug_rgb_array")
+            obs, reset_info = env.reset(seed = seed, options = reset_params)
+            img = env.render()
+        obs, reward, done, truncation, info = env.step(actions)
+        img = env.render()
 
         # Process event-loop
         for event in pygame.event.get():

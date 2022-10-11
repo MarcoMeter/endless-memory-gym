@@ -42,8 +42,9 @@ class GridMortarMayhemEnv(gym.Env):
         assert cloned_params["arena_size"] >= 2 and cloned_params["arena_size"] <= 6
         return cloned_params
 
-    def __init__(self, headless = True) -> None:
-        if headless:
+    def __init__(self, render_mode = None) -> None:
+        self.render_mode = render_mode
+        if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
         else:
@@ -54,7 +55,7 @@ class GridMortarMayhemEnv(gym.Env):
         self.screen_dim = int(336 * SCALE)
         self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim), pygame.NOFRAME)
         self.clock = pygame.time.Clock()
-        if headless:
+        if render_mode is None:
             pygame.event.set_allowed(None)
 
         # Init debug window
@@ -203,7 +204,7 @@ class GridMortarMayhemEnv(gym.Env):
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-        return vis_obs
+        return vis_obs, {}
 
     def step(self, action):
         reward = 0
@@ -292,32 +293,33 @@ class GridMortarMayhemEnv(gym.Env):
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-        return vis_obs, reward, done, info
+        return vis_obs, reward, done, False, info
 
-    def render(self, mode = "rgb_array"):
-        if self._command_visualization:
+    def render(self):
+        if self.render_mode is not None:
+            if self._command_visualization:
+                    fps = GridMortarMayhemEnv.metadata["render_fps"]
+            else:
                 fps = GridMortarMayhemEnv.metadata["render_fps"]
-        else:
-            fps = GridMortarMayhemEnv.metadata["render_fps"]
-        
-        if mode == "rgb_array":
-            self.clock.tick(fps)
-            return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
-        elif mode == "debug_rgb_array":
-            # Create debug window if it doesn't exist yet
-            if self.debug_window is None:
-                self.debug_window = Window(size = (336, 336))
-                self.debug_window.show()
-                self.renderer = Renderer(self.debug_window)
             
-            self.debug_window.title = "seed " + str(self.current_seed)
-            self.clock.tick(fps)
+            if self.render_mode == "rgb_array":
+                self.clock.tick(fps)
+                return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+            elif self.render_mode == "debug_rgb_array":
+                # Create debug window if it doesn't exist yet
+                if self.debug_window is None:
+                    self.debug_window = Window(size = (336, 336))
+                    self.debug_window.show()
+                    self.renderer = Renderer(self.debug_window)
+                
+                self.debug_window.title = "seed " + str(self.current_seed)
+                self.clock.tick(fps)
 
-            debug_surface = self._build_debug_surface()
-            texture = Texture.from_surface(self.renderer, debug_surface)
-            texture.draw(dstrect=(0, 0))
-            self.renderer.present()
-            return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
+                debug_surface = self._build_debug_surface()
+                texture = Texture.from_surface(self.renderer, debug_surface)
+                texture.draw(dstrect=(0, 0))
+                self.renderer.present()
+                return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
             if self.debug_window is not None:
@@ -329,11 +331,11 @@ def main():
     parser.add_argument("--seed", type=int, help="The to be used seed for the environment's random number generator.", default=0)
     options = parser.parse_args()
 
-    env = GridMortarMayhemEnv(headless = False)
+    env = GridMortarMayhemEnv(render_mode = "debug_rgb_array")
     reset_params = {}
     seed = options.seed
-    vis_obs = env.reset(seed = options.seed, options = reset_params)
-    img = env.render(mode = "debug_rgb_array")
+    vis_obs, reset_info = env.reset(seed = options.seed, options = reset_params)
+    img = env.render()
     done = False
 
     while not done:
@@ -361,11 +363,11 @@ def main():
             if keys == pygame.K_PAGEDOWN:
                 if not seed <= 0:
                     seed -= 1
-            vis_obs = env.reset(seed = seed, options = reset_params)
-            img = env.render(mode = "debug_rgb_array")
+            vis_obs, reset_info = env.reset(seed = seed, options = reset_params)
+            img = env.render()
         if actions[0] >= 0:
-            vis_obs, reward, done, info = env.step(actions)
-            img = env.render(mode = "debug_rgb_array")
+            vis_obs, reward, done, truncation, info = env.step(actions)
+            img = env.render()
 
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))

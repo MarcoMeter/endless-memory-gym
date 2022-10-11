@@ -32,7 +32,7 @@ setup(
       packages=find_packages(where='.', include="memory_gym*"),
       python_requires=">=3.6",
       include_package_data=True,
-      install_requires=["gym>=0.24.1",
+      install_requires=["gym>=0.26.2",
                         "pygame>=2.1.2"],
       entry_points={
             "console_scripts": [
@@ -45,5 +45,5 @@ setup(
             "mystery_path_grid=memory_gym.mystery_path_grid:main",
             ],
       },
-      version="0.1.20",
+      version="0.2.0",
 )
