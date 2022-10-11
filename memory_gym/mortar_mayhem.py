@@ -34,6 +34,15 @@ class MortarMayhemEnv(gym.Env):
             }
 
     def process_reset_params(reset_params):
+        """Compares the provided reset parameters to the default ones. It asserts whether false reset parameters were provided.
+        Missing reset parameters are filled with the default ones.
+
+        Arguments:
+            reset_params {dict} -- Provided reset parameters that are to be validated and completed
+
+        Returns:
+            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+        """
         cloned_params = MortarMayhemEnv.default_reset_parameters.copy()
         if reset_params is not None:
             for k, v in reset_params.items():
@@ -176,7 +185,7 @@ class MortarMayhemEnv(gym.Env):
         self.arena.rect.center = (self.screen_dim // 2, self.screen_dim // 2)
 
         # Setup the agent and sample its position
-        self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"])
+        self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"])
         spawn_pos = self.arena.get_tile_global_position(self.np_random.integers(0, self.reset_params["arena_size"] ** 2))
         offset = self.np_random.integers(-8 * SCALE, 8 * SCALE, 2)
         translate_x = self.arena.rect.center[0] - self.arena.local_center[0] + self.arena.tile_dim // 2 + offset[0]

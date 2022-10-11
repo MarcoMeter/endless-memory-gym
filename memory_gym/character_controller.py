@@ -4,8 +4,11 @@ from enum import Enum
 from pygame.math import Vector2
 
 class CharacterController():
-    def __init__(self, screen_dim, speed, scale, rotation = 0) -> None:
-        self.screen_dim = screen_dim
+    """CharacterController establishes a character that is rendered and can be moved using the step function.
+    This character can move vertically, horizontally, and diagonally at a certain speed. The character's orientation solely
+    depends on its velocity.
+    """
+    def __init__(self, speed, scale, rotation = 0) -> None:
         self.speed = speed
         self.rotation = rotation
         # Body
@@ -95,45 +98,17 @@ class CardinalDirection(Enum):
     SOUTH = 2
     EAST = 3
 
-class GridCharacterController():
+class GridCharacterController(CharacterController):
+    """The GridCharacterController establishes a character that has a grid-like locomotion. Using the step function, the 
+    character can move forward, rotate left, or rotate right.
+    """
     def __init__(self, scale, grid_index_position, grid, rotation = 0) -> None:
-        self.rotation = rotation
+        super().__init__(0, scale, rotation)
         self.grid = grid
         self.grid_position = grid_index_position
         self.face_direction = CardinalDirection((rotation % 360) // 90)
-        # Body
-        self.radius = int(25 * scale)
-        body_color = (250, 204, 153)
-        # Hands
-        hand_radius = int(10 * scale)
-        hands_x_distance = int(18 * scale)
-        hand_y_offset = int(12 * scale)
-        hand_color = (250, 250, 250)
-        hand_outline_color = (50, 50, 50)
-        hand_outline_size = int(3 * scale)
-        # rect dims
-        rect_dim = self.radius * 2 + hand_radius
-        self.surface = pygame.Surface((rect_dim, rect_dim))
-        self.surface.fill(255)
-        self.surface.set_colorkey(255)
-        self.rect = self.surface.get_rect()
         grid_position = self.grid[int(self.grid_position[0])][int(self.grid_position[1])]
         self.rect.center = (grid_position.x ,grid_position.y)
-        # Draw body
-        pygame.draw.circle(self.surface, body_color, (self.radius + hand_radius // 2, self.radius + hand_radius // 2), self.radius)
-        # Draw hands
-        pygame.draw.circle(self.surface, hand_color, (rect_dim // 2 - hands_x_distance, hand_y_offset), hand_radius) # left
-        pygame.draw.circle(self.surface, hand_color, (rect_dim // 2 + hands_x_distance, hand_y_offset), hand_radius) # right
-        # Draw hand outline
-        pygame.draw.circle(self.surface, hand_outline_color, (rect_dim // 2 - hands_x_distance, hand_y_offset), hand_radius, hand_outline_size) # left
-        pygame.draw.circle(self.surface, hand_outline_color, (rect_dim // 2 + hands_x_distance, hand_y_offset), hand_radius, hand_outline_size) # right
-        # Draw rect boundaries for debugging
-        # pygame.draw.rect(self.surface, (0, 0, 0), (0, 0, rect_dim, rect_dim), 1)
-
-    def rotate(self, angle):
-        new_surface = pygame.transform.rotate(self.surface, angle)
-        rect = new_surface.get_rect(center = self.rect.center)
-        return new_surface, rect
 
     def step(self, action):
         if action[0] == 1:  # rotate left

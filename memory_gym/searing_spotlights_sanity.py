@@ -59,6 +59,15 @@ class SearingSpotlightsSanityEnv(gym.Env):
             }
 
     def process_reset_params(reset_params):
+        """Compares the provided reset parameters to the default ones. It asserts whether false reset parameters were provided.
+        Missing reset parameters are filled with the default ones.
+
+        Arguments:
+            reset_params {dict} -- Provided reset parameters that are to be validated and completed
+
+        Returns:
+            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+        """
         cloned_params = SearingSpotlightsSanityEnv.default_reset_parameters.copy()
         if reset_params is not None:
             for k, v in reset_params.items():
@@ -283,7 +292,7 @@ class SearingSpotlightsSanityEnv(gym.Env):
         # Setup agent
         self.last_action = [0, 0]   # The agent shall sense its last action to potentially infer its postion from its past actions
         rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
-        self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
+        self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
         if self.reset_params["sample_agent_position"]:
             spawn_pos = self.grid_sampler.sample(5)
             spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))

@@ -32,6 +32,15 @@ class MysteryPathEnv(gym.Env):
             }
 
     def process_reset_params(reset_params):
+        """Compares the provided reset parameters to the default ones. It asserts whether false reset parameters were provided.
+        Missing reset parameters are filled with the default ones.
+
+        Arguments:
+            reset_params {dict} -- Provided reset parameters that are to be validated and completed
+
+        Returns:
+            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+        """
         cloned_params = MysteryPathEnv.default_reset_parameters.copy()
         if reset_params is not None:
             for k, v in reset_params.items():
@@ -137,7 +146,7 @@ class MysteryPathEnv(gym.Env):
 
         # Setup the agent and sample its position
         rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
-        self.agent = CharacterController(self.screen_dim, self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
+        self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
         # Place the agent on the path's starting position
         self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)

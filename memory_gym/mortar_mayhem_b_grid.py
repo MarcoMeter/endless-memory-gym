@@ -32,6 +32,15 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
             }
 
     def process_reset_params(reset_params):
+        """Compares the provided reset parameters to the default ones. It asserts whether false reset parameters were provided.
+        Missing reset parameters are filled with the default ones.
+
+        Arguments:
+            reset_params {dict} -- Provided reset parameters that are to be validated and completed
+
+        Returns:
+            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+        """
         cloned_params = GridMortarMayhemTaskBEnv.default_reset_parameters.copy()
         if reset_params is not None:
             for k, v in reset_params.items():
