@@ -68,6 +68,12 @@ python ./memory_gym/mortar_mayhem.py
 
 Mortar Mayhem challenges the agent with a sequence of commands that the agent has to memorize and execute in the right order. During the beginning of the episode, each command is visualized one by one. Mortar Mayhem can be reduced to solely executing commands. In this case, the command sequence is always available as vector observation (one-hot encoded) and, therefore, is not visualized.
 
+The max length of an episode can be calculated as follows:
+
+```
+max episode length = (command_show_duration + command_show_delay) * command_count + (explosion_delay + explosion_duration) * command_count - 2
+```
+
 ### Reset Parameters
 
 | Parameter              | Default | Description                                                                                                                                       |
