@@ -35,7 +35,6 @@ class GridPositionSampler():
         self.spawn_mask[max(0, x - block_radius) : x + block_radius,
                         max(0, y - block_radius) : y + block_radius] = True
 
-
 class Spotlight():
     def __init__(self, dim, radius, speed, rng, has_border = False) -> None:
         self.speed = speed
