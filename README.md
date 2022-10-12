@@ -5,8 +5,7 @@
 Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **Searing Spotlights** that are inspired by some mini games of [Pummel Party](http://rebuiltgames.com/). These environments shall benchmark an agent's memory to
 - memorize events across long sequences,
 - generalize,
-- be robust to noise,
-- and be sample efficient.
+- and be robust to noise.
 
 ## Installation
 
@@ -28,9 +27,11 @@ import gym
 
 env = gym.make("SearingSpotlights-v0")
 # env = gym.make("MortarMayhem-v0")
+# env = gym.make("MortarMayhem-Grid-v0")
+# env = gym.make("MortarMayhemB-v0")
+# env = gym.make("MortarMayhemB-Grid-v0")
 # env = gym.make("MysteryPath-v0")
-# env = gym.make("MortarMayhemB-Grid-v0", disable_env_checker = True)
-# env = gym.make("MysteryPath-Grid-v0", disable_env_checker = True)
+# env = gym.make("MysteryPath-Grid-v0")
 
 # Pass reset parameters to the environment
 options = {"agent_scale": 0.25}
