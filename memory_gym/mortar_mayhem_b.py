@@ -200,7 +200,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
                 done = True
                 success = 1
                 reward += self.reset_params["reward_episode_success"]
-            self._command_steps = 0
+            self._command_steps = 1
 
         # Keep the death tiles on for as long as the explosion duration
         if self.arena.tiles_on:
