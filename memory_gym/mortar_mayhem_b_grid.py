@@ -24,7 +24,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
                 "allowed_commands": 5,
                 "command_count": [10],
                 "explosion_duration": [2],
-                "explosion_delay": [5],
+                "explosion_delay": [6],
                 "visual_feedback": True,
                 "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,

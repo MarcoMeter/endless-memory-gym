@@ -25,7 +25,7 @@ class GridMortarMayhemEnv(gym.Env):
                 "command_show_duration": [3],
                 "command_show_delay": [1],
                 "explosion_duration": [2],
-                "explosion_delay": [5],
+                "explosion_delay": [6],
                 "visual_feedback": True,
                 "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,
@@ -193,8 +193,10 @@ class GridMortarMayhemEnv(gym.Env):
 
         # Sample the entire command sequence
         self._commands = self._generate_commands(self.normalized_agent_position)
+        show_duration = self.np_random.choice(self.reset_params["command_show_duration"])
+        show_delay = self.np_random.choice(self.reset_params["command_show_delay"])
         # Prepare list which prepares all steps (i.e. frames) for the visualization
-        self._command_visualization = self._generate_command_visualization(self._commands, self.reset_params["command_show_duration"], self.reset_params["command_show_delay"])
+        self._command_visualization = self._generate_command_visualization(self._commands, show_duration, show_delay)
         self._command_visualization_clone = self._command_visualization.copy() # the clone is needed for render()
         # Retrieve the first command frame
         command = Command(self._command_visualization.pop(0), SCALE)
