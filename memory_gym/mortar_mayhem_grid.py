@@ -22,10 +22,10 @@ class GridMortarMayhemEnv(gym.Env):
                 "arena_size": 5,
                 "allowed_commands": 5,
                 "command_count": [10],
-                "command_show_duration": 3,
-                "command_show_delay": 1,
-                "explosion_duration": 2,
-                "explosion_delay": 5,
+                "command_show_duration": [3],
+                "command_show_delay": [1],
+                "explosion_duration": [2],
+                "explosion_delay": [6],
                 "visual_feedback": True,
                 "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,
@@ -193,8 +193,10 @@ class GridMortarMayhemEnv(gym.Env):
 
         # Sample the entire command sequence
         self._commands = self._generate_commands(self.normalized_agent_position)
+        show_duration = self.np_random.choice(self.reset_params["command_show_duration"])
+        show_delay = self.np_random.choice(self.reset_params["command_show_delay"])
         # Prepare list which prepares all steps (i.e. frames) for the visualization
-        self._command_visualization = self._generate_command_visualization(self._commands, self.reset_params["command_show_duration"], self.reset_params["command_show_delay"])
+        self._command_visualization = self._generate_command_visualization(self._commands, show_duration, show_delay)
         self._command_visualization_clone = self._command_visualization.copy() # the clone is needed for render()
         # Retrieve the first command frame
         command = Command(self._command_visualization.pop(0), SCALE)
@@ -205,6 +207,9 @@ class GridMortarMayhemEnv(gym.Env):
         self._current_command = 0       # the current to be executed command
         self._command_steps = 0         # the current step while executing a command (i.e. death tiles off)
         self._command_verify_step = 0   # the current step while the command is being evaluated (i.e. death tiles on)
+        # Sample execution delay and duration
+        self._explosion_duration = self.np_random.choice(self.reset_params["explosion_duration"])
+        self._explosion_delay = self.np_random.choice(self.reset_params["explosion_delay"])
 
         # Draw
         self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect),
@@ -233,7 +238,7 @@ class GridMortarMayhemEnv(gym.Env):
 
             # Process the command execution logic
             # One command is alive for explosion delay steps
-            verify = self._command_steps % self.reset_params["explosion_delay"] == 0 and self._command_steps > 0
+            verify = self._command_steps % self._explosion_delay == 0 and self._command_steps > 0
 
             # Run the verification logic on whether the agent succeeded on moving to the target tile
             if verify and not self.arena.tiles_on:
@@ -262,7 +267,7 @@ class GridMortarMayhemEnv(gym.Env):
 
             # Keep the death tiles on for as long as the explosion duration
             if self.arena.tiles_on:
-                if self._command_verify_step % self.reset_params["explosion_duration"] == 0 and self._command_verify_step > 0:
+                if self._command_verify_step % self._explosion_duration == 0 and self._command_verify_step > 0:
                     # Turn death tiles off
                     self.arena.toggle_tiles(None, self.reset_params["visual_feedback"])
                     self._command_verify_step = 0
