@@ -5,35 +5,34 @@ import pygame
 from pygame.math import Vector2
 
 class GridPositionSampler():
-    def __init__(self, world_dim, cell_dim) -> None:
-        assert cell_dim < world_dim
-        assert world_dim % cell_dim == 0
-        self.cell_dim = cell_dim
-        self.grid_dim = int(world_dim // cell_dim)
+    def __init__(self, world_dim) -> None:
+        self.grid_dim = world_dim
         self.area = np.arange(0, self.grid_dim ** 2, dtype=np.int32).reshape((self.grid_dim, self.grid_dim))
 
     def reset(self, rng):
         self.spawn_mask = np.zeros((self.grid_dim, self.grid_dim), dtype=np.bool_)
         self.rng = rng
 
-    def sample(self, block_radius = 2):
+    def sample(self, block_radius = 21):
         # Retrieve valid indices
         spawn_area = np.ma.array(self.area, mask=self.spawn_mask).compressed()
         # Sample index
         cell_id = self.rng.integers(0, len(spawn_area))
         # Convert to 2D indices
-        y = int(spawn_area[cell_id] % self.grid_dim)
-        x = int(spawn_area[cell_id] / self.grid_dim)
+        y = int(spawn_area[cell_id] / self.grid_dim)
+        x = int(spawn_area[cell_id] % self.grid_dim)
         # Update spawn mask
-        self.spawn_mask[max(0, x - block_radius) : x + block_radius,
-                        max(0, y - block_radius) : y + block_radius] = True
-        return (x * self.cell_dim, y * self.cell_dim)
+        self.block_spawn_position((x, y), block_radius)
+        return (x, y)
 
-    def block_spawn_position(self, pos, block_radius = 3):
-        x = pos[0] // self.cell_dim
-        y = pos[1] // self.cell_dim
-        self.spawn_mask[max(0, x - block_radius) : x + block_radius,
-                        max(0, y - block_radius) : y + block_radius] = True
+    def block_spawn_position(self, pos, block_radius = 21):
+        x = pos[0]
+        y = pos[1]
+        n = self.grid_dim
+        r = block_radius
+        y, x = np.ogrid[-y:n-y, -x:n-x]
+        mask = x*x + y*y < r*r
+        self.spawn_mask[mask] = True
 
 class Spotlight():
     def __init__(self, dim, radius, speed, rng, has_border = False) -> None:

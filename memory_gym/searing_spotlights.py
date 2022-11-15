@@ -118,7 +118,7 @@ class SearingSpotlightsEnv(gym.Env):
         self.walkable_rect = pygame.Rect(0, 16 * SCALE, self.screen_dim, self.screen_dim - 16 * SCALE)
 
         # Init grid spawner
-        self.grid_sampler = GridPositionSampler(self.screen_dim, self.screen_dim // 24)
+        self.grid_sampler = GridPositionSampler(self.screen_dim)
         # self.grid_sampler = GridPositionSampler(self.screen_dim - 16 * SCALE, self.screen_dim // 24)
 
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
@@ -232,7 +232,7 @@ class SearingSpotlightsEnv(gym.Env):
         self.coin_surface.fill(255)
         self.coin_surface.set_colorkey(255)
         for _ in range(self.num_coins):
-            spawn_pos = self.grid_sampler.sample(2)
+            spawn_pos = self.grid_sampler.sample(21)
             spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
             spawn_pos = self._process_spawn_pos(spawn_pos)
             coin = Coin(self.reset_params["coin_scale"], spawn_pos)
@@ -240,7 +240,7 @@ class SearingSpotlightsEnv(gym.Env):
             self.coins.append(coin)
 
     def _spawn_exit(self):
-        spawn_pos = self.grid_sampler.sample(3)
+        spawn_pos = self.grid_sampler.sample(21)
         spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
         spawn_pos = self._process_spawn_pos(spawn_pos)
         self.exit = Exit(spawn_pos, self.reset_params["exit_scale"])
@@ -297,7 +297,7 @@ class SearingSpotlightsEnv(gym.Env):
         rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
         self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
         if self.reset_params["sample_agent_position"]:
-            spawn_pos = self.grid_sampler.sample(5)
+            spawn_pos = self.grid_sampler.sample(28)
             spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
         else:
             spawn_pos = (self.screen_dim // 2, self.screen_dim // 2)
