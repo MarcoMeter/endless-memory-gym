@@ -149,11 +149,12 @@ class GridMysteryPathEnv(gym.Env):
         start_pos = (self.start[0] * self.tile_dim + int(25 * SCALE), self.start[1] * self.tile_dim + int(25 * SCALE)) # TODO depend on agent radius and not hard coded int(25 * SCALE)
         self.normalized_agent_position = self._normalize_agent_position(start_pos)
         self.agent = GridCharacterController(SCALE, self.normalized_agent_position, self.mystery_path.to_grid(self.tile_dim), rotation)
+        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.rotate(rotation)
         self.is_off_path = False
         self.num_fails = 0
 
         # Draw
-        self._draw_surfaces([(self.path_surface, (0, 0)), (self.agent.surface, self.agent.rect)])
+        self._draw_surfaces([(self.path_surface, (0, 0)), (self.rotated_agent_surface, self.rotated_agent_rect)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
