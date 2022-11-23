@@ -1,6 +1,5 @@
 from gymnasium.envs.registration import register
 from memory_gym.searing_spotlights import SearingSpotlightsEnv
-from memory_gym.searing_spotlights_sanity import SearingSpotlightsSanityEnv
 from memory_gym.mortar_mayhem import MortarMayhemEnv
 from memory_gym.mortar_mayhem_grid import GridMortarMayhemEnv
 from memory_gym.mortar_mayhem_b import MortarMayhemTaskBEnv
