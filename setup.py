@@ -32,7 +32,7 @@ setup(
       packages=find_packages(where='.', include="memory_gym*"),
       python_requires=">=3.6",
       include_package_data=True,
-      install_requires=["gym>=0.26.2",
+      install_requires=["gymnasium==0.26.3",
                         "pygame>=2.1.2"],
       entry_points={
             "console_scripts": [

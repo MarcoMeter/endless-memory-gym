@@ -1,4 +1,4 @@
-from gym.envs.registration import register
+from gymnasium.envs.registration import register
 from memory_gym.searing_spotlights import SearingSpotlightsEnv
 from memory_gym.searing_spotlights_sanity import SearingSpotlightsSanityEnv
 from memory_gym.mortar_mayhem import MortarMayhemEnv

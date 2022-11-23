@@ -1,10 +1,10 @@
-import gym
+import gymnasium as gym
 import numpy as np
 import os
 import pygame
 
 from argparse import ArgumentParser
-from gym import  spaces
+from gymnasium import spaces
 from memory_gym.character_controller import CharacterController
 from memory_gym.pygame_assets import Command, MortarArena
 from pygame._sdl2 import Window, Texture, Renderer

@@ -1,11 +1,11 @@
-import gym
+import gymnasium as gym
 import numpy as np
 import os
 import pygame
 
 from argparse import ArgumentParser
-from gym import  spaces
-from gym.utils import seeding
+from gymnasium import spaces
+from gymnasium.utils import seeding
 from memory_gym.character_controller import CharacterController
 from memory_gym.mortar_mayhem import MortarMayhemEnv
 from memory_gym.pygame_assets import Command, MortarArena
