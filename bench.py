@@ -1,5 +1,5 @@
 import memory_gym
-import gym
+import gymnasium as gym
 import time
 import numpy as np
 
