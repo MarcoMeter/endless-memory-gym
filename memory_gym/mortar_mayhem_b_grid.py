@@ -121,7 +121,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
 
         # Check reset parameters for completeness and errors
         self.reset_params = GridMortarMayhemTaskBEnv.process_reset_params(options)
-        self._max_episode_steps = calc_max_episode_steps(max(self.reset_params["command_count"]),
+        self.max_episode_steps = calc_max_episode_steps(max(self.reset_params["command_count"]),
                                                             0,
                                                             0,
                                                             max(self.reset_params["explosion_delay"]),

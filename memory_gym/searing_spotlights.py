@@ -280,7 +280,7 @@ class SearingSpotlightsEnv(gym.Env):
         super().reset(seed=seed)
         self.current_seed = seed
         self.reset_params = SearingSpotlightsEnv.process_reset_params(options)
-        self._max_episode_steps = self.reset_params["max_steps"]
+        self.max_episode_steps = self.reset_params["max_steps"]
         self.t = 0
 
         if self.reset_params["hide_chessboard"]:
@@ -428,7 +428,7 @@ class SearingSpotlightsEnv(gym.Env):
                     done = True
         # Time limit
         self.t += 1
-        if self.t == self._max_episode_steps:
+        if self.t == self.max_episode_steps:
             done = True
 
         # Draw all surfaces

@@ -175,7 +175,7 @@ class MortarMayhemEnv(gym.Env):
 
         # Check reset parameters for completeness and errors
         self.reset_params = MortarMayhemEnv.process_reset_params(options)
-        self._max_episode_steps = calc_max_episode_steps(max(self.reset_params["command_count"]),
+        self.max_episode_steps = calc_max_episode_steps(max(self.reset_params["command_count"]),
                                                             max(self.reset_params["command_show_duration"]),
                                                             max(self.reset_params["command_show_delay"]),
                                                             max(self.reset_params["explosion_delay"]),
