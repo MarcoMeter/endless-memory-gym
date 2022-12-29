@@ -107,6 +107,7 @@ class GridMysteryPathEnv(gym.Env):
 
         # Check reset parameters for completeness and errors
         self.reset_params = GridMysteryPathEnv.process_reset_params(options)
+        self._max_episode_steps = self.reset_params["max_steps"]
 
         # Track all rewards during one episode
         self.episode_rewards = []
@@ -210,7 +211,7 @@ class GridMysteryPathEnv(gym.Env):
 
         # Time limit
         self.t += 1
-        if self.t == self.reset_params["max_steps"]:
+        if self.t == self._max_episode_steps:
             done = True
 
         if done:

@@ -277,6 +277,24 @@ class MortarArena():
                 grid[i].append(GridPosition(tile.global_position[0] + translate_x, tile.global_position[1] + translate_y, i, j))
         return grid
 
+def calc_max_episode_steps(command_count, show_duration, show_delay, execution_duration, execution_delay):
+    """Calculates the maximum number of steps one episode can last.
+
+    Arguments:
+        command_count {int} -- Max number of commands
+        show_duration {int} -- Max number of steps a command is shown
+        show_delay {int} -- Max number of steps between showing commands
+        execution_duration {int} -- Max number of steps of moving to the target tile
+        execution_delay {int} -- Max number of steps to validate the current tile
+
+    Returns:
+        {int} -- Returns the maximum number of steps that one episode can last
+    """
+    clue_task_steps = (show_duration + show_delay) * command_count
+    act_task_steps = (execution_duration + execution_delay) * command_count
+    act_task_steps = act_task_steps - execution_delay + 1
+    return clue_task_steps + act_task_steps
+
 class Node():
     def __init__(self, i, j, is_wall = False):
         self.x, self.y = i, j

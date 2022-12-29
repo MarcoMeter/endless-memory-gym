@@ -8,7 +8,7 @@ from gymnasium import spaces
 from gymnasium.utils import seeding
 from memory_gym.character_controller import CharacterController
 from memory_gym.mortar_mayhem import MortarMayhemEnv
-from memory_gym.pygame_assets import Command, MortarArena
+from memory_gym.pygame_assets import Command, MortarArena, calc_max_episode_steps
 
 SCALE = 0.25
 
@@ -122,6 +122,11 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
 
         # Check reset parameters for completeness and errors
         self.reset_params = MortarMayhemTaskBEnv.process_reset_params(options)
+        self._max_episode_steps = calc_max_episode_steps(max(self.reset_params["command_count"]),
+                                                            0,
+                                                            0,
+                                                            max(self.reset_params["explosion_delay"]),
+                                                            max(self.reset_params["explosion_duration"]))
 
         # Track all rewards during one episode
         self.episode_rewards = []
