@@ -87,6 +87,10 @@ You can also execute the python scripts directly, for example:
 python ./memory_gym/mortar_mayhem.py
 ```
 
+Controls:
+- WASD or Arrow Keys to move or rotate
+- Page Up / Page Down to increment / decrement environment seeds
+
 ## Mortar Mayhem
 
 ![Mortar Mayhem Environment](/docs/assets/mm.jpg)
