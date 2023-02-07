@@ -1,3 +1,5 @@
+![mm](docs/assets/mortar_mayhem_0.gif) ![mm_gt](docs/assets/mortar_mayhem_0_gt.gif) ![mp](docs/assets/mystery_path_0.gif) ![mp_gt](docs/assets/mystery_path_0_gt.gif) ![ss](docs/assets/searing_spotlights_0.gif) ![ss_gt](docs/assets/searing_spotlights_0_gt.gif)
+
 [[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Searing Spotlights](#searing-spotlights)] [[Training](#training)]
 
 # Memory Gym: Partially Observable Challenges for Memory-Based Agents
