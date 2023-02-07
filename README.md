@@ -60,10 +60,10 @@ env = gym.make("SearingSpotlights-v0")
 # Pass reset parameters to the environment
 options = {"agent_scale": 0.25}
 
-obs = env.reset(options)
+obs, info = env.reset(options)
 done = False
 while not done:
-    obs, reward, done, info = env.step(env.action_space.sample())
+    obs, reward, truncation, done, info = env.step(env.action_space.sample())
 
 print(info)
 ```
