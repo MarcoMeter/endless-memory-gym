@@ -1,4 +1,4 @@
-[[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Searing Spotlights](#searing-spotlights)]
+[[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Searing Spotlights](#searing-spotlights)] [[Training](#training)]
 
 # Memory Gym: Partially Observable Challenges for Memory-Based Agents
 
@@ -24,18 +24,30 @@ url={https://openreview.net/forum?id=jHc8dCx6DDr}
 Major dependencies:
 - gymnasium==0.26.3
 - PyGame
+
 ```console
 conda create -n memory-gym --python=3.7 --yes
+conda activate memory-gym
+pip install memory-gym
+```
+
+or
+
+```console
+conda create -n memory-gym --python=3.7 --yes
+conda activate memory-gym
+git clone https://github.com/MarcoMeter/drl-memory-gym.git
 cd drl-memory-gym
 pip install -e .
 ```
+
 
 ## Usage
 
 Executing the environment using random actions:
 ```python
 import memory_gym
-import gym
+import gymnasium as gym
 
 env = gym.make("SearingSpotlights-v0")
 # env = gym.make("MortarMayhem-v0")
@@ -171,3 +183,11 @@ Searing Spotlights is a pitch black surrounding to the agent. The environment is
 | reward_exit              | 1.0     | What reward to signal after successfully using the exit.                                                        |
 | reward_max_steps         | 0.0     | What reward to signal if max steps is reached.                                                                  |
 | reward_coin              | 0.25    | What reward to signal upon collecting one coin.                                                                 |
+
+## Training
+
+Baseline results are avaible via these repositories.
+
+[Recurrence + PPO](https://github.com/MarcoMeter/recurrent-ppo-truncated-bptt)
+
+[Gated TransformerXL + PPO](https://github.com/MarcoMeter/episodic-transformer-memory-ppo)
