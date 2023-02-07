@@ -49,6 +49,7 @@ pip install -e .
 
 
 ## Usage
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/github/vwxyzjn/cleanrl/blob/master/docs/get-started/CleanRL_Huggingface_Integration_Demo.ipynb](https://colab.research.google.com/drive/1LjlUOEer8vjGrz0rLM8pP5UyeNCsURkY?usp=sharing))
 
 Executing the environment using random actions:
 ```python
@@ -66,10 +67,10 @@ env = gym.make("SearingSpotlights-v0")
 # Pass reset parameters to the environment
 options = {"agent_scale": 0.25}
 
-obs, info = env.reset(options)
+obs, info = env.reset(seed=1, options=options)
 done = False
 while not done:
-    obs, reward, truncation, done, info = env.step(env.action_space.sample())
+    obs, reward, done, truncation, info = env.step(env.action_space.sample())
 
 print(info)
 ```
