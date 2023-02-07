@@ -2,7 +2,8 @@
 
 # Memory Gym: Partially Observable Challenges for Memory-Based Agents
 
-<img src="docs/assets/mortar_mayhem_0.gif" width=280> <img src="docs/assets/mortar_mayhem_0_gt.gif" width=280> <img src="docs/assets/mystery_path_0.gif" width=280> <img src="docs/assets/mystery_path_0_gt.gif" width=280> <img src="docs/assets/searing_spotlights_0.gif" width=280> <img src="docs/assets/searing_spotlights_0_gt.gif" width=280>
+<img src="docs/assets/mortar_mayhem_0.gif" width=180> <img src="docs/assets/mystery_path_0.gif" width=180> <img src="docs/assets/searing_spotlights_0.gif" width=180>
+<img src="docs/assets/mortar_mayhem_0_gt.gif" width=180> <img src="docs/assets/mystery_path_0_gt.gif" width=180> <img src="docs/assets/searing_spotlights_0_gt.gif" width=180>
 
 Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **Searing Spotlights** that are inspired by some mini games of [Pummel Party](http://rebuiltgames.com/). These environments shall benchmark an agent's memory to
 - memorize events across long sequences,
