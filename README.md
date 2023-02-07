@@ -1,4 +1,4 @@
-[[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Searing Spotlights](#searing-spotlights)] [[Training](#training)]
+[[Paper](https://openreview.net/forum?id=jHc8dCx6DDr)] [[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Searing Spotlights](#searing-spotlights)] [[Training](#training)]
 
 # Memory Gym: Partially Observable Challenges for Memory-Based Agents
 <p align="center">
