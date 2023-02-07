@@ -7,10 +7,22 @@ Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **
 - generalize,
 - and be robust to noise.
 
+## Citation
+
+```bibtex
+@inproceedings{pleines2023memory,
+title={Memory Gym: Partially Observable Challenges to Memory-Based Agents},
+author={Marco Pleines and Matthias Pallasch and Frank Zimmer and Mike Preuss},
+booktitle={International Conference on Learning Representations},
+year={2023},
+url={https://openreview.net/forum?id=jHc8dCx6DDr}
+}
+```
+
 ## Installation
 
 Major dependencies:
-- gym==0.26.2
+- gymnasium==0.26.3
 - PyGame
 ```console
 conda create -n memory-gym --python=3.7 --yes
