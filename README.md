@@ -49,7 +49,7 @@ pip install -e .
 
 
 ## Usage
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/github/vwxyzjn/cleanrl/blob/master/docs/get-started/CleanRL_Huggingface_Integration_Demo.ipynb](https://colab.research.google.com/drive/1LjlUOEer8vjGrz0rLM8pP5UyeNCsURkY?usp=sharing))
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1LjlUOEer8vjGrz0rLM8pP5UyeNCsURkY?usp=sharing)
 
 Executing the environment using random actions:
 ```python
