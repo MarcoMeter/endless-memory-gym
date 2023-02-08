@@ -274,17 +274,17 @@ def main():
             # Quit
             if event.type == pygame.QUIT:
                 done = True
-        actions = [-1]
+        action = -1
         if keys == None:
             continue
         if keys == pygame.K_UP or keys == pygame.K_w:
-            actions[0] = 3
+            action = 3
         if keys == pygame.K_RIGHT or keys == pygame.K_d:
-            actions[0] = 2
+            action = 2
         if keys == pygame.K_LEFT or keys == pygame.K_a:
-            actions[0] = 1
+            action = 1
         if keys == pygame.K_SPACE:
-            actions[0] = 0
+            action = 0
         if keys == pygame.K_PAGEDOWN or keys == pygame.K_PAGEUP:
             if keys == pygame.K_PAGEUP:
                 seed += 1
@@ -293,8 +293,8 @@ def main():
                     seed -= 1
             obs, reset_info = env.reset(seed = seed, options = reset_params)
             img = env.render()    
-        if actions[0] >= 0:
-            obs, reward, done, truncation, info = env.step(actions)
+        if action >= 0:
+            obs, reward, done, truncation, info = env.step(action)
             img = env.render()
 
     print("episode reward: " + str(info["reward"]))

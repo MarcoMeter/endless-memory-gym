@@ -111,12 +111,12 @@ class GridCharacterController(CharacterController):
         self.rect.center = (grid_position.x ,grid_position.y)
 
     def step(self, action):
-        if action[0] == 1:  # rotate left
+        if action == 1:  # rotate left
             self.rotation = (self.rotation + 90) % 360
-        if action[0] == 2:  # rotate right
+        if action == 2:  # rotate right
             self.rotation = (self.rotation - 90) % 360
         self.face_direction = CardinalDirection(self.rotation // 90)
-        if action[0] == 3:  # move forward
+        if action == 3:  # move forward
             x = self.grid_position[0]
             y = self.grid_position[1]
             if self.face_direction == CardinalDirection.NORTH:
