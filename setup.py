@@ -8,7 +8,7 @@ cwd = os.getcwd()
 
 # Get long description from README.md
 long_description = ""
-with open(cwd + "\\README.md", "r", encoding="utf-8") as fh:
+with open(cwd + "//README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(

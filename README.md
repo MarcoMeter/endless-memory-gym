@@ -32,7 +32,7 @@ Major dependencies:
 - PyGame
 
 ```console
-conda create -n memory-gym --python=3.7 --yes
+conda create -n memory-gym python=3.7 --yes
 conda activate memory-gym
 pip install memory-gym
 ```
@@ -40,7 +40,7 @@ pip install memory-gym
 or
 
 ```console
-conda create -n memory-gym --python=3.7 --yes
+conda create -n memory-gym python=3.7 --yes
 conda activate memory-gym
 git clone https://github.com/MarcoMeter/drl-memory-gym.git
 cd drl-memory-gym
