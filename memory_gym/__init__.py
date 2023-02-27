@@ -1,6 +1,7 @@
 from gymnasium.envs.registration import register
 from memory_gym.searing_spotlights import SearingSpotlightsEnv
 from memory_gym.mortar_mayhem import MortarMayhemEnv
+from memory_gym.mortar_mayhem_oe import MortarMayhemEnvOE
 from memory_gym.mortar_mayhem_grid import GridMortarMayhemEnv
 from memory_gym.mortar_mayhem_b import MortarMayhemTaskBEnv
 from memory_gym.mortar_mayhem_b_grid import GridMortarMayhemTaskBEnv
@@ -20,6 +21,11 @@ register(
 register(
      id="MortarMayhem-v0",
      entry_point="memory_gym.mortar_mayhem:MortarMayhemEnv",
+)
+
+register(
+     id="MortarMayhem-OE-v0",
+     entry_point="memory_gym.mortar_mayhem_oe:MortarMayhemEnvOE",
 )
 
 register(
