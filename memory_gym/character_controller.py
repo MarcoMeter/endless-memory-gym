@@ -141,3 +141,60 @@ class GridCharacterController(CharacterController):
         grid_position = self.grid[int(grid_index_position[0])][int(grid_index_position[1])]
         self.grid_position = grid_index_position
         self.rect.center = (grid_position.x, grid_position.y)
+
+class ScreenWrapCharacterController(CharacterController):
+    """ScreenWrapCharacterController establishes a character that is rendered and can be moved using the step function.
+    This character can move vertically, horizontally, and diagonally at a certain speed. The character's orientation solely
+    depends on its velocity. If the agent leaves the screen, it will reappear on the opposite side of the screen.
+    """
+    def __init__(self, speed, scale, rotation = 0) -> None:
+        super().__init__(speed, scale, rotation)
+
+    def step(self, action, boundary_rect = None):
+        # Determine agent velocity and rotation
+        velocity = Vector2()
+        if action[0] == 1:
+            self.rotation = 90
+            velocity.x = -1
+        if action[0] == 2:
+            self.rotation = 270
+            velocity.x = 1
+        if action[1] == 1:
+            self.rotation = 0
+            velocity.y = -1
+        if action[1] == 2:
+            self.rotation = 180
+            velocity.y = 1
+
+        if velocity.x < 0 and velocity.y < 0:
+            self.rotation = 45 # -,-
+        if velocity.x < 0 and velocity.y > 0:
+            self.rotation = 135 # -,+
+        if velocity.x > 0 and velocity.y < 0:
+            self.rotation = 305 # +,-
+        if velocity.x > 0 and velocity.y > 0:
+            self.rotation = 215 # +,+
+
+        # Normalize velocity
+        if velocity.length() != 0.0:
+            velocity = velocity.normalize() * self.speed
+
+        # Update the agent's position
+        self.rect.center = Vector2(self.rect.center[0],self.rect.center[1]) + velocity
+        
+        # Wrap the agent to the opposite side of the screen (i.e. boundary_rect)
+        offset = 0.5
+        if boundary_rect is not None:
+            x = self.rect.center[0]
+            y = self.rect.center[1]
+            if x > boundary_rect.bottomright[0] + self.radius * offset:
+                x = boundary_rect.topleft[0] - self.radius * offset
+            if x < boundary_rect.topleft[0] - self.radius * offset:
+                x = boundary_rect.bottomright[0] + self.radius * offset
+            if y > boundary_rect.bottomright[1] + self.radius * offset:
+                y = boundary_rect.topleft[1] - self.radius * offset
+            if y < boundary_rect.topleft[1] - self.radius * offset:
+                y = boundary_rect.bottomright[1] + self.radius * offset
+            self.rect.center = (x, y)
+
+        return self.rotate(self.rotation)

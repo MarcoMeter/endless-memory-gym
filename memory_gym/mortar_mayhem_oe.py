@@ -5,13 +5,13 @@ import pygame
 
 from argparse import ArgumentParser
 from gymnasium import spaces
-from memory_gym.character_controller import CharacterController
+from memory_gym.character_controller import ScreenWrapCharacterController
 from memory_gym.pygame_assets import Command, MortarArena, calc_max_episode_steps
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
-class MortarMayhemEnv(gym.Env):
+class MortarMayhemEnvOE(gym.Env):
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
         "render_fps": 25,
@@ -20,7 +20,6 @@ class MortarMayhemEnv(gym.Env):
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 10.0 * SCALE,
-                "arena_size": 5,
                 "allowed_commands": 9,
                 "command_count": [5],
                 "command_show_duration": [3],
@@ -30,7 +29,6 @@ class MortarMayhemEnv(gym.Env):
                 "visual_feedback": True,
                 "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,
-                "reward_episode_success": 0.0
             }
 
     def process_reset_params(reset_params):
@@ -43,13 +41,12 @@ class MortarMayhemEnv(gym.Env):
         Returns:
             dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
-        cloned_params = MortarMayhemEnv.default_reset_parameters.copy()
+        cloned_params = MortarMayhemEnvOE.default_reset_parameters.copy()
         if reset_params is not None:
             for k, v in reset_params.items():
                 assert k in cloned_params.keys(), "Provided reset parameter (" + str(k) + ") is not valid. Check spelling."
                 cloned_params[k] = v
         assert cloned_params["allowed_commands"] >= 4 and cloned_params["allowed_commands"] <= 9
-        assert cloned_params["arena_size"] >= 2 and cloned_params["arena_size"] <= 6
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
@@ -81,6 +78,7 @@ class MortarMayhemEnv(gym.Env):
 
         # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
+        self.arena_size = 6
 
     def _draw_surfaces(self, surfaces):
         # Draw all surfaces
@@ -128,8 +126,8 @@ class MortarMayhemEnv(gym.Env):
         available_commands = {key: Command.COMMANDS[key] for key in keys}
         for key, value in available_commands.items():
             test_pos = (pos[0] + value[0], pos[1] + value[1])
-            if test_pos[0] >= 0 and test_pos[0] < self.reset_params["arena_size"]:
-                if test_pos[1] >= 0 and test_pos[1] < self.reset_params["arena_size"]:
+            if test_pos[0] >= 0 and test_pos[0] < self.arena_size:
+                if test_pos[1] >= 0 and test_pos[1] < self.arena_size:
                     valid_commands.append(key)
         # Return the commands that can be executed
         return valid_commands
@@ -174,7 +172,7 @@ class MortarMayhemEnv(gym.Env):
         self.current_seed = seed
 
         # Check reset parameters for completeness and errors
-        self.reset_params = MortarMayhemEnv.process_reset_params(options)
+        self.reset_params = MortarMayhemEnvOE.process_reset_params(options)
         self.max_episode_steps = calc_max_episode_steps(max(self.reset_params["command_count"]),
                                                             max(self.reset_params["command_show_duration"]),
                                                             max(self.reset_params["command_show_delay"]),
@@ -186,12 +184,12 @@ class MortarMayhemEnv(gym.Env):
 
         # Setup the arena and place it on the center of the screen
         self.bg = pygame.Surface((self.screen_dim, self.screen_dim))
-        self.arena = MortarArena(SCALE, self.reset_params["arena_size"])
+        self.arena = MortarArena(SCALE, self.arena_size)
         self.arena.rect.center = (self.screen_dim // 2, self.screen_dim // 2)
 
         # Setup the agent and sample its position
-        self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"])
-        spawn_pos = self.arena.get_tile_global_position(self.np_random.integers(0, self.reset_params["arena_size"] ** 2))
+        self.agent = ScreenWrapCharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"])
+        spawn_pos = self.arena.get_tile_global_position(self.np_random.integers(0, self.arena_size ** 2))
         offset = self.np_random.integers(-8 * SCALE, 8 * SCALE, 2)
         translate_x = self.arena.rect.center[0] - self.arena.local_center[0] + self.arena.tile_dim // 2 + offset[0]
         translate_y = self.arena.rect.center[1] - self.arena.local_center[1] + self.arena.tile_dim // 2 + offset[1]
@@ -269,7 +267,6 @@ class MortarMayhemEnv(gym.Env):
                     # All commands completed!
                     done = True
                     success = 1
-                    reward += self.reset_params["reward_episode_success"]
                 self._command_steps = 1
 
             # Keep the death tiles on for as long as the explosion duration
@@ -321,7 +318,7 @@ class MortarMayhemEnv(gym.Env):
             if self._command_visualization:
                     fps = 4
             else:
-                fps = MortarMayhemEnv.metadata["render_fps"]
+                fps = MortarMayhemEnvOE.metadata["render_fps"]
             
             if self.render_mode == "rgb_array":
                 self.clock.tick(fps)
@@ -352,7 +349,7 @@ def main():
     parser.add_argument("--seed", type=int, help="The to be used seed for the environment's random number generator.", default=0)
     options = parser.parse_args()
 
-    env = MortarMayhemEnv(render_mode="debug_rgb_array")
+    env = MortarMayhemEnvOE(render_mode="debug_rgb_array")
     reset_params = {}
     seed = options.seed
     vis_obs, reset_info = env.reset(seed = options.seed, options = reset_params)
