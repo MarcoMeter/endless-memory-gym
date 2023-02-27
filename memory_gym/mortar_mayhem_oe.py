@@ -21,7 +21,7 @@ class MortarMayhemEnvOE(gym.Env):
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 10.0 * SCALE,
                 "allowed_commands": 9,
-                "initial_command_count": 2,
+                "initial_command_count": 1,
                 "command_show_duration": [3],
                 "command_show_delay": [1],
                 "explosion_duration": [6],
@@ -188,6 +188,7 @@ class MortarMayhemEnvOE(gym.Env):
         self._current_command = 0       # the current to be executed command
         self._command_steps = 0         # the current step while executing a command (i.e. death tiles off)
         self._command_verify_step = 0   # the current step while the command is being evaluated (i.e. death tiles on)
+        self._total_commands_completed = 0
         # Sample execution delay and duration
         self._explosion_duration = self.np_random.choice(self.reset_params["explosion_duration"])
         self._explosion_delay = self.np_random.choice(self.reset_params["explosion_delay"])
@@ -204,7 +205,6 @@ class MortarMayhemEnvOE(gym.Env):
     def step(self, action):
         reward = 0
         done = False
-        success = 0
         command = None
 
         # Show each command one by one, while the agent cannot move
@@ -233,6 +233,7 @@ class MortarMayhemEnvOE(gym.Env):
                     if self.normalized_agent_position == self._target_pos:
                         # Success!
                         reward += self.reset_params["reward_command_success"]
+                        self._total_commands_completed += 1
                     # If the agent is not on the target position, terminate the episode
                     else:
                         # Failure!
@@ -279,8 +280,8 @@ class MortarMayhemEnvOE(gym.Env):
             info = {
                 "reward": sum(self.episode_rewards),
                 "length": len(self.episode_rewards),
-                "success": success,
-                "commands_completed": (self._current_command - 1 + success) / self.num_commands,
+                "commands_completed": self._total_commands_completed,
+                "max_command_sequence": len(self._commands) - 1 if len(self._commands) > 1 else 0,
             }
         else:
             info = {}
@@ -369,8 +370,8 @@ def main():
 
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))
-    print("success: " + str(bool(info["success"])))
     print("commands completed: " + str(info["commands_completed"]))
+    print("max command sequence completed: " + str(info["max_command_sequence"]))
 
     env.close()
     exit()
