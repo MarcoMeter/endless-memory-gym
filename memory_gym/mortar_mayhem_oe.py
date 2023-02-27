@@ -119,31 +119,11 @@ class MortarMayhemEnvOE(gym.Env):
         return ((agent_position[0] - self.arena.rect[0]) // self.arena.tile_dim,
                 (agent_position[1] - self.arena.rect[1]) // self.arena.tile_dim)
 
-    def _get_valid_commands(self, pos):
-        # Check whether each command can be executed or not
-        valid_commands = []
-        keys = list(Command.COMMANDS.keys())[:self.reset_params["allowed_commands"]]
-        available_commands = {key: Command.COMMANDS[key] for key in keys}
-        for key, value in available_commands.items():
-            test_pos = (pos[0] + value[0], pos[1] + value[1])
-            if test_pos[0] >= 0 and test_pos[0] < self.arena_size:
-                if test_pos[1] >= 0 and test_pos[1] < self.arena_size:
-                    valid_commands.append(key)
-        # Return the commands that can be executed
-        return valid_commands
-
     def _generate_commands(self, start_pos):
-        simulated_pos = start_pos
-        commands = []
         self.num_commands = self.np_random.choice(self.reset_params["command_count"])
-        for i in range(self.num_commands):
-            # Retrieve valid commands (we cannot walk on to a wall)
-            valid_commands = self._get_valid_commands(simulated_pos)            
-            # Sample one command from the available ones
-            sample = valid_commands[self.np_random.integers(0, len(valid_commands))]
-            commands.append(sample)
-            # Update the simulated position
-            simulated_pos = (simulated_pos[0] + Command.COMMANDS[sample][0], simulated_pos[1] + Command.COMMANDS[sample][1])
+        commands = list(Command.COMMANDS.keys())
+        samples = self.np_random.integers(0, self.reset_params["allowed_commands"], self.num_commands)
+        commands = np.take(commands, samples)
         return commands
 
     def _generate_command_visualization(self, commands, duration=1, delay=0):
@@ -207,8 +187,8 @@ class MortarMayhemEnvOE(gym.Env):
         command = Command(self._command_visualization.pop(0), SCALE)
 
         # Init episode members
-        self._target_pos = (self.normalized_agent_position[0] + Command.COMMANDS[self._commands[0]][0],
-                            self.normalized_agent_position[1] + Command.COMMANDS[self._commands[0]][1])
+        self._target_pos = ((self.normalized_agent_position[0] + Command.COMMANDS[self._commands[0]][0]) % self.arena_size,
+                            (self.normalized_agent_position[1] + Command.COMMANDS[self._commands[0]][1]) % self.arena_size)
         self._current_command = 0       # the current to be executed command
         self._command_steps = 0         # the current step while executing a command (i.e. death tiles off)
         self._command_verify_step = 0   # the current step while the command is being evaluated (i.e. death tiles on)
