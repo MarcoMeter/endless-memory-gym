@@ -6,7 +6,7 @@ import pygame
 from argparse import ArgumentParser
 from gymnasium import spaces
 from memory_gym.character_controller import ScreenWrapCharacterController
-from memory_gym.pygame_assets import Command, MortarArena, calc_max_episode_steps
+from memory_gym.pygame_assets import Command, MortarArena
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
@@ -21,7 +21,7 @@ class MortarMayhemEnvOE(gym.Env):
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 10.0 * SCALE,
                 "allowed_commands": 9,
-                "command_count": [5],
+                "initial_command_count": 2,
                 "command_show_duration": [3],
                 "command_show_delay": [1],
                 "explosion_duration": [6],
@@ -119,11 +119,10 @@ class MortarMayhemEnvOE(gym.Env):
         return ((agent_position[0] - self.arena.rect[0]) // self.arena.tile_dim,
                 (agent_position[1] - self.arena.rect[1]) // self.arena.tile_dim)
 
-    def _generate_commands(self, start_pos):
-        self.num_commands = self.np_random.choice(self.reset_params["command_count"])
+    def _generate_commands(self, num_commands):
         commands = list(Command.COMMANDS.keys())
-        samples = self.np_random.integers(0, self.reset_params["allowed_commands"], self.num_commands)
-        commands = np.take(commands, samples)
+        samples = self.np_random.integers(0, self.reset_params["allowed_commands"], num_commands)
+        commands = np.take(commands, samples).tolist()
         return commands
 
     def _generate_command_visualization(self, commands, duration=1, delay=0):
@@ -153,11 +152,7 @@ class MortarMayhemEnvOE(gym.Env):
 
         # Check reset parameters for completeness and errors
         self.reset_params = MortarMayhemEnvOE.process_reset_params(options)
-        self.max_episode_steps = calc_max_episode_steps(max(self.reset_params["command_count"]),
-                                                            max(self.reset_params["command_show_duration"]),
-                                                            max(self.reset_params["command_show_delay"]),
-                                                            max(self.reset_params["explosion_delay"]),
-                                                            max(self.reset_params["explosion_duration"]))
+        self.max_episode_steps =  10e+10
 
         # Track all rewards during one episode
         self.episode_rewards = []
@@ -177,11 +172,12 @@ class MortarMayhemEnvOE(gym.Env):
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
 
         # Sample the entire command sequence
-        self._commands = self._generate_commands(self.normalized_agent_position)
-        show_duration = self.np_random.choice(self.reset_params["command_show_duration"])
-        show_delay = self.np_random.choice(self.reset_params["command_show_delay"])
+        self.num_commands = self.reset_params["initial_command_count"]
+        self._commands = self._generate_commands(self.num_commands)
+        self.show_duration = self.np_random.choice(self.reset_params["command_show_duration"])
+        self.show_delay = self.np_random.choice(self.reset_params["command_show_delay"])
         # Prepare list which prepares all steps (i.e. frames) for the visualization
-        self._command_visualization = self._generate_command_visualization(self._commands, show_duration, show_delay)
+        self._command_visualization = self._generate_command_visualization(self._commands, self.show_duration, self.show_delay)
         self._command_visualization_clone = self._command_visualization.copy() # the clone is needed for render()
         # Retrieve the first command frame
         command = Command(self._command_visualization.pop(0), SCALE)
@@ -245,8 +241,15 @@ class MortarMayhemEnvOE(gym.Env):
                 # Finish the episode once all commands are completed
                 if self._current_command >= self.num_commands:
                     # All commands completed!
-                    done = True
-                    success = 1
+                    # Append another command, reset command logic members, and reset the command visualization
+                    new_command = self._generate_commands(1)
+                    self._commands.append(new_command[0])
+                    self.num_commands = len(self._commands)
+                    self._current_command = 0       # the current to be executed command
+                    self._command_steps = 0         # the current step while executing a command (i.e. death tiles off)
+                    self._command_verify_step = 0   # the current step while the command is being evaluated (i.e. death tiles on)
+                    self._command_visualization = self._generate_command_visualization(new_command, self.show_duration, self.show_delay)
+                    self._command_visualization_clone = self._command_visualization.copy() # the clone is needed for render()
                 self._command_steps = 1
 
             # Keep the death tiles on for as long as the explosion duration
@@ -257,8 +260,8 @@ class MortarMayhemEnvOE(gym.Env):
                     self._command_verify_step = 0
                     if self._current_command < self.num_commands:
                         # Update target position
-                        self._target_pos = (self._target_pos[0] + Command.COMMANDS[self._commands[self._current_command]][0],
-                                            self._target_pos[1] + Command.COMMANDS[self._commands[self._current_command]][1])
+                        self._target_pos = ((self._target_pos[0] + Command.COMMANDS[self._commands[self._current_command]][0]) % self.arena_size,
+                                            (self._target_pos[1] + Command.COMMANDS[self._commands[self._current_command]][1]) % self.arena_size)
                 else:
                     # The agent dies upon walking on a death tile
                     if not self.normalized_agent_position == self._target_pos:
