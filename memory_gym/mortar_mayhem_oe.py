@@ -79,6 +79,7 @@ class MortarMayhemEnvOE(gym.Env):
         # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
         self.arena_size = 6
+        self.max_episode_steps =  2048
 
     def _draw_surfaces(self, surfaces):
         # Draw all surfaces
@@ -152,7 +153,6 @@ class MortarMayhemEnvOE(gym.Env):
 
         # Check reset parameters for completeness and errors
         self.reset_params = MortarMayhemEnvOE.process_reset_params(options)
-        self.max_episode_steps =  10e+10
 
         # Track all rewards during one episode
         self.episode_rewards = []
@@ -210,7 +210,8 @@ class MortarMayhemEnvOE(gym.Env):
         # Show each command one by one, while the agent cannot move
         if self._command_visualization:
             command = Command(self._command_visualization.pop(0), SCALE)
-            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.surface, self.agent.rect
+            if self.rotated_agent_surface is None and self.rotated_agent_rect is None:
+                self.rotated_agent_surface, self.rotated_agent_rect = self.agent.surface, self.agent.rect
         # All commands were shown, the agent can move now, while the command execution logic is running
         else:
             # Move the agent's controlled character
