@@ -79,7 +79,7 @@ class MortarMayhemEnvOE(gym.Env):
         # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
         self.arena_size = 6
-        self.max_episode_steps =  2048
+        self.max_episode_steps = 1024
 
     def _draw_surfaces(self, surfaces):
         # Draw all surfaces
@@ -301,7 +301,7 @@ class MortarMayhemEnvOE(gym.Env):
     def render(self):
         if self.render_mode is not None:
             if self._command_visualization:
-                    fps = 4
+                    fps = 3
             else:
                 fps = MortarMayhemEnvOE.metadata["render_fps"]
             
