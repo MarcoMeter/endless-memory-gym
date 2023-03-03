@@ -300,6 +300,7 @@ class Node():
         self.x, self.y = i, j
         self.f_cost, self.g_cost, self.h_cost = 0, 0, 0
         self.neighbors = []
+        self.diagonal_neighbors = []
         self.previous_node = None
         self.is_wall = is_wall
         self.visited = False
@@ -313,6 +314,15 @@ class Node():
             self.neighbors.append(grid[self.x][self.y+1])
         if self.y > 0:
             self.neighbors.append(grid[self.x][self.y-1])
+        # add diagonal neighbors
+        if self.x < num_columns - 1 and self.y < num_rows - 1:
+            self.diagonal_neighbors.append(grid[self.x+1][self.y+1])
+        if self.x > 0 and self.y > 0:
+            self.diagonal_neighbors.append(grid[self.x-1][self.y-1])
+        if self.x < num_columns - 1 and self.y > 0:
+            self.diagonal_neighbors.append(grid[self.x+1][self.y-1])
+        if self.x > 0 and self.y < num_rows - 1:
+            self.diagonal_neighbors.append(grid[self.x-1][self.y+1])
 
     def draw_to_surface(self, surface, tile_dim, color):
         if self.is_wall:
@@ -332,6 +342,7 @@ class MysteryPath():
             column = []
             for j in range(num_rows):
                 is_wall = False
+                # Randomly add walls to the inside of the grid
                 if i > 0 and i < num_columns - 2 and j > 0 and j < num_rows - 2:
                     if rng.integers(0, 100) < 33:
                         is_wall = True
@@ -346,12 +357,45 @@ class MysteryPath():
             for j in range(num_rows):
                 self.grid[i][j].add_neighbors(self.grid, num_columns, num_rows)
 
+        # Set start and end nodes
         start_node = self.grid[start_position[0]][start_position[1]]
         end_node = self.grid[end_position[0]][end_position[1]]
 
+        # Add walls to the outer edge of the grid
+        # Gather all nodes, but select only nodes that are not adjacent (also diagonally) to a wall
+        # Ensure that the start and end nodes (plus neighbors) are not added to this set of nodes
+        outer_nodes = []
+        for i in range(num_columns):
+            for j in range(num_rows):
+                if i == 0 or i == num_columns - 1 or j == 0 or j == num_rows - 1:
+                    node = self.grid[i][j]
+                    if i != start_position[0] or j != start_position[1]:
+                        if i != end_position[0] or j != end_position[1]:
+                            if node not in start_node.neighbors and node not in end_node.neighbors:
+                                adjacent_to_wall = False
+                                for neighbor in node.neighbors:
+                                    if neighbor.is_wall:
+                                        adjacent_to_wall = True
+                                        break
+                                if not adjacent_to_wall:
+                                    for neighbor in node.diagonal_neighbors:
+                                        if neighbor.is_wall:
+                                            adjacent_to_wall = True
+                                            break
+                                if not adjacent_to_wall:
+                                    outer_nodes.append(node)
+        
+        # Randomly select nodes from the outer node list and turn them into walls
+        for i in range(rng.choice([4, 8])):
+            if len(outer_nodes) > 0:
+                node = rng.choice(outer_nodes)
+                node.is_wall = True
+                self.wall_nodes.append(node)
+                outer_nodes.remove(node)
+
+        # A* algorithm to procedurally generate a path, which is not necessarily the shortest path
         # Add start node to open set
         open_set.append(start_node)
-
         while not path_found:
             if len(open_set) > 0:
                 # Pick the most promising node from the open set
@@ -392,7 +436,9 @@ class MysteryPath():
                         if new_path:
                                 neighbor.h_cost = self.heuristic(neighbor, end_node)
                                 neighbor.f_cost = neighbor.g_cost + neighbor.h_cost
-                                neighbor.previous_node = current_node     
+                                neighbor.previous_node = current_node
+            else:
+                raise Exception("No valid path found")
 
     def heuristic(self, a, b):
         return math.sqrt((a.x - b.x)**2 + abs(a.y - b.y)**2)
