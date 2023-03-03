@@ -38,7 +38,7 @@ setup(
             "console_scripts": [
             "searing_spotlights=memory_gym.searing_spotlights:main",
             "mortar_mayhem=memory_gym.mortar_mayhem:main",
-            "mortar_mayhem_oe=memory_gym.mortar_mayhem_oe:main",
+            "endless_mortar_mayhem=memory_gym.endless_mortar_mayhem:main",
             "mortar_mayhem_b=memory_gym.mortar_mayhem_b:main",
             "mortar_mayhem_grid=memory_gym.mortar_mayhem_grid:main",
             "mortar_mayhem_b_grid=memory_gym.mortar_mayhem_b_grid:main",

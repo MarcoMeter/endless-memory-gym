@@ -11,7 +11,7 @@ from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
-class MortarMayhemEnvOE(gym.Env):
+class EndlessMortarMayhemEnv(gym.Env):
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
         "render_fps": 25,
@@ -41,7 +41,7 @@ class MortarMayhemEnvOE(gym.Env):
         Returns:
             dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
-        cloned_params = MortarMayhemEnvOE.default_reset_parameters.copy()
+        cloned_params = EndlessMortarMayhemEnv.default_reset_parameters.copy()
         if reset_params is not None:
             for k, v in reset_params.items():
                 assert k in cloned_params.keys(), "Provided reset parameter (" + str(k) + ") is not valid. Check spelling."
@@ -152,7 +152,7 @@ class MortarMayhemEnvOE(gym.Env):
         self.current_seed = seed
 
         # Check reset parameters for completeness and errors
-        self.reset_params = MortarMayhemEnvOE.process_reset_params(options)
+        self.reset_params = EndlessMortarMayhemEnv.process_reset_params(options)
 
         # Track all rewards during one episode
         self.episode_rewards = []
@@ -303,7 +303,7 @@ class MortarMayhemEnvOE(gym.Env):
             if self._command_visualization:
                     fps = 3
             else:
-                fps = MortarMayhemEnvOE.metadata["render_fps"]
+                fps = EndlessMortarMayhemEnv.metadata["render_fps"]
             
             if self.render_mode == "rgb_array":
                 self.clock.tick(fps)
@@ -334,7 +334,7 @@ def main():
     parser.add_argument("--seed", type=int, help="The to be used seed for the environment's random number generator.", default=0)
     options = parser.parse_args()
 
-    env = MortarMayhemEnvOE(render_mode="debug_rgb_array")
+    env = EndlessMortarMayhemEnv(render_mode="debug_rgb_array")
     reset_params = {}
     seed = options.seed
     vis_obs, reset_info = env.reset(seed = options.seed, options = reset_params)
