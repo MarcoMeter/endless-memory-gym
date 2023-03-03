@@ -24,8 +24,8 @@ register(
 )
 
 register(
-     id="MortarMayhem-OE-v0",
-     entry_point="memory_gym.mortar_mayhem_oe:MortarMayhemEnvOE",
+     id="Endless-MortarMayhem-v0",
+     entry_point="memory_gym.endless_mortar_mayhem:EndlessMortarMayhemEnv",
 )
 
 register(
