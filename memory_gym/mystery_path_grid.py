@@ -145,12 +145,12 @@ class GridMysteryPathEnv(gym.Env):
         self.fall_off_surface.set_alpha(0)
 
         # Setup the agent and sample its position
-        rotation = self.np_random.choice([0, 90, 180, 270])
+        rotation = 0 #self.np_random.choice([0, 90, 180, 270])
         # Place the agent on the path's starting position
         start_pos = (self.start[0] * self.tile_dim + int(25 * SCALE), self.start[1] * self.tile_dim + int(25 * SCALE)) # TODO depend on agent radius and not hard coded int(25 * SCALE)
         self.normalized_agent_position = self._normalize_agent_position(start_pos)
         self.agent = GridCharacterController(SCALE, self.normalized_agent_position, self.mystery_path.to_grid(self.tile_dim), rotation)
-        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.rotate(rotation)
+        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.get_rotated_sprite(rotation)
         self.is_off_path = False
         self.num_fails = 0
 

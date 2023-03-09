@@ -146,9 +146,9 @@ class MysteryPathEnv(gym.Env):
         self.fall_off_surface.set_alpha(0)
 
         # Setup the agent and sample its position
-        rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
+        rotation = 0 # self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
         self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
-        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.rotate(rotation)
+        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.get_rotated_sprite(rotation)
         # Place the agent on the path's starting position
         self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)

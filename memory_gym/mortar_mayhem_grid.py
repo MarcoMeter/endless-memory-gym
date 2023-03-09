@@ -97,7 +97,7 @@ class GridMortarMayhemEnv(gym.Env):
         if self.rotated_agent_surface is not None:
             surfs.append((self.rotated_agent_surface, self.rotated_agent_rect))
         else:
-            surfs.append((self.agent.surface, self.agent.rect))
+            surfs.append(self.agent.get_rotated_sprite(0))
 
         # Draw command visualization
         if self._command_visualization:
@@ -217,7 +217,7 @@ class GridMortarMayhemEnv(gym.Env):
         self._explosion_delay = self.np_random.choice(self.reset_params["explosion_delay"])
 
         # Draw
-        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect),
+        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), self.agent.get_rotated_sprite(0),
                             (command.surface, (((self.screen_dim // 2) - command.rect_dim // 2, (self.screen_dim // 2) - command.rect_dim // 2)))])
 
         # Retrieve the rendered image of the environment
@@ -234,7 +234,7 @@ class GridMortarMayhemEnv(gym.Env):
         # Show each command one by one, while the agent cannot move
         if self._command_visualization:
             command = Command(self._command_visualization.pop(0), SCALE)
-            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.surface, self.agent.rect
+            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.get_rotated_sprite(0)
         # All commands were shown, the agent can move now, while the command execution logic is running
         else:
             # Move the agent's controlled character

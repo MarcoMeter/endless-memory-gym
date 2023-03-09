@@ -154,7 +154,7 @@ class SearingSpotlightsEnv(gym.Env):
         if self.rotated_agent_surface is not None:
             surfs.append((self.rotated_agent_surface, self.rotated_agent_rect))
         else:
-            surfs.append((self.agent.surface, self.agent.rect))
+            surfs.append(self.agent.get_rotated_sprite(0))
         surfs.append((self.top_bar_surface, (0, 0)))
         # Blit all surfaces
         for surf, rect in surfs:
