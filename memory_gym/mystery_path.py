@@ -172,6 +172,7 @@ class MysteryPathEnv(gym.Env):
         if not self.is_off_path:
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.screen.get_rect())
         else:
+            self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step([0, 0], self.screen.get_rect())
 
         # Check whether the agent reached the goal
@@ -192,7 +193,6 @@ class MysteryPathEnv(gym.Env):
                         node.visited = True
                     break
             if not on_path:
-                self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
                 reward += self.reset_params["reward_fall_off"]
                 self.num_fails += 1
                 if self.reset_params["visual_feedback"]:

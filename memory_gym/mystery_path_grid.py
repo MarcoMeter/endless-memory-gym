@@ -171,6 +171,9 @@ class GridMysteryPathEnv(gym.Env):
         if not self.is_off_path:
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
         else:
+            # self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
+            start_pos = (self.start[0] * self.tile_dim + int(25 * SCALE), self.start[1] * self.tile_dim + int(25 * SCALE))
+            self.agent.reset_position(self._normalize_agent_position(start_pos))
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(0)
 
         # Check whether the agent reached the goal
@@ -191,9 +194,6 @@ class GridMysteryPathEnv(gym.Env):
                         node.visited = True
                     break
             if not on_path:
-                # self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
-                start_pos = (self.start[0] * self.tile_dim + int(25 * SCALE), self.start[1] * self.tile_dim + int(25 * SCALE))
-                self.agent.reset_position(self._normalize_agent_position(start_pos))
                 reward += self.reset_params["reward_fall_off"]
                 self.num_fails += 1
                 if self.reset_params["visual_feedback"]:
