@@ -159,7 +159,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         self._explosion_delay = self.np_random.choice(self.reset_params["explosion_delay"])
 
         # Draw
-        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect)])
+        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), self.agent.get_rotated_sprite(0)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
