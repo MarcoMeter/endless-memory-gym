@@ -329,6 +329,68 @@ class Node():
             color = (255, 0, 0)
         pygame.draw.rect(surface, color, (self.x * tile_dim, self.y * tile_dim, tile_dim, tile_dim))
 
+class EndlessMysteryPath():
+    def __init__(self, num_columns, num_rows, tile_dim, rng, num_initial_segments) -> None:
+        self.path = []
+        self.num_segments = 0
+        self.num_columns = num_columns
+        self.num_rows = num_rows
+        self.rng = rng
+        self.start_position, self.end_position = None, None
+
+        for _ in range(num_initial_segments):
+            self.add_path_segment()
+
+        self.surface = self.gen_surface(tile_dim)
+
+    def render_path(self):
+        tile_size = 50
+        self.path_surface = pygame.Surface(((self.num_columns * self.num_segments + self.num_segments) * tile_size, self.num_rows * tile_size))
+        self.path_surface.fill((0, 0, 0))
+        for node in self.path:
+            pygame.draw.rect(self.path_surface, (255, 255, 255), (node.x * tile_size, node.y * tile_size, tile_size, tile_size))
+        # path surface to image
+        pygame.image.save(self.path_surface, "path.png")
+
+    def gen_surface(self, tile_size):
+        surface = pygame.Surface(((self.num_columns * self.num_segments + self.num_segments) * tile_size, self.num_rows * tile_size))
+        surface.fill((0, 0, 0))
+        for node in self.path:
+            pygame.draw.rect(surface, (255, 255, 255), (node.x * tile_size, node.y * tile_size, tile_size, tile_size))
+        return surface
+
+
+    def add_path_segment(self):
+        # Determine start position
+        if self.start_position is None:
+            self.start_position = (0, self.rng.integers(0, self.num_rows))
+        else:
+            # Convert end position to start position
+            self.start_position = (0, self.end_position[1])
+
+        # Sample end position
+        self.end_position = (self.num_rows - 1, self.rng.integers(0, self.num_rows))
+
+        # Build path segment
+        mystery_path = MysteryPath(self.num_columns, self.num_rows, self.start_position, self.end_position, self.rng)
+
+        # Update x position of nodes depending on self.num_segments (and transition nodes)
+        for node in mystery_path.path:
+            if self.num_segments == 0:
+                node.x += self.num_segments * self.num_rows
+            else:
+                node.x += self.num_segments * self.num_rows + self.num_segments
+
+        # Add transition node to path that increments the x position
+        # This is done to avoid too many neighboring nodes for the end and start nodes
+        self.num_segments += 1
+        transition_node = Node(self.end_position[0] + self.num_segments + (self.num_segments - 1) * self.num_rows, self.end_position[1])
+        mystery_path.path.insert(0, transition_node)
+
+        # Concatenate the new segment to the entire path
+        mystery_path.path.reverse()
+        self.path += mystery_path.path
+
 class MysteryPath():
     def __init__(self, num_columns, num_rows, start_position, end_position, rng) -> None:
         path_found = False
