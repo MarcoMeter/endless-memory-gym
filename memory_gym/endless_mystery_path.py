@@ -111,8 +111,8 @@ class EndlessMysteryPathEnv(gym.Env):
         self.episode_rewards = []
 
         # Setup initial path segments
-        self.endless_path = EndlessMysteryPath(self.grid_dim, self.grid_dim, self.tile_dim, self.np_random, num_initial_segments=2)
-        self.start = self.endless_path.path[0]
+        self.endless_path = EndlessMysteryPath(self.grid_dim, self.grid_dim, self.tile_dim, self.np_random, num_initial_segments=3)
+        self.start = self.endless_path.path[0][0]
 
         # Fall off surface to indicate that the agent lost the path
         dim = 40 * SCALE
@@ -162,10 +162,22 @@ class EndlessMysteryPathEnv(gym.Env):
             # Reset camera x position
             self.camera_x = self.camera_offset
 
-        # Check whether the agent fell off the path
+        # Normalize the agent's position to run the path logic
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
+
+        # Determine the current segment of the path based on the the agent's normalized x position
+        current_segment = int(self.normalized_agent_position[0]) // self.endless_path.segment_length
+        nodes = self.endless_path.path[current_segment]
+
+        if current_segment > self.endless_path.num_segments - 2:
+            # Generate new path segment
+            self.endless_path.add_path_segment()
+            self.endless_path.gen_surface(self.tile_dim)
+            print("Generated new path segment")
+
+        # Check whether the agent fell off the path
         on_path = False
-        for node in self.endless_path.path:
+        for node in nodes:
             if self.normalized_agent_position == (node.x, node.y):
                 on_path = True
                 if not node.reward_visited and not (node.x, node.y) == self.start:
@@ -184,9 +196,10 @@ class EndlessMysteryPathEnv(gym.Env):
                 self.fall_off_surface.set_alpha(255)
             self.is_off_path = True
             # Reset all visited tiles so that the agent can gain stamina again
-            for node in self.endless_path.path:
-                node.stamina_visited = False
-                self.stamina = self.reset_params["stamina_gain"]
+            for segment in self.endless_path.path:
+                for node in segment:
+                    node.stamina_visited = False
+                    self.stamina = self.reset_params["stamina_gain"]
         else:
             self.fall_off_surface.set_alpha(0)
             self.is_off_path = False

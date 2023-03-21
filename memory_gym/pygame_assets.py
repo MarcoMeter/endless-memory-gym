@@ -342,24 +342,29 @@ class EndlessMysteryPath():
         for _ in range(num_initial_segments):
             self.add_path_segment()
 
-        self.surface = self.gen_surface(tile_dim)
+        self.gen_surface(tile_dim)
+        self.segment_length = self.num_columns + 1 # +1 for the transition tile
+
+    def get_segment(self, segment_index):
+        return self.path[segment_index]
 
     def render_path(self):
         tile_size = 50
-        self.path_surface = pygame.Surface(((self.num_columns * self.num_segments + self.num_segments) * tile_size, self.num_rows * tile_size))
-        self.path_surface.fill((0, 0, 0))
-        for node in self.path:
-            pygame.draw.rect(self.path_surface, (255, 255, 255), (node.x * tile_size, node.y * tile_size, tile_size, tile_size))
+        surface = pygame.Surface(((self.num_columns * self.num_segments + self.num_segments) * tile_size, self.num_rows * tile_size))
+        surface.fill((0, 0, 0))
+        for segment in self.path:
+            for node in segment:
+                pygame.draw.rect(surface, (255, 255, 255), (node.x * tile_size, node.y * tile_size, tile_size, tile_size))
         # path surface to image
         pygame.image.save(self.path_surface, "path.png")
 
     def gen_surface(self, tile_size):
         surface = pygame.Surface(((self.num_columns * self.num_segments + self.num_segments) * tile_size, self.num_rows * tile_size))
         surface.fill((0, 0, 0))
-        for node in self.path:
-            pygame.draw.rect(surface, (255, 255, 255), (node.x * tile_size, node.y * tile_size, tile_size, tile_size))
-        return surface
-
+        for segment in self.path:
+            for node in segment:
+                pygame.draw.rect(surface, (255, 255, 255), (node.x * tile_size, node.y * tile_size, tile_size, tile_size))
+        self.surface = surface
 
     def add_path_segment(self):
         # Determine start position
@@ -390,7 +395,7 @@ class EndlessMysteryPath():
 
         # Concatenate the new segment to the entire path
         mystery_path.path.reverse()
-        self.path += mystery_path.path
+        self.path.append(mystery_path.path)
 
 class MysteryPath():
     def __init__(self, num_columns, num_rows, start_position, end_position, rng) -> None:
