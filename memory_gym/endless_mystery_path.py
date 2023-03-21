@@ -22,7 +22,7 @@ class EndlessMysteryPathEnv(gym.Env):
                 "agent_speed": 10.0 * SCALE,
                 "show_origin": True,
                 "visual_feedback": True,
-                "stamina_gain": 6,
+                "stamina_gain": 7,
                 "reward_fall_off": 0.0,
                 "reward_path_progress": 0.1,
                 "reward_step": 0.0
@@ -137,7 +137,7 @@ class EndlessMysteryPathEnv(gym.Env):
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
         self.is_off_path = False
         self.num_fails = 0
-        self.stamina = self.reset_params["stamina_gain"]
+        self.stamina = 0
         self.max_x_reached = 0
         self.tiles_visited = 0
 
