@@ -24,6 +24,7 @@ class CharacterController():
         self.character_surfaces = self.create_character_sprites()
         self.rect = self.character_surfaces[0].get_rect()
         self.rect.center = (0, 0)
+        self.velocity = Vector2(0, 0)
 
     def create_character_sprites(self):
         """Create eight sprites for the character, one for each 45 degree rotation.
@@ -125,6 +126,7 @@ class CharacterController():
         
         # Update the agent's position
         self.rect.center = Vector2(self.rect.center[0],self.rect.center[1]) + velocity
+        self.velocity = velocity
 
         # Limit the agent to the specified rect's boundary
         if boundary_rect is not None:

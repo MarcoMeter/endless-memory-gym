@@ -6,7 +6,7 @@ import pygame
 from argparse import ArgumentParser
 from gymnasium import spaces
 from memory_gym.character_controller import CharacterController
-from memory_gym.pygame_assets import MysteryPath, EndlessMysteryPath
+from memory_gym.pygame_assets import EndlessMysteryPath
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
@@ -88,9 +88,9 @@ class EndlessMysteryPathEnv(gym.Env):
     def _build_debug_surface(self):
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
         surface.fill(0)
-        surface.blit(self.endless_path.surface, (0, 0))
+        surface.blit(self.endless_path.surface, (-self.camera_x, 0))
         if self.rotated_agent_surface:
-            surface.blit(self.rotated_agent_surface, self.rotated_agent_rect)
+            surface.blit(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))
         else:
             surface.blit(self.agent.surface, self.agent.rect)
         surface.blit(self.fall_off_surface, self.fall_off_rect)
@@ -126,17 +126,23 @@ class EndlessMysteryPathEnv(gym.Env):
         pygame.draw.line(self.fall_off_surface, (255, 0, 0), (dim - 1, 0), (0, dim - 1), int(12 * SCALE))
         self.fall_off_surface.set_alpha(0)
 
-        # Setup the agent and sample its position
+        # Init camera x position for the scrolling effect
+        self.camera_offset = -self.tile_dim * 3
+        self.camera_x = self.camera_offset
+
+        # Setup the agent
         self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"], 270)
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.get_rotated_sprite(270)
         # Place the agent on the path's starting position
         self.agent.rect.center = (self.start.x * self.tile_dim + self.agent.radius, self.start.y * self.tile_dim + self.agent.radius)
+        self.agent_draw_x = self.agent.rect.topleft[0] - self.camera_offset
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
         self.is_off_path = False
         self.num_fails = 0
 
         # Draw
-        self._draw_surfaces([(self.endless_path.surface, (0, 0)), (self.rotated_agent_surface, self.rotated_agent_rect)])
+        print((self.agent_draw_x, self.rotated_agent_rect.y))
+        self._draw_surfaces([(self.endless_path.surface, (-self.camera_x, 0)), (self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
@@ -151,9 +157,13 @@ class EndlessMysteryPathEnv(gym.Env):
         # Move the agent's controlled character
         if not self.is_off_path:
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
+            # update camera position based on agent x velocity
+            self.camera_x += int(self.agent.velocity.x)
         else:
             self.agent.rect.center = (self.start.x * self.tile_dim + self.agent.radius, self.start.y * self.tile_dim + self.agent.radius)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step([0, 0])
+            # reset camera x position
+            self.camera_x = self.camera_offset
 
         # Check whether the agent reached the goal
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
@@ -180,7 +190,7 @@ class EndlessMysteryPathEnv(gym.Env):
             else:
                 self.fall_off_surface.set_alpha(0)
                 self.is_off_path = False
-            self.fall_off_rect.center = self.agent.rect.center
+            self.fall_off_rect.center = (self.agent.rect.center[0] - self.camera_x, self.agent.rect.center[1])
 
         reward += self.reset_params["reward_step"]
 
@@ -203,7 +213,7 @@ class EndlessMysteryPathEnv(gym.Env):
             info = {}
 
         # Draw
-        self._draw_surfaces([(self.endless_path.surface, (0, 0)), (self.rotated_agent_surface, self.agent.rect), (self.fall_off_surface, self.fall_off_rect)])
+        self._draw_surfaces([(self.endless_path.surface, (-self.camera_x, 0)), (self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y)), (self.fall_off_surface, self.fall_off_rect)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
