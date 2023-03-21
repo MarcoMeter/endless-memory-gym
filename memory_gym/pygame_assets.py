@@ -345,6 +345,9 @@ class EndlessMysteryPath():
         self.gen_surface(tile_dim)
         self.segment_length = self.num_columns + 1 # +1 for the transition tile
 
+        # The first node of the path shall not yield any reward
+        self.path[0][0].reward_visited = True
+
     def get_segment(self, segment_index):
         return self.path[segment_index]
 

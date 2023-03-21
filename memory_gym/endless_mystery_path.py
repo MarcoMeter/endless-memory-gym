@@ -138,6 +138,8 @@ class EndlessMysteryPathEnv(gym.Env):
         self.is_off_path = False
         self.num_fails = 0
         self.stamina = self.reset_params["stamina_gain"]
+        self.max_x_reached = 0
+        self.tiles_visited = 0
 
         # Draw
         self._draw_surfaces([(self.endless_path.surface, (-self.camera_x, 0)), (self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))])
@@ -169,11 +171,10 @@ class EndlessMysteryPathEnv(gym.Env):
         current_segment = int(self.normalized_agent_position[0]) // self.endless_path.segment_length
         nodes = self.endless_path.path[current_segment]
 
+        # Generate new path segment
         if current_segment > self.endless_path.num_segments - 2:
-            # Generate new path segment
             self.endless_path.add_path_segment()
             self.endless_path.gen_surface(self.tile_dim)
-            print("Generated new path segment")
 
         # Check whether the agent fell off the path
         on_path = False
@@ -183,6 +184,7 @@ class EndlessMysteryPathEnv(gym.Env):
                 if not node.reward_visited and not (node.x, node.y) == self.start:
                     # Reward the agent for reaching a tile that it has not visisted before
                     reward += self.reset_params["reward_path_progress"]
+                    self.tiles_visited += 1
                     node.reward_visited = True
                 if not node.stamina_visited and not (node.x, node.y) == self.start:
                     # Add stamina to the agent for reaching a tile that it has not visisted before
@@ -212,6 +214,10 @@ class EndlessMysteryPathEnv(gym.Env):
         self.stamina -= 1
         if self.stamina == 0:
             done = True
+        
+        # Determine the maximum normalized x position reached by the agent
+        if self.normalized_agent_position[0] > self.max_x_reached and on_path:
+            self.max_x_reached = self.normalized_agent_position[0]
 
         # Track all rewards
         self.episode_rewards.append(reward)
@@ -221,6 +227,8 @@ class EndlessMysteryPathEnv(gym.Env):
                 "reward": sum(self.episode_rewards),
                 "length": len(self.episode_rewards),
                 "num_fails": self.num_fails,
+                "max_x": self.max_x_reached,
+                "tiles_visited": self.tiles_visited
             }
         else:
             info = {}
@@ -302,6 +310,8 @@ def main():
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))
     print("num fails: " + str(info["num_fails"]))
+    print("max x: " + str(info["max_x"]))
+    print("tiles visited: " + str(info["tiles_visited"]))
 
     env.close()
     exit()
