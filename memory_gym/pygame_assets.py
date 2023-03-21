@@ -303,7 +303,8 @@ class Node():
         self.diagonal_neighbors = []
         self.previous_node = None
         self.is_wall = is_wall
-        self.visited = False
+        self.reward_visited = False
+        self.stamina_visited = False
 
     def add_neighbors(self, grid, num_columns, num_rows):
         if self.x < num_columns - 1:

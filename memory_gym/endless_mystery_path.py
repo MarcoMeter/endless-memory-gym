@@ -18,14 +18,13 @@ class EndlessMysteryPathEnv(gym.Env):
     }
 
     default_reset_parameters = {
-                "max_steps": 512,
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 10.0 * SCALE,
                 "show_origin": True,
-                "show_goal": True,
                 "visual_feedback": True,
+                "stamina_gain": 6,
                 "reward_fall_off": 0.0,
-                "reward_path_progress": 0.0,
+                "reward_path_progress": 0.1,
                 "reward_step": 0.0
             }
 
@@ -106,7 +105,7 @@ class EndlessMysteryPathEnv(gym.Env):
 
         # Check reset parameters for completeness and errors
         self.reset_params = EndlessMysteryPathEnv.process_reset_params(options)
-        self.max_episode_steps = self.reset_params["max_steps"]
+        self.max_episode_steps = 1024
 
         # Track all rewards during one episode
         self.episode_rewards = []
@@ -114,7 +113,6 @@ class EndlessMysteryPathEnv(gym.Env):
         # Setup initial path segments
         self.endless_path = EndlessMysteryPath(self.grid_dim, self.grid_dim, self.tile_dim, self.np_random, num_initial_segments=2)
         self.start = self.endless_path.path[0]
-        self.end = self.endless_path.path[-1]
 
         # Fall off surface to indicate that the agent lost the path
         dim = 40 * SCALE
@@ -139,9 +137,9 @@ class EndlessMysteryPathEnv(gym.Env):
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
         self.is_off_path = False
         self.num_fails = 0
+        self.stamina = self.reset_params["stamina_gain"]
 
         # Draw
-        print((self.agent_draw_x, self.rotated_agent_rect.y))
         self._draw_surfaces([(self.endless_path.surface, (-self.camera_x, 0)), (self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))])
 
         # Retrieve the rendered image of the environment
@@ -152,51 +150,54 @@ class EndlessMysteryPathEnv(gym.Env):
     def step(self, action):
         reward = 0
         done = False
-        success = 0
 
         # Move the agent's controlled character
         if not self.is_off_path:
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
-            # update camera position based on agent x velocity
+            # Update camera position based on agent x velocity
             self.camera_x += int(self.agent.velocity.x)
         else:
             self.agent.rect.center = (self.start.x * self.tile_dim + self.agent.radius, self.start.y * self.tile_dim + self.agent.radius)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step([0, 0])
-            # reset camera x position
+            # Reset camera x position
             self.camera_x = self.camera_offset
 
-        # Check whether the agent reached the goal
+        # Check whether the agent fell off the path
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
-        if self.normalized_agent_position == self.end:
-            done = True
-            success = 1
-        else:
-            # Check whether the agent fell off the path
-            on_path = False
+        on_path = False
+        for node in self.endless_path.path:
+            if self.normalized_agent_position == (node.x, node.y):
+                on_path = True
+                if not node.reward_visited and not (node.x, node.y) == self.start:
+                    # Reward the agent for reaching a tile that it has not visisted before
+                    reward += self.reset_params["reward_path_progress"]
+                    node.reward_visited = True
+                if not node.stamina_visited and not (node.x, node.y) == self.start:
+                    # Add stamina to the agent for reaching a tile that it has not visisted before
+                    self.stamina += self.reset_params["stamina_gain"]
+                    node.stamina_visited = True
+                break
+        if not on_path:
+            reward += self.reset_params["reward_fall_off"]
+            self.num_fails += 1
+            if self.reset_params["visual_feedback"]:
+                self.fall_off_surface.set_alpha(255)
+            self.is_off_path = True
+            # Reset all visited tiles so that the agent can gain stamina again
             for node in self.endless_path.path:
-                if self.normalized_agent_position == (node.x, node.y):
-                    on_path = True
-                    if not node.visited and not (node.x, node.y) == self.start and not (node.x, node.y) == self.end:
-                        # Reward the agent for reaching a tile that it has not visisted before
-                        reward += self.reset_params["reward_path_progress"]
-                        node.visited = True
-                    break
-            if not on_path:
-                reward += self.reset_params["reward_fall_off"]
-                self.num_fails += 1
-                if self.reset_params["visual_feedback"]:
-                    self.fall_off_surface.set_alpha(255)
-                self.is_off_path = True
-            else:
-                self.fall_off_surface.set_alpha(0)
-                self.is_off_path = False
-            self.fall_off_rect.center = (self.agent.rect.center[0] - self.camera_x, self.agent.rect.center[1])
+                node.stamina_visited = False
+                self.stamina = self.reset_params["stamina_gain"]
+        else:
+            self.fall_off_surface.set_alpha(0)
+            self.is_off_path = False
+        self.fall_off_rect.center = (self.agent.rect.center[0] - self.camera_x, self.agent.rect.center[1])
 
+        # Emit a reward signal for every single step
         reward += self.reset_params["reward_step"]
 
-        # Time limit
-        self.t += 1
-        if self.t == self.max_episode_steps:
+        # Time limit (agent ran out of stamina)
+        self.stamina -= 1
+        if self.stamina == 0:
             done = True
 
         # Track all rewards
@@ -206,7 +207,6 @@ class EndlessMysteryPathEnv(gym.Env):
             info = {
                 "reward": sum(self.episode_rewards),
                 "length": len(self.episode_rewards),
-                "success": success,
                 "num_fails": self.num_fails,
             }
         else:
@@ -288,7 +288,6 @@ def main():
 
     print("episode reward: " + str(info["reward"]))
     print("episode length: " + str(info["length"]))
-    print("success: " + str(bool(info["success"])))
     print("num fails: " + str(info["num_fails"]))
 
     env.close()
