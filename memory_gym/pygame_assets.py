@@ -538,6 +538,28 @@ class MysteryPath():
                 cells[i].append(GridPosition(cell_dim * i + cell_dim // 2, cell_dim * j + cell_dim // 2, i, j))
         return cells
 
+def draw_icy_surface(tile_dim):
+    border_width = 1
+    # Init surface
+    surface = pygame.Surface((tile_dim, tile_dim))
+    # Fill surface light blue (like a frozen lake)
+    surface.fill((125, 177, 250))
+    # Draw border
+    pygame.draw.rect(surface, (210, 210, 210), (0, 0, tile_dim, tile_dim), border_width)
+    # Return surface
+    return surface
+
+def draw_column_tile_surface(tile_dim, num_tiles):
+    tile_dim = int(tile_dim)
+    # Init surface
+    surface = pygame.Surface((tile_dim, tile_dim * num_tiles))
+    # Fill surface with black
+    surface.fill((0, 0, 0))
+    for i in range(num_tiles):
+        surface.blit(draw_icy_surface(tile_dim), (0, i * tile_dim))
+    # Return surface
+    return surface
+
 class GridPosition():
     def __init__(self, x, y, i, j) -> None:
         self.x = x
