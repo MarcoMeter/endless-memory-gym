@@ -23,7 +23,7 @@ class EndlessMysteryPathEnv(gym.Env):
                 "agent_speed": 12.0 * SCALE,
                 "show_origin": True,
                 "visual_feedback": True,
-                "stamina_gain": 700,
+                "stamina_gain": 7,
                 "reward_fall_off": 0.0,
                 "reward_path_progress": 0.1,
                 "reward_step": 0.0
@@ -81,12 +81,15 @@ class EndlessMysteryPathEnv(gym.Env):
         # Scrolling background members
         self.tile_coloumn_surface = draw_column_tile_surface(self.tile_dim, self.grid_dim)
         self.num_coloums = math.ceil(self.screen_dim / self.tile_dim) + 2
+        
+        # Stamina bar surface
+        self.stamina_surface = pygame.Surface((16 * SCALE, self.screen_dim))
 
     def _draw_surfaces(self, surfaces):
         # Draw scrolling background
         for i in range(self.num_coloums):
             self.screen.blit(self.tile_coloumn_surface, (i * self.tile_dim + self.bg_scroll - self.tile_dim, 0))
-        # Draw all surfaces
+        # Draw remaining surfaces
         for surface in surfaces:
             if surface[0] is not None:
                 self.screen.blit(surface[0], surface[1])
@@ -95,12 +98,17 @@ class EndlessMysteryPathEnv(gym.Env):
     def _build_debug_surface(self):
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
         surface.fill(0)
+        # Draw scrolling background
+        for i in range(self.num_coloums):
+            surface.blit(self.tile_coloumn_surface, (i * self.tile_dim + self.bg_scroll - self.tile_dim, 0))
         surface.blit(self.endless_path.surface, (-self.camera_x, 0))
         if self.rotated_agent_surface:
             surface.blit(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))
         else:
             surface.blit(self.agent.surface, self.agent.rect)
         surface.blit(self.fall_off_surface, self.fall_off_rect)
+        # Blit stamina bar
+        surface.blit(self.stamina_surface, self.stamina_position)
         return pygame.transform.scale(surface, (336, 336))
 
     def _normalize_agent_position(self, agent_position):
@@ -146,13 +154,19 @@ class EndlessMysteryPathEnv(gym.Env):
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
         self.is_off_path = False
         self.num_fails = 0
-        self.stamina = 0
+        self.stamina = self.reset_params["stamina_gain"]
         self.max_x_reached = 0
         self.tiles_visited = 0
 
+        # Reset stamina bar
+        self.max_visible_stamina = 48
+        self.stamina_surface.fill((0, 255, 0))
+        self.stamina_position = (self.screen_dim - 16 * SCALE, 0)
+        height = int(self.screen_dim * (1 - (max(self.stamina, self.max_visible_stamina) / self.max_visible_stamina)))
+        pygame.draw.rect(self.stamina_surface, (255, 0, 0),(0, 0, 16 * SCALE, height))
+
         # Draw
-        # self._draw_surfaces([(self.endless_path.surface, (-self.camera_x, 0)), (self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))])
-        self._draw_surfaces([(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))])
+        self._draw_surfaces([(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y)), (self.stamina_surface, self.stamina_position)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
@@ -163,19 +177,22 @@ class EndlessMysteryPathEnv(gym.Env):
         reward = 0
         done = False
 
-        # Move the agent's controlled character
+        # Move the agent's controlled character and scroll the camera and the background
         if not self.is_off_path:
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
             # Update camera position based on agent x velocity
             self.camera_x += self.agent.velocity.x
+            # Update background scroll based on agent x velocity
             self.bg_scroll -= self.agent.velocity.x
-            if abs(self.bg_scroll) > self.tile_dim:
+            if abs(self.bg_scroll) >= self.tile_dim:
                 self.bg_scroll = 0
         else:
             self.agent.rect.center = (self.start.x * self.tile_dim + self.agent.radius, self.start.y * self.tile_dim + self.agent.radius)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step([0, 0])
             # Reset camera x position
             self.camera_x = self.camera_offset
+            # Reset background scroll
+            self.bg_scroll = 0
 
         # Normalize the agent's position to run the path logic
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
@@ -247,9 +264,12 @@ class EndlessMysteryPathEnv(gym.Env):
         else:
             info = {}
 
+        # Update the stamina bar
+        self.stamina_surface.fill((0, 255, 0))
+        height = int(self.screen_dim * (1 - (min(self.stamina, self.max_visible_stamina) / self.max_visible_stamina)))
+        pygame.draw.rect(self.stamina_surface, (255, 0, 0),(0, 0, 16 * SCALE, height))
         # Draw
-        # self._draw_surfaces([(self.endless_path.surface, (-self.camera_x, 0)), (self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y)), (self.fall_off_surface, self.fall_off_rect)])
-        self._draw_surfaces([(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y)), (self.fall_off_surface, self.fall_off_rect)])
+        self._draw_surfaces([(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y)), (self.fall_off_surface, self.fall_off_rect), (self.stamina_surface, self.stamina_position)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
