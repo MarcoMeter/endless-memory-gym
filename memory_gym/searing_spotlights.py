@@ -46,7 +46,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "exit_scale": 2.0 * SCALE,
                 "exit_visible": False,
                 # Agent Parameters
-                "agent_speed": 10.0 * SCALE,
+                "agent_speed": 12.0 * SCALE,
                 "agent_health": 20,
                 "agent_scale": 1.0 * SCALE,
                 "agent_visible": False,

@@ -19,7 +19,7 @@ class EndlessMortarMayhemEnv(gym.Env):
 
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
-                "agent_speed": 10.0 * SCALE,
+                "agent_speed": 12.0 * SCALE,
                 "allowed_commands": 9,
                 "initial_command_count": 1,
                 "command_show_duration": [3],

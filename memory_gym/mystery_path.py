@@ -20,7 +20,7 @@ class MysteryPathEnv(gym.Env):
     default_reset_parameters = {
                 "max_steps": 512,
                 "agent_scale": 1.0 * SCALE,
-                "agent_speed": 10.0 * SCALE,
+                "agent_speed": 12.0 * SCALE,
                 "cardinal_origin_choice": [0, 1, 2, 3],
                 "show_origin": True,
                 "show_goal": True,
@@ -187,10 +187,10 @@ class MysteryPathEnv(gym.Env):
             for node in self.mystery_path.path:
                 if self.normalized_agent_position == (node.x, node.y):
                     on_path = True
-                    if not node.visited and not (node.x, node.y) == self.start and not (node.x, node.y) == self.end:
+                    if not node.reward_visited and not (node.x, node.y) == self.start and not (node.x, node.y) == self.end:
                         # Reward the agent for reaching a tile that it has not visisted before
                         reward += self.reset_params["reward_path_progress"]
-                        node.visited = True
+                        node.reward_visited = True
                     break
             if not on_path:
                 reward += self.reset_params["reward_fall_off"]

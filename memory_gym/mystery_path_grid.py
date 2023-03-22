@@ -188,10 +188,10 @@ class GridMysteryPathEnv(gym.Env):
             for node in self.mystery_path.path:
                 if self.normalized_agent_position == (node.x, node.y):
                     on_path = True
-                    if not node.visited and not (node.x, node.y) == self.start and not (node.x, node.y) == self.end:
+                    if not node.reward_visited and not (node.x, node.y) == self.start and not (node.x, node.y) == self.end:
                         # Reward the agent for reaching a tile that it has not visisted before
                         reward += self.reset_params["reward_path_progress"]
-                        node.visited = True
+                        node.reward_visited = True
                     break
             if not on_path:
                 reward += self.reset_params["reward_fall_off"]

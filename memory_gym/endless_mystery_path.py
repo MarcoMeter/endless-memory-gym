@@ -19,7 +19,7 @@ class EndlessMysteryPathEnv(gym.Env):
 
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
-                "agent_speed": 10.0 * SCALE,
+                "agent_speed": 12.0 * SCALE,
                 "show_origin": True,
                 "visual_feedback": True,
                 "stamina_gain": 7,
@@ -157,7 +157,7 @@ class EndlessMysteryPathEnv(gym.Env):
         if not self.is_off_path:
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action)
             # Update camera position based on agent x velocity
-            self.camera_x += int(self.agent.velocity.x)
+            self.camera_x += self.agent.velocity.x
         else:
             self.agent.rect.center = (self.start.x * self.tile_dim + self.agent.radius, self.start.y * self.tile_dim + self.agent.radius)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step([0, 0])
@@ -191,6 +191,7 @@ class EndlessMysteryPathEnv(gym.Env):
                     self.stamina += self.reset_params["stamina_gain"]
                     node.stamina_visited = True
                 break
+
         if not on_path:
             reward += self.reset_params["reward_fall_off"]
             self.num_fails += 1

@@ -20,7 +20,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
 
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
-                "agent_speed": 10.0 * SCALE,
+                "agent_speed": 12.0 * SCALE,
                 "arena_size": 5,
                 "allowed_commands": 9,
                 "command_count": [5],

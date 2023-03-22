@@ -123,6 +123,7 @@ class CharacterController():
         # Normalize velocity
         if velocity.length() != 0.0:
             velocity = velocity.normalize() * self.speed
+            velocity = Vector2(int(velocity.x), int(velocity.y))
         
         # Update the agent's position
         self.rect.center = Vector2(self.rect.center[0],self.rect.center[1]) + velocity
