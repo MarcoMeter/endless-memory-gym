@@ -117,6 +117,10 @@ class EndlessMysteryPathEnv(gym.Env):
         # Draw past path
         if self.reset_params["show_past_path"]:
             self._draw_past_path()
+        # Draw origin
+        if self.reset_params["show_origin"] and self.normalized_agent_position[0] < 5:
+            pygame.draw.rect(self.screen, (0, 255, 0), (self.start.x * self.tile_dim - self.camera_x, self.start.y * self.tile_dim, self.tile_dim, self.tile_dim))
+            pygame.draw.rect(self.screen, (210, 210, 210), (self.start.x * self.tile_dim - self.camera_x, self.start.y * self.tile_dim, self.tile_dim, self.tile_dim), int(4 * SCALE))
         # Draw remaining surfaces
         for surface in surfaces:
             if surface[0] is not None:
@@ -183,6 +187,7 @@ class EndlessMysteryPathEnv(gym.Env):
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
         self.current_node = self.endless_path.path[0][0]
         self.is_off_path = False
+        self.current_segment = 0
         self.num_fails = 0
         self.stamina = self.reset_params["stamina_gain"]
         self.max_x_reached = 0
@@ -231,11 +236,11 @@ class EndlessMysteryPathEnv(gym.Env):
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
 
         # Determine the current segment of the path based on the the agent's normalized x position
-        current_segment = int(self.normalized_agent_position[0]) // self.endless_path.segment_length
-        nodes = self.endless_path.path[current_segment]
+        self.current_segment = int(self.normalized_agent_position[0]) // self.endless_path.segment_length
+        nodes = self.endless_path.path[self.current_segment]
 
         # Generate new path segment
-        if current_segment > self.endless_path.num_segments - 2:
+        if self.current_segment > self.endless_path.num_segments - 2:
             self.endless_path.add_path_segment()
             self.endless_path.gen_surface(self.tile_dim)
 

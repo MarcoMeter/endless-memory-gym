@@ -365,7 +365,7 @@ class EndlessMysteryPath():
         surface = pygame.Surface(((self.num_columns * self.num_segments + self.num_segments) * tile_size, self.num_rows * tile_size))
         surface.fill((0, 0, 0))
         surface.set_colorkey((0, 0, 0))
-        surface.set_alpha(150)
+        surface.set_alpha(200)
         for segment in self.path:
             for node in segment:
                 pygame.draw.rect(surface, (255, 255, 255), (node.x * tile_size, node.y * tile_size, tile_size, tile_size))
