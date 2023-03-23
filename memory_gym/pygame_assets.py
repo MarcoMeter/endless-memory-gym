@@ -392,15 +392,22 @@ class EndlessMysteryPath():
             else:
                 node.x += self.num_segments * self.num_rows + self.num_segments
 
-        # Add transition node to path that increments the x position
-        # This is done to avoid too many neighboring nodes for the end and start nodes
+        # Increment the number of segments
         self.num_segments += 1
+
+        # Add a transition node to the path that increments the x position
+        # This is done to avoid too many neighboring nodes for the end and start nodes
         transition_node = Node(self.end_position[0] + self.num_segments + (self.num_segments - 1) * self.num_rows, self.end_position[1])
+        transition_node.previous_node = mystery_path.path[0]
         mystery_path.path.insert(0, transition_node)
 
         # Concatenate the new segment to the entire path
         mystery_path.path.reverse()
         self.path.append(mystery_path.path)
+
+        # Set the previous node reference of the first node of the new segment
+        if len(self.path) > 1:
+            self.path[self.num_segments - 1][0].previous_node = self.path[self.num_segments - 2][-1]
 
 class MysteryPath():
     def __init__(self, num_columns, num_rows, start_position, end_position, rng) -> None:

@@ -22,8 +22,9 @@ class EndlessMysteryPathEnv(gym.Env):
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 12.0 * SCALE,
                 "show_origin": True,
+                "show_past_path": True,
                 "visual_feedback": True,
-                "stamina_gain": 7,
+                "stamina_gain": 5,
                 "reward_fall_off": 0.0,
                 "reward_path_progress": 0.1,
                 "reward_step": 0.0
@@ -85,10 +86,33 @@ class EndlessMysteryPathEnv(gym.Env):
         # Stamina bar surface
         self.stamina_surface = pygame.Surface((16 * SCALE, self.screen_dim))
 
+    def _draw_past_path(self):
+        # Get normalized agent x position
+        x = self.normalized_agent_position[0] - 1
+        if x < 0:
+            return
+        depth = 3
+        past_x = max(0, x - depth)
+        current_node = self.current_node.previous_node
+        # Iterate over previous nodes
+        while x >= past_x and x >= 0:
+            x, y = current_node.x, current_node.y
+            draw_x = (x) * self.tile_dim - self.camera_x
+            # Draw previous node
+            pygame.draw.rect(self.screen, (255, 255, 255), (draw_x, y * self.tile_dim, self.tile_dim, self.tile_dim))
+            # Draw border
+            pygame.draw.rect(self.screen, (210, 210, 210), (draw_x, y * self.tile_dim, self.tile_dim, self.tile_dim), 1)
+            if x == past_x:
+                break
+            current_node = current_node.previous_node
+
     def _draw_surfaces(self, surfaces):
         # Draw scrolling background
         for i in range(self.num_coloums):
             self.screen.blit(self.tile_coloumn_surface, (i * self.tile_dim + self.bg_scroll - self.tile_dim, 0))
+        # Draw past path
+        if self.reset_params["show_past_path"]:
+            self._draw_past_path()
         # Draw remaining surfaces
         for surface in surfaces:
             if surface[0] is not None:
@@ -152,6 +176,7 @@ class EndlessMysteryPathEnv(gym.Env):
         self.agent.rect.center = (self.start.x * self.tile_dim + self.agent.radius, self.start.y * self.tile_dim + self.agent.radius)
         self.agent_draw_x = self.agent.rect.topleft[0] - self.camera_offset
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
+        self.current_node = self.endless_path.path[0][0]
         self.is_off_path = False
         self.num_fails = 0
         self.stamina = self.reset_params["stamina_gain"]
@@ -214,6 +239,7 @@ class EndlessMysteryPathEnv(gym.Env):
         for node in nodes:
             if self.normalized_agent_position == (node.x, node.y):
                 on_path = True
+                self.current_node = node
                 if not node.reward_visited and not (node.x, node.y) == self.start:
                     # Reward the agent for reaching a tile that it has not visisted before
                     reward += self.reset_params["reward_path_progress"]
