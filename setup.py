@@ -43,6 +43,7 @@ setup(
             "mortar_mayhem_grid=memory_gym.mortar_mayhem_grid:main",
             "mortar_mayhem_b_grid=memory_gym.mortar_mayhem_b_grid:main",
             "mystery_path=memory_gym.mystery_path:main",
+            "endless_mystery_path=memory_gym.endless_mystery_path:main",
             "mystery_path_grid=memory_gym.mystery_path_grid:main",
             ],
       },
