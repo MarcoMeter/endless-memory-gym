@@ -107,7 +107,7 @@ class EndlessMysteryPathEnv(gym.Env):
         else:
             surface.blit(self.agent.surface, self.agent.rect)
         surface.blit(self.fall_off_surface, self.fall_off_rect)
-        # Blit stamina bar
+        # Draw stamina bar
         surface.blit(self.stamina_surface, self.stamina_position)
         return pygame.transform.scale(surface, (336, 336))
 
@@ -185,7 +185,10 @@ class EndlessMysteryPathEnv(gym.Env):
             # Update background scroll based on agent x velocity
             self.bg_scroll -= self.agent.velocity.x
             if abs(self.bg_scroll) >= self.tile_dim:
-                self.bg_scroll = 0
+                # bg scroll cannot always be reset to 0 due to the different velocity of moving diagonally
+                remainder = abs(self.bg_scroll) % abs(self.agent.velocity.x)
+                sign = self.bg_scroll / abs(self.bg_scroll)
+                self.bg_scroll = remainder * sign
         else:
             self.agent.rect.center = (self.start.x * self.tile_dim + self.agent.radius, self.start.y * self.tile_dim + self.agent.radius)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step([0, 0])
