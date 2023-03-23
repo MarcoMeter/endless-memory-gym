@@ -23,6 +23,7 @@ class EndlessMysteryPathEnv(gym.Env):
                 "agent_speed": 12.0 * SCALE,
                 "show_origin": True,
                 "show_past_path": True,
+                "show_background": True,
                 "visual_feedback": True,
                 "stamina_gain": 5,
                 "reward_fall_off": 0.0,
@@ -108,8 +109,11 @@ class EndlessMysteryPathEnv(gym.Env):
 
     def _draw_surfaces(self, surfaces):
         # Draw scrolling background
-        for i in range(self.num_coloums):
-            self.screen.blit(self.tile_coloumn_surface, (i * self.tile_dim + self.bg_scroll - self.tile_dim, 0))
+        if self.reset_params["show_background"]:
+            for i in range(self.num_coloums):
+                self.screen.blit(self.tile_coloumn_surface, (i * self.tile_dim + self.bg_scroll - self.tile_dim, 0))
+        else:
+            self.screen.fill((0, 0, 0))
         # Draw past path
         if self.reset_params["show_past_path"]:
             self._draw_past_path()
@@ -123,8 +127,9 @@ class EndlessMysteryPathEnv(gym.Env):
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
         surface.fill(0)
         # Draw scrolling background
-        for i in range(self.num_coloums):
-            surface.blit(self.tile_coloumn_surface, (i * self.tile_dim + self.bg_scroll - self.tile_dim, 0))
+        if self.reset_params["show_background"]:
+            for i in range(self.num_coloums):
+                surface.blit(self.tile_coloumn_surface, (i * self.tile_dim + self.bg_scroll - self.tile_dim, 0))
         surface.blit(self.endless_path.surface, (-self.camera_x, 0))
         if self.rotated_agent_surface:
             surface.blit(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))
