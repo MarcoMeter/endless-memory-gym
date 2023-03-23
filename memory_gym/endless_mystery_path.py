@@ -19,6 +19,7 @@ class EndlessMysteryPathEnv(gym.Env):
     }
 
     default_reset_parameters = {
+                "max_steps": 1024,
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 12.0 * SCALE,
                 "show_origin": True,
@@ -97,6 +98,8 @@ class EndlessMysteryPathEnv(gym.Env):
         current_node = self.current_node.previous_node
         # Iterate over previous nodes
         while x >= past_x and x >= 0:
+            if current_node is None:
+                break
             x, y = current_node.x, current_node.y
             draw_x = (x) * self.tile_dim - self.camera_x
             # Draw previous node
@@ -154,7 +157,7 @@ class EndlessMysteryPathEnv(gym.Env):
 
         # Check reset parameters for completeness and errors
         self.reset_params = EndlessMysteryPathEnv.process_reset_params(options)
-        self.max_episode_steps = 1024
+        self.max_episode_steps = self.reset_params["max_steps"]
 
         # Track all rewards during one episode
         self.episode_rewards = []
@@ -283,6 +286,11 @@ class EndlessMysteryPathEnv(gym.Env):
         # Time limit (agent ran out of stamina)
         self.stamina -= 1
         if self.stamina == 0:
+            done = True
+        # Upper time limit
+        # Time limit
+        self.t += 1
+        if self.t == self.max_episode_steps:
             done = True
         
         # Determine the maximum normalized x position reached by the agent
