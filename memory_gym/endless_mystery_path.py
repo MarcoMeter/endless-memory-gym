@@ -270,6 +270,9 @@ class EndlessMysteryPathEnv(gym.Env):
             if self.reset_params["visual_feedback"]:
                 self.fall_off_surface.set_alpha(255)
             self.is_off_path = True
+            # Terminate the episode if the agent fell off the path too soon
+            if self.normalized_agent_position[0] < self.max_x_reached:
+                done = True
             # Reset all visited tiles so that the agent can gain stamina again
             for segment in self.endless_path.path:
                 for node in segment:
