@@ -192,6 +192,7 @@ class EndlessMysteryPathEnv(gym.Env):
         self.is_off_path = False
         self.current_segment = 0
         self.num_fails = 0
+        self.fall_off_locations = []
         self.stamina = self.reset_params["stamina_gain"]
         self.max_x_reached = 0
         self.tiles_visited = 0
@@ -214,6 +215,7 @@ class EndlessMysteryPathEnv(gym.Env):
     def step(self, action):
         reward = 0
         done = False
+        previous_max_x = self.max_x_reached
 
         # Move the agent's controlled character and scroll the camera and the background
         if not self.is_off_path:
@@ -273,6 +275,17 @@ class EndlessMysteryPathEnv(gym.Env):
             # Terminate the episode if the agent fell off the path too soon
             if self.normalized_agent_position[0] < self.max_x_reached:
                 done = True
+            # Terminate the episode if the agent fell off the path at the location where it fell off before
+            else:
+                fall_off_pos_found = False
+                for fall_off_pos in self.fall_off_locations:
+                    if self.normalized_agent_position == fall_off_pos:
+                        done = True
+                        fall_off_pos_found = True
+                        break
+                if not fall_off_pos_found:
+                    self.fall_off_locations.append(self.normalized_agent_position)
+
             # Reset all visited tiles so that the agent can gain stamina again
             for segment in self.endless_path.path:
                 for node in segment:
@@ -282,6 +295,10 @@ class EndlessMysteryPathEnv(gym.Env):
             self.fall_off_surface.set_alpha(0)
             self.is_off_path = False
         self.fall_off_rect.center = (self.agent.rect.center[0] - self.camera_x, self.agent.rect.center[1])
+
+        # Reset fall off locations if the agent reached a new maximum x position
+        if self.max_x_reached > previous_max_x:
+            self.fall_off_locations = []
 
         # Emit a reward signal for every single step
         reward += self.reset_params["reward_step"]
