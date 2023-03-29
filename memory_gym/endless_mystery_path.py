@@ -28,7 +28,7 @@ class EndlessMysteryPathEnv(gym.Env):
                 "show_stamina": True,
                 "visual_feedback": True,
                 "camera_offset_scale": 5.0, # must be between 0.0 and 5.5
-                "stamina_gain": 5,
+                "stamina_level": 20,
                 "reward_fall_off": 0.0,
                 "reward_path_progress": 0.1,
                 "reward_step": 0.0
@@ -196,12 +196,12 @@ class EndlessMysteryPathEnv(gym.Env):
         self.current_segment = 0
         self.num_fails = 0
         self.fall_off_locations = []
-        self.stamina = self.reset_params["stamina_gain"]
+        self.stamina = self.reset_params["stamina_level"]
         self.max_x_reached = 0
         self.tiles_visited = 0
 
         # Reset stamina bar
-        self.max_visible_stamina = 48
+        self.max_visible_stamina = self.reset_params["stamina_level"]
         self.stamina_surface.fill((0, 255, 0))
         self.stamina_position = (self.screen_dim - 16 * SCALE, 0)
         height = int(self.screen_dim * (1 - (max(self.stamina, self.max_visible_stamina) / self.max_visible_stamina)))
@@ -267,8 +267,8 @@ class EndlessMysteryPathEnv(gym.Env):
                     self.tiles_visited += 1
                     node.reward_visited = True
                 if not node.stamina_visited and not (node.x, node.y) == self.start:
-                    # Add stamina to the agent for reaching a tile that it has not visisted before
-                    self.stamina += self.reset_params["stamina_gain"]
+                    # Reset the agent's stamina for reaching a tile that it has not visited before
+                    self.stamina = self.reset_params["stamina_level"]
                     node.stamina_visited = True
                 break
 
@@ -296,7 +296,7 @@ class EndlessMysteryPathEnv(gym.Env):
             for segment in self.endless_path.path:
                 for node in segment:
                     node.stamina_visited = False
-                    self.stamina = self.reset_params["stamina_gain"]
+                    self.stamina = self.reset_params["stamina_level"]
         else:
             self.fall_off_surface.set_alpha(0)
             self.is_off_path = False
