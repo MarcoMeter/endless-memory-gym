@@ -1,5 +1,4 @@
 import gymnasium as gym
-import math
 import numpy as np
 import os
 import pygame
@@ -21,12 +20,9 @@ class EndlessSearingSpotlightsEnv(gym.Env):
     default_reset_parameters = {
                 # Spotlight parameters
                 "max_steps": 1024,
-                "steps_per_coin": 128,
-                "initial_spawns": 4,
-                "num_spawns": 50,
-                "initial_spawn_interval": 30,
-                "spawn_interval_threshold": 10,
-                "spawn_interval_decay": 0.95,
+                "steps_per_coin": 160,
+                "initial_spawns": 3,
+                "spawn_interval": 50,
                 "spot_min_radius": 30.0 * SCALE,
                 "spot_max_radius": 55.0 * SCALE,
                 "spot_min_speed": 0.0025,
@@ -118,14 +114,6 @@ class EndlessSearingSpotlightsEnv(gym.Env):
 
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
-    def _compute_spawn_intervals(self, reset_params) -> list:
-        intervals = []
-        initial = reset_params["initial_spawn_interval"]
-        for i in range(reset_params["num_spawns"]):
-            intervals.append(int(initial + reset_params["spawn_interval_threshold"]))
-            initial = initial * math.pow(reset_params["spawn_interval_decay"], 1)
-        return intervals
-
     def _draw_surfaces(self, surfaces):
         # Draw all surfaces
         for surface in surfaces:
@@ -161,13 +149,11 @@ class EndlessSearingSpotlightsEnv(gym.Env):
         done = False
         # Spawn spotlights
         self.spawn_timer += 1
-        if self.spawn_intervals:
-            if self.spawn_timer >= self.spawn_intervals[0]:
-                self.spotlights.append(Spotlight(self.screen_dim, self.np_random.integers(self.reset_params["spot_min_radius"], self.reset_params["spot_max_radius"] + 1),
-                                                            self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random, 
-                                                            self.reset_params["black_background"]))
-                self.spawn_intervals.pop()
-                self.spawn_timer = 0
+        if self.spawn_timer >= self.reset_params["spawn_interval"]:
+            self.spotlights.append(Spotlight(self.screen_dim, self.np_random.integers(self.reset_params["spot_min_radius"], self.reset_params["spot_max_radius"] + 1),
+                                                        self.np_random.uniform(self.reset_params["spot_min_speed"], self.reset_params["spot_max_speed"]), self.np_random, 
+                                                        self.reset_params["black_background"]))
+            self.spawn_timer = 0
 
         # Draw spotlights and check whether the agent is visible or not
         self.spotlight_surface.fill(0)
@@ -243,6 +229,7 @@ class EndlessSearingSpotlightsEnv(gym.Env):
             reward += self.reset_params["reward_coin"]
             update_coin_surface = True
             self.coins_collected += 1
+            self.steps_between_coins.append(self.t)
             self.t = 0
             # Spawn new coin
             self._spawn_coin()
@@ -258,6 +245,7 @@ class EndlessSearingSpotlightsEnv(gym.Env):
         self.reset_params = EndlessSearingSpotlightsEnv.process_reset_params(options)
         self.max_episode_steps = self.reset_params["max_steps"]
         self.t = 0
+        self.steps_between_coins = []
 
         if self.reset_params["hide_chessboard"]:
             self.blue_background_surface.fill((255, 255, 255))
@@ -295,7 +283,6 @@ class EndlessSearingSpotlightsEnv(gym.Env):
         pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_1)
 
         # Setup spotlights
-        self.spawn_intervals = self._compute_spawn_intervals(self.reset_params)
         if self.reset_params["light_dim_off_duration"] > 0:
             self.spotlight_surface.set_alpha(0)
         else:
@@ -399,6 +386,7 @@ class EndlessSearingSpotlightsEnv(gym.Env):
                 "length": len(self.episode_rewards),
                 "agent_health": self.current_agent_health / self.agent_health,
                 "coins_collected": self.coins_collected,
+                # "mean_steps_between_coins": sum(self.steps_between_coins) / self.coins_collected
             }
         else:
             info = {}
@@ -478,6 +466,7 @@ def main():
     print("episode length: " + str(info["length"]))
     print("agent health: " + str(info["agent_health"]))
     print("coins collected: " + str(info["coins_collected"]))
+    # print("mean steps between coins: " + str(info["mean_steps_between_coins"]))
 
     env.close()
     exit()
