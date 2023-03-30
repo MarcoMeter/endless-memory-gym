@@ -22,10 +22,10 @@ class EndlessMysteryPathEnv(gym.Env):
                 "max_steps": 1024,
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 12.0 * SCALE,
-                "show_origin": True,
+                "show_origin": False,
                 "show_past_path": True,
-                "show_background": True,
-                "show_stamina": True,
+                "show_background": False,
+                "show_stamina": False,
                 "visual_feedback": True,
                 "camera_offset_scale": 5.0, # must be between 0.0 and 5.5
                 "stamina_level": 20,
