@@ -21,6 +21,7 @@ class EndlessSearingSpotlightsEnv(gym.Env):
     default_reset_parameters = {
                 # Spotlight parameters
                 "max_steps": 1024,
+                "steps_per_coin": 128,
                 "initial_spawns": 4,
                 "num_spawns": 50,
                 "initial_spawn_interval": 30,
@@ -242,6 +243,7 @@ class EndlessSearingSpotlightsEnv(gym.Env):
             reward += self.reset_params["reward_coin"]
             update_coin_surface = True
             self.coins_collected += 1
+            self.t = 0
             # Spawn new coin
             self._spawn_coin()
         # Redraw coins if at least one was collected
@@ -370,7 +372,7 @@ class EndlessSearingSpotlightsEnv(gym.Env):
 
         # Time limit
         self.t += 1
-        if self.t == self.max_episode_steps:
+        if self.t == self.reset_params["steps_per_coin"]:
             done = True
 
         # Draw all surfaces
