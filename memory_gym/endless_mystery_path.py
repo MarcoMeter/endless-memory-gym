@@ -71,7 +71,7 @@ class EndlessMysteryPathEnv(gym.Env):
         self.debug_window = None
 
         # Setup observation and action space
-        self.action_space = spaces.MultiDiscrete([3, 3])
+        self.action_space = spaces.Discrete(4)
         self.observation_space= spaces.Box(
                     low = 0.0,
                     high = 1.0,
@@ -219,6 +219,16 @@ class EndlessMysteryPathEnv(gym.Env):
         return vis_obs, {}
 
     def step(self, action):
+        # Map single discrete action to multi-discrete action
+        if action == 0:
+            action = [0, 0]
+        elif action == 1:
+            action = [2, 0]
+        elif action == 2:
+            action = [0, 1]
+        elif action == 3:
+            action = [0, 2]
+
         reward = 0
         done = False
         previous_max_x = self.max_x_reached
