@@ -36,6 +36,7 @@ class EndlessSearingSpotlightsEnv(gym.Env):
                 "light_threshold": 255,
                 # Coin Parameters
                 "coin_scale": 1.5 * SCALE,
+                "coin_show_duration": 5,
                 "coins_visible": False,
                 # Agent Parameters
                 "agent_speed": 12.0 * SCALE,
@@ -305,11 +306,13 @@ class EndlessSearingSpotlightsEnv(gym.Env):
             self.bg.fill(0)
         surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.top_bar_surface, (0, 0))]
         spot_surface_id = 1
-        if self.reset_params["coins_visible"]:
+        # Coin surface
+        if self.reset_params["coins_visible"] or self.t <= self.reset_params["coin_show_duration"]:
             surfaces.insert(spot_surface_id + 1, (self.coin_surface, (0, 0)))
         else:
             surfaces.insert(spot_surface_id, (self.coin_surface, (0, 0)))
             spot_surface_id += 1
+        # Agent surface
         if self.reset_params["agent_visible"]:
             surfaces.insert(spot_surface_id + 3, (self.rotated_agent_surface, self.rotated_agent_rect))
         else:
@@ -365,11 +368,13 @@ class EndlessSearingSpotlightsEnv(gym.Env):
         # Draw all surfaces
         surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.top_bar_surface, (0, 0))]
         spot_surface_id = 1
-        if self.reset_params["coins_visible"]:
+        # Coin surface
+        if self.reset_params["coins_visible"] or self.t <= self.reset_params["coin_show_duration"]:
             surfaces.insert(spot_surface_id + 1, (self.coin_surface, (0, 0)))
         else:
             surfaces.insert(spot_surface_id, (self.coin_surface, (0, 0)))
             spot_surface_id += 1
+        # Agent surface
         if self.reset_params["agent_visible"]:
             surfaces.insert(spot_surface_id + 3, (self.rotated_agent_surface, self.rotated_agent_rect))
         else:
