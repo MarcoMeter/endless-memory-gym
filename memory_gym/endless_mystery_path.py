@@ -130,6 +130,9 @@ class EndlessMysteryPathEnv(gym.Env):
         for surface in surfaces:
             if surface[0] is not None:
                 self.screen.blit(surface[0], surface[1])
+        # Draw visual feedback
+        if self.reset_params["visual_feedback"]:
+            self.screen.blit(self.fall_off_surface, self.fall_off_rect)
         pygame.display.flip()
 
     def _build_debug_surface(self):
