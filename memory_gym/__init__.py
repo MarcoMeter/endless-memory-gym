@@ -1,5 +1,6 @@
 from gymnasium.envs.registration import register
 from memory_gym.searing_spotlights import SearingSpotlightsEnv
+from memory_gym.searing_spotlights_gt import SearingSpotlightsGTEnv
 from memory_gym.endless_searing_spotlights import EndlessSearingSpotlightsEnv
 from memory_gym.mortar_mayhem import MortarMayhemEnv
 from memory_gym.endless_mortar_mayhem import EndlessMortarMayhemEnv
@@ -13,6 +14,11 @@ from memory_gym.mystery_path_grid import GridMysteryPathEnv
 register(
      id="SearingSpotlights-v0",
      entry_point="memory_gym.searing_spotlights:SearingSpotlightsEnv",
+)
+
+register(
+     id="GroundTruth-SearingSpotlights-v0",
+     entry_point="memory_gym.searing_spotlights_gt:SearingSpotlightsGTEnv",
 )
 
 register(
