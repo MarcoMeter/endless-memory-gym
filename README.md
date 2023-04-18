@@ -28,11 +28,11 @@ url={https://openreview.net/forum?id=jHc8dCx6DDr}
 ## Installation
 
 Major dependencies:
-- gymnasium==0.26.3
-- PyGame
+- gymnasium==0.28.1
+- PyGame==2.1.2 (Pygame >= 2.3.0 breaks Searing Spotlights)
 
 ```console
-conda create -n memory-gym python=3.7 --yes
+conda create -n memory-gym python=3.9 --yes
 conda activate memory-gym
 pip install memory-gym
 ```
@@ -40,7 +40,7 @@ pip install memory-gym
 or
 
 ```console
-conda create -n memory-gym python=3.7 --yes
+conda create -n memory-gym python=3.9 --yes
 conda activate memory-gym
 git clone https://github.com/MarcoMeter/drl-memory-gym.git
 cd drl-memory-gym
@@ -56,11 +56,14 @@ Executing the environment using random actions:
 import memory_gym
 import gymnasium as gym
 
-env = gym.make("SearingSpotlights-v0")
+env = gym.make("Endless-SearingSpotlights-v0")
+# env = gym.make("SearingSpotlights-v0")
+# env = gym.make("Endless-MortarMayhem-v0")
 # env = gym.make("MortarMayhem-v0")
 # env = gym.make("MortarMayhem-Grid-v0")
 # env = gym.make("MortarMayhemB-v0")
 # env = gym.make("MortarMayhemB-Grid-v0")
+# env = gym.make("Endless-MysteryPath-v0")
 # env = gym.make("MysteryPath-v0")
 # env = gym.make("MysteryPath-Grid-v0")
 
@@ -87,6 +90,11 @@ mortar_mayhem_b_grid
 mystery_path
 mystery_path_grid
 searing_spotlights
+
+# Endless Environments
+endless_mortar_mayhem
+endless_mystery_path
+endless_searing_spotlights
 ```
 
 You can also execute the python scripts directly, for example:
@@ -202,3 +210,21 @@ Baseline results are avaible via these repositories.
 [Recurrence + PPO](https://github.com/MarcoMeter/recurrent-ppo-truncated-bptt)
 
 [Gated TransformerXL + PPO](https://github.com/MarcoMeter/episodic-transformer-memory-ppo)
+
+## Changelog
+
+v1.0.0
+
+Improvements
+- All environment concepts are extrapolated to endless episodes!
+    - Endless Mortar Mayhem
+    - Endless Mystery Path
+    - Endless Searing Spotlights
+- Improved simulation speed by using already rotated sprites and not rotating the character's surface every frame
+- Mystery Path: A* obstacle walls are also placed now on the environments boundary to mitigate trivial paths
+
+Breaking Changes
+- Refactored the info key "exit_success" in Searing Spotlights to "success"
+
+Bug Fixes
+- Fixed the speed of character controller, because moving downwards was slower than moving upwards due to float truncation
