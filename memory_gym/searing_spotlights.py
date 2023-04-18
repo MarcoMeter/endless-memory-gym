@@ -405,7 +405,7 @@ class SearingSpotlightsEnv(gym.Env):
         else:
             coins_done = True
         # Exit task
-        exit_success = 0
+        success = 0
         if self.reset_params["use_exit"]:
             r, exit_done = self._step_exit_task(coins_done)
             reward += r
@@ -420,12 +420,14 @@ class SearingSpotlightsEnv(gym.Env):
             if self.reset_params["use_exit"]:
                 if exit_done:
                     done = True
-                    exit_success = 1
+                    success = 1
                 else:
                     done = False
             else:
                 if self.num_coins > 0:
                     done = True
+                    success = 1
+                    
         # Time limit
         self.t += 1
         if self.t == self.max_episode_steps:
@@ -460,7 +462,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "length": len(self.episode_rewards),
                 "agent_health": self.current_agent_health / self.agent_health,
                 "coins_collected": self.coins_collected / self.num_coins,
-                "exit_success": exit_success,
+                "success": success,
             }
         else:
             info = {}
@@ -540,7 +542,7 @@ def main():
     print("episode length: " + str(info["length"]))
     print("agent health: " + str(info["agent_health"]))
     print("coins collected: " + str(info["coins_collected"]))
-    print("exit success: " + str(bool(info["exit_success"])))
+    print("success: " + str(bool(info["success"])))
 
     env.close()
     exit()
