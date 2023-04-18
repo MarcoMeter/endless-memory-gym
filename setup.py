@@ -32,8 +32,8 @@ setup(
       packages=find_packages(where='.', include="memory_gym*"),
       python_requires=">=3.6",
       include_package_data=True,
-      install_requires=["gymnasium==0.26.3",
-                        "pygame>=2.1.2"],
+      install_requires=["gymnasium==0.28.1",
+                        "pygame==2.1.2"],
       entry_points={
             "console_scripts": [
             "searing_spotlights=memory_gym.searing_spotlights:main",
@@ -49,5 +49,5 @@ setup(
             "mystery_path_grid=memory_gym.mystery_path_grid:main",
             ],
       },
-      version="0.3.5",
+      version="1.0.0",
 )
