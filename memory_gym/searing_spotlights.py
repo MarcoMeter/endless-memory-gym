@@ -20,7 +20,7 @@ class SearingSpotlightsEnv(gym.Env):
 
     default_reset_parameters = {
                 # Spotlight parameters
-                "max_steps": 512,
+                "max_steps": 256,
                 "initial_spawns": 4,
                 "num_spawns": 30,
                 "initial_spawn_interval": 30,
@@ -47,7 +47,7 @@ class SearingSpotlightsEnv(gym.Env):
                 "exit_visible": False,
                 # Agent Parameters
                 "agent_speed": 12.0 * SCALE,
-                "agent_health": 20,
+                "agent_health": 5,
                 "agent_scale": 1.0 * SCALE,
                 "agent_visible": False,
                 "sample_agent_position": True,
