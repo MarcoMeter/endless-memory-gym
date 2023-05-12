@@ -45,6 +45,8 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
                 "agent_scale": 1.0 * SCALE,
                 "agent_visible": False,
                 "sample_agent_position": True,
+                "show_last_action": True,
+                "show_last_positive_reward": True,
                 # Reward Function
                 "reward_inside_spotlight": 0.0,
                 "reward_outside_spotlight": 0.0,
@@ -288,11 +290,18 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         self.top_bar_surface = pygame.Surface((self.screen_dim, 16 * SCALE))
         pygame.draw.rect(self.top_bar_surface, (0, 255, 0), (0, 0, self.quarter_width * 2, 16 * SCALE))
         # Render the last action of the agent
-        self.action_colors = [(120, 120, 120), (116, 1, 113), (255, 255, 20)]
-        self.act_rect_0 =  (self.quarter_width * 2, 0, self.quarter_width * 3, 16 * SCALE)
-        self.act_rect_1 =  (self.quarter_width * 3, 0, self.quarter_width * 4, 16 * SCALE)
-        pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_0)
-        pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_1)
+        if self.reset_params["show_last_action"]:
+            self.action_colors = [(120, 120, 120), (116, 1, 113), (255, 94, 14)]
+            self.act_rect_0 =  (self.quarter_width * 2, 0, self.quarter_width, 16 * SCALE)
+            self.act_rect_1 =  (self.quarter_width * 3, 0, self.quarter_width, 16 * SCALE)
+            pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_0)
+            pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_1)
+        if self.reset_params["show_last_positive_reward"]:
+            self.last_reward = 0.0
+            if self.reset_params["show_last_action"]:
+                self.coin_bar_rect = (int(self.quarter_width * 2.75), 0, int(self.quarter_width * 0.5), 16 * SCALE)
+            else:
+                self.coin_bar_rect = (int(self.quarter_width * 2), 0, int(self.quarter_width * 2), 16 * SCALE)
 
         # Setup spotlights
         if self.reset_params["light_dim_off_duration"] > 0:
@@ -339,7 +348,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-        return vis_obs, {}
+        return vis_obs, {"ground_truth": np.asarray(self.agent.rect.center) / self.screen_dim}
 
     def step(self, action):
         # Move the agent's controlled character
@@ -376,6 +385,14 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         if self.t == self.reset_params["steps_per_coin"]:
             done = True
 
+        # Render the last reward of the agent
+        if self.reset_params["show_last_positive_reward"]:
+            if self.last_reward > 0:
+                pygame.draw.rect(self.top_bar_surface, (255, 255, 0), self.coin_bar_rect)
+            else:
+                pygame.draw.rect(self.top_bar_surface, (50, 50, 50), self.coin_bar_rect)
+            self.last_reward = reward
+
         # Draw all surfaces
         surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.top_bar_surface, (0, 0))]
         spot_surface_id = 1
@@ -402,10 +419,11 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
                 "length": len(self.episode_rewards),
                 "agent_health": self.current_agent_health / self.agent_health,
                 "coins_collected": self.coins_collected,
+                "ground_truth": np.asarray(self.agent.rect.center) / self.screen_dim,
                 # "mean_steps_between_coins": sum(self.steps_between_coins) / self.coins_collected
             }
         else:
-            info = {}
+            info = {"ground_truth": np.asarray(self.agent.rect.center) / self.screen_dim}
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
