@@ -338,7 +338,6 @@ class SearingSpotlightsEnv(CustomEnv):
                 self.coin_bar_rect = (int(self.quarter_width * 2.75), 0, int(self.quarter_width * 0.5), 16 * SCALE)
             else:
                 self.coin_bar_rect = (int(self.quarter_width * 2), 0, int(self.quarter_width * 2), 16 * SCALE)
-            # pygame.draw.rect(self.top_bar_surface, (255, 255, 0), self.coin_bar_rect)
 
         # Setup spotlights
         self.spawn_intervals = self._compute_spawn_intervals(self.reset_params)
