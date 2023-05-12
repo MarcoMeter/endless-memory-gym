@@ -51,6 +51,8 @@ class SearingSpotlightsEnv(gym.Env):
                 "agent_scale": 1.0 * SCALE,
                 "agent_visible": False,
                 "sample_agent_position": True,
+                "show_last_action": True,
+                "show_last_positive_reward": True,
                 # Reward Function
                 "reward_inside_spotlight": 0.0,
                 "reward_outside_spotlight": 0.0,
@@ -310,13 +312,22 @@ class SearingSpotlightsEnv(gym.Env):
         # Render the agent's health as a green bar on the first half of the screen width
         self.quarter_width = int(self.screen_dim // 4)
         self.top_bar_surface = pygame.Surface((self.screen_dim, 16 * SCALE))
+        pygame.draw.rect(self.top_bar_surface, (50, 50, 50), (0, 0, self.screen_dim, 16 * SCALE))
         pygame.draw.rect(self.top_bar_surface, (0, 255, 0), (0, 0, self.quarter_width * 2, 16 * SCALE))
         # Render the last action of the agent
-        self.action_colors = [(120, 120, 120), (116, 1, 113), (255, 255, 20)]
-        self.act_rect_0 =  (self.quarter_width * 2, 0, self.quarter_width * 3, 16 * SCALE)
-        self.act_rect_1 =  (self.quarter_width * 3, 0, self.quarter_width * 4, 16 * SCALE)
-        pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_0)
-        pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_1)
+        if self.reset_params["show_last_action"]:
+            self.action_colors = [(120, 120, 120), (116, 1, 113), (255, 94, 14)]
+            self.act_rect_0 =  (self.quarter_width * 2, 0, self.quarter_width, 16 * SCALE)
+            self.act_rect_1 =  (self.quarter_width * 3, 0, self.quarter_width, 16 * SCALE)
+            pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_0)
+            pygame.draw.rect(self.top_bar_surface, self.action_colors[0], self.act_rect_1)
+        if self.reset_params["show_last_positive_reward"]:
+            self.last_reward = 0.0
+            if self.reset_params["show_last_action"]:
+                self.coin_bar_rect = (int(self.quarter_width * 2.75), 0, int(self.quarter_width * 0.5), 16 * SCALE)
+            else:
+                self.coin_bar_rect = (int(self.quarter_width * 2), 0, int(self.quarter_width * 2), 16 * SCALE)
+            # pygame.draw.rect(self.top_bar_surface, (255, 255, 0), self.coin_bar_rect)
 
         # Setup spotlights
         self.spawn_intervals = self._compute_spawn_intervals(self.reset_params)
@@ -381,10 +392,11 @@ class SearingSpotlightsEnv(gym.Env):
         # Move the agent's controlled character
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.walkable_rect)
 
-        # Render the last action of the agent
-        pygame.draw.rect(self.top_bar_surface, self.action_colors[self.last_action[0]], self.act_rect_0)
-        pygame.draw.rect(self.top_bar_surface, self.action_colors[self.last_action[1]], self.act_rect_1)
-        self.last_action = action
+        # Render the last action and last reward of the agent
+        if self.reset_params["show_last_action"]:
+            pygame.draw.rect(self.top_bar_surface, self.action_colors[self.last_action[0]], self.act_rect_0)
+            pygame.draw.rect(self.top_bar_surface, self.action_colors[self.last_action[1]], self.act_rect_1)
+            self.last_action = action
 
         # Dim light untill off
         if self.spotlight_surface.get_alpha() <= self.reset_params["light_threshold"]:
@@ -432,6 +444,14 @@ class SearingSpotlightsEnv(gym.Env):
         self.t += 1
         if self.t == self.max_episode_steps:
             done = True
+
+        # Render the last reward of the agent
+        if self.reset_params["show_last_positive_reward"]:
+            if self.last_reward > 0:
+                pygame.draw.rect(self.top_bar_surface, (255, 255, 0), self.coin_bar_rect)
+            else:
+                pygame.draw.rect(self.top_bar_surface, (50, 50, 50), self.coin_bar_rect)
+            self.last_reward = reward
 
         # Draw all surfaces
         surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.top_bar_surface, (0, 0))]
