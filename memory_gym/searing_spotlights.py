@@ -6,13 +6,14 @@ import pygame
 
 from argparse import ArgumentParser
 from gymnasium import  spaces
+from memory_gym.environment import CustomEnv
 from memory_gym.character_controller import CharacterController
 from memory_gym.pygame_assets import Coin, Exit, GridPositionSampler, Spotlight, get_tiled_background_surface
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
-class SearingSpotlightsEnv(gym.Env):
+class SearingSpotlightsEnv(CustomEnv):
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
         "render_fps": 25,
@@ -80,6 +81,7 @@ class SearingSpotlightsEnv(gym.Env):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        super().__init__()
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
@@ -104,6 +106,15 @@ class SearingSpotlightsEnv(gym.Env):
                     low = 0.0,
                     high = 1.0,
                     shape = [self.screen_dim, self.screen_dim, 3],
+                    dtype = np.float32)
+        
+        # Optional information that is part of the returned info dictionary during reset and step
+        # The absolute position (ground truth) of the agent is distributed using the info dictionary.
+        self.has_ground_truth_info = True
+        self.ground_truth_space = spaces.Box(
+                    low = np.zeros((2), dtype=np.float32),
+                    high = np.ones((2), dtype=np.float32),
+                    shape = (2, ),
                     dtype = np.float32)
 
         # Environment members

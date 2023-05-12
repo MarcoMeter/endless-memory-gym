@@ -5,13 +5,14 @@ import pygame
 
 from argparse import ArgumentParser
 from gymnasium import spaces
+from memory_gym.environment import CustomEnv
 from memory_gym.character_controller import GridCharacterController
 from memory_gym.pygame_assets import Command, MortarArena, calc_max_episode_steps
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
-class GridMortarMayhemEnv(gym.Env):
+class GridMortarMayhemEnv(CustomEnv):
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
         "render_fps": 6,
@@ -52,6 +53,7 @@ class GridMortarMayhemEnv(gym.Env):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        super().__init__()
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')

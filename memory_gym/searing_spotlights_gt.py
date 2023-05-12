@@ -6,13 +6,14 @@ import pygame
 
 from argparse import ArgumentParser
 from gymnasium import  spaces
+from memory_gym.environment import CustomEnv
 from memory_gym.character_controller import CharacterController
 from memory_gym.pygame_assets import Coin, Exit, GridPositionSampler, Spotlight, get_tiled_background_surface
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
-class SearingSpotlightsGTEnv(gym.Env):
+class SearingSpotlightsGTEnv(CustomEnv):
     """Ground Truth version of Searing Spotlights. The absolute agent position is provided as vector observation."""
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
@@ -79,6 +80,7 @@ class SearingSpotlightsGTEnv(gym.Env):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        super().__init__()
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
