@@ -382,9 +382,9 @@ class SearingSpotlightsEnv(CustomEnv):
             surfaces.insert(spot_surface_id, (self.exit.surface, self.exit.rect))
             spot_surface_id += 1
         if self.reset_params["agent_visible"]:
-            surfaces.insert(spot_surface_id + 3, (self.rotated_agent_surface, self.rotated_agent_rect))
+            surfaces.insert(spot_surface_id + 3, (self.agent.get_rotated_sprite(0)))
         else:
-            surfaces.insert(spot_surface_id, (self.rotated_agent_surface, self.rotated_agent_rect))
+            surfaces.insert(spot_surface_id, (self.agent.get_rotated_sprite(0)))
             spot_surface_id += 1
         self._draw_surfaces(surfaces)
 
