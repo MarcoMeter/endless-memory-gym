@@ -396,7 +396,8 @@ class SearingSpotlightsEnv(CustomEnv):
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-        return vis_obs, {"ground_truth": np.asarray(self.agent.rect.center) / self.screen_dim}
+        # Return the visual observation and the ground truth
+        return vis_obs, {"ground_truth": np.asarray([float(self.agent.rect.center) / float(self.screen_dim), float(self.coin.rect.center) / float(self.screen_dim), float(self.exit.rect.center) / float(self.screen_dim)])}
 
     def step(self, action):
         # Move the agent's controlled character
@@ -493,10 +494,11 @@ class SearingSpotlightsEnv(CustomEnv):
                 "agent_health": self.current_agent_health / self.agent_health,
                 "coins_collected": self.coins_collected / self.num_coins,
                 "success": success,
-                "ground_truth": np.asarray(self.agent.rect.center) / self.screen_dim,
+                "ground_truth": np.asarray([float(self.agent.rect.center) / float(self.screen_dim), float(self.coin.rect.center) / float(self.screen_dim), float(self.exit.rect.center) / float(self.screen_dim)])
             }
         else:
-            info = {"ground_truth": np.asarray(self.agent.rect.center) / self.screen_dim}
+            # Ground truth contains the position of the agent, coin and exit
+            info = {"ground_truth": np.asarray([float(self.agent.rect.center) / float(self.screen_dim), float(self.coin.rect.center) / float(self.screen_dim), float(self.exit.rect.center) / float(self.screen_dim)])}
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
