@@ -78,6 +78,15 @@ class EndlessMortarMayhemEnv(CustomEnv):
                     shape = [self.screen_dim, self.screen_dim, 3],
                     dtype = np.float32)
 
+        # Optional information that is part of the returned info dictionary during reset and step
+        # The absolute position (ground truth) of the agent is distributed using the info dictionary.
+        self.has_ground_truth_info = True
+        self.ground_truth_space = spaces.Box(
+                    low = np.zeros((2), dtype=np.float32),
+                    high = np.ones((2), dtype=np.float32),
+                    shape = (2, ),
+                    dtype = np.float32)
+
         # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
         self.arena_size = 6
@@ -202,7 +211,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-        return vis_obs, {}
+        return vis_obs, {"ground_truth": np.asarray([self._target_pos])}
 
     def step(self, action):
         reward = 0
@@ -285,9 +294,11 @@ class EndlessMortarMayhemEnv(CustomEnv):
                 "length": len(self.episode_rewards),
                 "commands_completed": self._total_commands_completed,
                 "max_command_sequence": len(self._commands) - 1 if len(self._commands) > 1 else 0,
+                "ground_truth": np.asarray([self._target_pos])
             }
         else:
-            info = {}
+            # The info dict is used to track the ground truth position of the target
+            info = {"ground_truth": np.asarray([self._target_pos])}
         
         # Draw
         surfaces = [(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.rotated_agent_surface, self.rotated_agent_rect)]
