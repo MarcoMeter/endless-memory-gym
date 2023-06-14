@@ -211,7 +211,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-        return vis_obs, {"ground_truth": np.asarray([*self._target_pos])}
+        return vis_obs, {"ground_truth": np.asarray([*self._target_pos]) / 5.0}
 
     def step(self, action):
         reward = 0
@@ -294,11 +294,11 @@ class EndlessMortarMayhemEnv(CustomEnv):
                 "length": len(self.episode_rewards),
                 "commands_completed": self._total_commands_completed,
                 "max_command_sequence": len(self._commands) - 1 if len(self._commands) > 1 else 0,
-                "ground_truth": np.asarray([*self._target_pos])
+                "ground_truth": np.asarray([*self._target_pos]) / 5.0
             }
         else:
             # The info dict is used to track the ground truth position of the target
-            info = {"ground_truth": np.asarray([*self._target_pos])}
+            info = {"ground_truth": np.asarray([*self._target_pos]) / 5.0}
         
         # Draw
         surfaces = [(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.rotated_agent_surface, self.rotated_agent_rect)]
