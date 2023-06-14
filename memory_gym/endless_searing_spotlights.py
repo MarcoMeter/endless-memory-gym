@@ -104,8 +104,8 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         # The absolute position (ground truth) of the agent is distributed using the info dictionary.
         self.has_ground_truth_info = True
         self.ground_truth_space = spaces.Box(
-                    low = np.zeros((2), dtype=np.float32),
-                    high = np.ones((2), dtype=np.float32),
+                    low = np.zeros((4), dtype=np.float32),
+                    high = np.ones((4), dtype=np.float32),
                     shape = (4, ),
                     dtype = np.float32)
 
@@ -349,7 +349,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         # Return the visual observation and the ground truth
-        return vis_obs, {"ground_truth": np.asarray([float(self.agent.rect.center) / float(self.screen_dim), float(self.coin.rect.center) / float(self.screen_dim)])}
+        return vis_obs, {"ground_truth": np.asarray((np.asarray(self.agent.rect.center), np.asarray(self.coin.location))) / self.screen_dim}
 
     def step(self, action):
         # Move the agent's controlled character
@@ -420,12 +420,12 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
                 "length": len(self.episode_rewards),
                 "agent_health": self.current_agent_health / self.agent_health,
                 "coins_collected": self.coins_collected,
-                "ground_truth": np.asarray([float(self.agent.rect.center) / float(self.screen_dim), float(self.coin.rect.center) / float(self.screen_dim)]),
+                "ground_truth": np.asarray((np.asarray(self.agent.rect.center), np.asarray(self.coin.location))) / self.screen_dim,
                 # "mean_steps_between_coins": sum(self.steps_between_coins) / self.coins_collected
             }
         else:
             # Ground truth: agent and coin position
-            info = {"ground_truth": np.asarray([float(self.agent.rect.center) / float(self.screen_dim), float(self.coin.rect.center) / float(self.screen_dim)])}
+            info = {"ground_truth": np.asarray((np.asarray(self.agent.rect.center), np.asarray(self.coin.location))) / self.screen_dim}
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
