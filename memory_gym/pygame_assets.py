@@ -359,7 +359,7 @@ class EndlessMysteryPath():
             for node in segment:
                 pygame.draw.rect(surface, (255, 255, 255), (node.x * tile_size, node.y * tile_size, tile_size, tile_size))
         # path surface to image
-        pygame.image.save(self.path_surface, "path.png")
+        pygame.image.save(surface, "path.png")
 
     def gen_surface(self, tile_size):
         surface = pygame.Surface(((self.num_columns * self.num_segments + self.num_segments) * tile_size, self.num_rows * tile_size))

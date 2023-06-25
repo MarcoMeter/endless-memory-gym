@@ -20,7 +20,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
 
     default_reset_parameters = {
                 # Spotlight parameters
-                "max_steps": 1024,
+                "max_steps": -1,
                 "steps_per_coin": 160,
                 "initial_spawns": 3,
                 "spawn_interval": 50,
@@ -244,7 +244,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
             update_coin_surface = True
             self.coins_collected += 1
             self.steps_between_coins.append(self.t)
-            self.t = 0
+            self.coin_t = 0
             # Spawn new coin
             self._spawn_coin()
         # Redraw coins if at least one was collected
@@ -259,6 +259,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         self.reset_params = EndlessSearingSpotlightsEnv.process_reset_params(options)
         self.max_episode_steps = self.reset_params["max_steps"]
         self.t = 0
+        self.coin_t = 0
         self.steps_between_coins = []
 
         if self.reset_params["hide_chessboard"]:
@@ -383,8 +384,12 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
 
         # Time limit
         self.t += 1
-        if self.t == self.reset_params["steps_per_coin"]:
+        self.coin_t += 1
+        if self.coin_t == self.reset_params["steps_per_coin"]:
             done = True
+        if self.t == self.max_episode_steps:
+            done = True
+
 
         # Render the last reward of the agent
         if self.reset_params["show_last_positive_reward"]:

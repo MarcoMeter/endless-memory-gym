@@ -19,6 +19,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
     }
 
     default_reset_parameters = {
+                "max_steps": -1,
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 12.0 * SCALE,
                 "allowed_commands": 9,
@@ -90,7 +91,6 @@ class EndlessMortarMayhemEnv(CustomEnv):
         # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
         self.arena_size = 6
-        self.max_episode_steps = 1024
 
     def _draw_surfaces(self, surfaces):
         # Draw all surfaces
@@ -161,9 +161,11 @@ class EndlessMortarMayhemEnv(CustomEnv):
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
         self.current_seed = seed
+        self.t = 0
 
         # Check reset parameters for completeness and errors
         self.reset_params = EndlessMortarMayhemEnv.process_reset_params(options)
+        self.max_episode_steps = self.reset_params["max_steps"]
 
         # Track all rewards during one episode
         self.episode_rewards = []
@@ -284,6 +286,11 @@ class EndlessMortarMayhemEnv(CustomEnv):
                     self._command_verify_step += 1
             else:
                 self._command_steps +=1
+
+        # Upper time limit
+        self.t += 1
+        if self.t == self.max_episode_steps:
+            done = True
 
         # Track all rewards
         self.episode_rewards.append(reward)

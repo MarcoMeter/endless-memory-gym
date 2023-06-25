@@ -20,7 +20,7 @@ class EndlessMysteryPathEnv(CustomEnv):
     }
 
     default_reset_parameters = {
-                "max_steps": 1024,
+                "max_steps": -1,
                 "agent_scale": 1.0 * SCALE,
                 "agent_speed": 12.0 * SCALE,
                 "show_origin": False,
@@ -329,7 +329,6 @@ class EndlessMysteryPathEnv(CustomEnv):
         if self.stamina == 0:
             done = True
         # Upper time limit
-        # Time limit
         self.t += 1
         if self.t == self.max_episode_steps:
             done = True
