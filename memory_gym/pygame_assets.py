@@ -302,6 +302,7 @@ class Node():
         self.neighbors = []
         self.diagonal_neighbors = []
         self.previous_node = None
+        self.next_node = None
         self.is_wall = is_wall
         self.reward_visited = False
         self.stamina_visited = False
@@ -408,6 +409,14 @@ class EndlessMysteryPath():
         # Set the previous node reference of the first node of the new segment
         if len(self.path) > 1:
             self.path[self.num_segments - 1][0].previous_node = self.path[self.num_segments - 2][-1]
+
+        # Set the next node reference for every node in the new segment
+        for i in range(len(self.path[self.num_segments - 1]) - 1):
+            self.path[self.num_segments - 1][i].next_node = self.path[self.num_segments - 1][i + 1]
+
+        # Set the next node of the last node of the previous segment
+        if self.num_segments > 1:
+            self.path[self.num_segments - 2][-1].next_node = self.path[self.num_segments - 1][0]
 
 class MysteryPath():
     def __init__(self, num_columns, num_rows, start_position, end_position, rng) -> None:

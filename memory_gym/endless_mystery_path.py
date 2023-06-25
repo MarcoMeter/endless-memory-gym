@@ -80,6 +80,15 @@ class EndlessMysteryPathEnv(CustomEnv):
                     shape = [self.screen_dim, self.screen_dim, 3],
                     dtype = np.float32)
         
+        # Optional information that is part of the returned info dictionary during reset and step
+        # The cardinal direction where the next path tile is located
+        self.has_ground_truth_info = True
+        self.ground_truth_space = spaces.Box(
+                    low = np.zeros((3), dtype=np.float32),
+                    high = np.ones((3), dtype=np.float32),
+                    shape = (3, ),
+                    dtype = np.float32)
+        
         # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
         self.grid_dim = 7
@@ -197,6 +206,17 @@ class EndlessMysteryPathEnv(CustomEnv):
         self.agent_draw_x = self.agent.rect.topleft[0] - self.camera_offset
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
         self.current_node = self.endless_path.path[0][0]
+
+        # Determine cardinal directoin (north, east, south, west) based on the current node and the next node
+        x = self.current_node.next_node.x - self.current_node.x
+        y = self.current_node.next_node.y - self.current_node.y
+        if x == 1:
+            self.target_direction = np.asarray([1, 0, 0]) # East
+        elif y == -1:
+            self.target_direction = np.asarray([0, 1, 0]) # North
+        elif y == 1:
+            self.target_direction = np.asarray([0, 0, 1]) # South
+        
         self.is_off_path = False
         self.current_segment = 0
         self.num_fails = 0
@@ -221,7 +241,7 @@ class EndlessMysteryPathEnv(CustomEnv):
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
-        return vis_obs, {}
+        return vis_obs, {"ground_truth": self.target_direction}
 
     def step(self, action):
         # Map single discrete action to multi-discrete action
@@ -333,6 +353,16 @@ class EndlessMysteryPathEnv(CustomEnv):
         if self.t == self.max_episode_steps:
             done = True
         
+        # Determine cardinal directoin (north, east, south, west) based on the current node and the next node
+        x = self.current_node.next_node.x - self.current_node.x
+        y = self.current_node.next_node.y - self.current_node.y
+        if x == 1:
+            self.target_direction = np.asarray([1, 0, 0]) # East
+        elif y == -1:
+            self.target_direction = np.asarray([0, 1, 0]) # North
+        elif y == 1:
+            self.target_direction = np.asarray([0, 0, 1]) # South
+
         # Determine the maximum normalized x position reached by the agent
         if self.normalized_agent_position[0] > self.max_x_reached and on_path:
             self.max_x_reached = self.normalized_agent_position[0]
@@ -346,10 +376,11 @@ class EndlessMysteryPathEnv(CustomEnv):
                 "length": len(self.episode_rewards),
                 "num_fails": self.num_fails,
                 "max_x": self.max_x_reached,
-                "tiles_visited": self.tiles_visited
+                "tiles_visited": self.tiles_visited,
+                "ground_truth": self.target_direction
             }
         else:
-            info = {}
+            info = {"ground_truth": self.target_direction}
 
         # Update the stamina bar
         self.stamina_surface.fill((0, 255, 0))
@@ -398,7 +429,7 @@ def main():
     options = parser.parse_args()
 
     env = EndlessMysteryPathEnv(render_mode = "debug_rgb_array")
-    reset_params = {}
+    reset_params = {"stamina_level": 100000}
     seed = options.seed
     vis_obs, reset_info = env.reset(seed = seed, options = reset_params)
     img = env.render()
