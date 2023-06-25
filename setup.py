@@ -33,7 +33,7 @@ setup(
       python_requires=">=3.6",
       include_package_data=True,
       install_requires=["gymnasium==0.28.1",
-                        "pygame==2.1.2"],
+                        "pygame==2.4.0"],
       entry_points={
             "console_scripts": [
             "searing_spotlights=memory_gym.searing_spotlights:main",
