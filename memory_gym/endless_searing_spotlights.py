@@ -243,7 +243,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
             reward += self.reset_params["reward_coin"]
             update_coin_surface = True
             self.coins_collected += 1
-            self.steps_between_coins.append(self.t)
+            self.steps_between_coins.append(self.coin_t)
             self.coin_t = 0
             # Spawn new coin
             self._spawn_coin()
@@ -328,7 +328,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.top_bar_surface, (0, 0))]
         spot_surface_id = 1
         # Coin surface
-        if self.reset_params["coins_visible"] or self.t < self.reset_params["coin_show_duration"]:
+        if self.reset_params["coins_visible"] or self.coin_t < self.reset_params["coin_show_duration"]:
             surfaces.insert(spot_surface_id + 1, (self.coin_surface, (0, 0)))
         else:
             surfaces.insert(spot_surface_id, (self.coin_surface, (0, 0)))
@@ -403,7 +403,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         surfaces = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (self.top_bar_surface, (0, 0))]
         spot_surface_id = 1
         # Coin surface
-        if self.reset_params["coins_visible"] or self.t < self.reset_params["coin_show_duration"]:
+        if self.reset_params["coins_visible"] or self.coin_t < self.reset_params["coin_show_duration"]:
             surfaces.insert(spot_surface_id + 1, (self.coin_surface, (0, 0)))
         else:
             surfaces.insert(spot_surface_id, (self.coin_surface, (0, 0)))
