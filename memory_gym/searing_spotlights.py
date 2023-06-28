@@ -36,7 +36,7 @@ class SearingSpotlightsEnv(CustomEnv):
                 "black_background": False,
                 "hide_chessboard": False,
                 # Light Parameters
-                "light_dim_off_duration": 0,
+                "light_dim_off_duration": 6,
                 "light_threshold": 255,
                 # Coin Parameters
                 "num_coins": [1],

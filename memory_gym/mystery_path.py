@@ -28,7 +28,7 @@ class MysteryPathEnv(CustomEnv):
                 "visual_feedback": True,
                 "reward_goal": 1.0,
                 "reward_fall_off": 0.0,
-                "reward_path_progress": 0.0,
+                "reward_path_progress": 0.1,
                 "reward_step": 0.0
             }
 
