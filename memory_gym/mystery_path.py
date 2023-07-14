@@ -40,7 +40,7 @@ class MysteryPathEnv(CustomEnv):
             reset_params {dict} -- Provided reset parameters that are to be validated and completed
 
         Returns:
-            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+            {dict} -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
         cloned_params = MysteryPathEnv.default_reset_parameters.copy()
         if reset_params is not None:

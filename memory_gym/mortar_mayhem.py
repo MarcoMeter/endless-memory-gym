@@ -42,7 +42,7 @@ class MortarMayhemEnv(CustomEnv):
             reset_params {dict} -- Provided reset parameters that are to be validated and completed
 
         Returns:
-            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+            {dict} -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
         cloned_params = MortarMayhemEnv.default_reset_parameters.copy()
         if reset_params is not None:
@@ -345,9 +345,9 @@ class MortarMayhemEnv(CustomEnv):
                 return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
-            if self.debug_window is not None:
-                self.debug_window.destroy()
-            pygame.quit()
+        if self.debug_window is not None:
+            self.debug_window.destroy()
+        pygame.quit()
 
 def main():
     parser = ArgumentParser()

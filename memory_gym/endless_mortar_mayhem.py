@@ -41,7 +41,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
             reset_params {dict} -- Provided reset parameters that are to be validated and completed
 
         Returns:
-            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+            {dict} -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
         cloned_params = EndlessMortarMayhemEnv.default_reset_parameters.copy()
         if reset_params is not None:
@@ -140,7 +140,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
     def _generate_command_visualization(self, commands, duration=1, delay=0):
         """Generates a list that states on which step to show which command. Each element corresponds to one step.
 
-        Args:
+        Arguments:
             commands {list} -- Sampled commands
             duration {int} -- How many steps to show one command (default: {1})
             delay {int} -- How many steps until the next command is shown (default: {0})

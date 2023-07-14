@@ -43,7 +43,7 @@ class EndlessMysteryPathEnv(CustomEnv):
             reset_params {dict} -- Provided reset parameters that are to be validated and completed
 
         Returns:
-            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+            {dict} -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
         cloned_params = EndlessMysteryPathEnv.default_reset_parameters.copy()
         if reset_params is not None:
@@ -164,7 +164,7 @@ class EndlessMysteryPathEnv(CustomEnv):
         return pygame.transform.scale(surface, (336, 336))
 
     def _normalize_agent_position(self, agent_position):
-            return (agent_position[0] // self.tile_dim, agent_position[1] // self.tile_dim)
+        return (agent_position[0] // self.tile_dim, agent_position[1] // self.tile_dim)
 
     def reset(self, seed = None, return_info = True, options = None):
         super().reset(seed=seed)
