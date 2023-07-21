@@ -73,6 +73,12 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        """
+        Initialize the EndlessSearingSpotlightsEnv environment.
+
+        Arguments:
+            render_mode {str} -- The rendering mode for the environment. (default: None)
+        """
         super().__init__()
         self.render_mode = render_mode
         if render_mode is None:
@@ -129,6 +135,11 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
     def _draw_surfaces(self, surfaces):
+        """Draw all surfaces onto the Pygame screen.
+
+        Arguments:
+            surfaces {list} -- A list of surfaces to draw on the screen.
+        """
         # Draw all surfaces
         for surface in surfaces:
             if surface[0] is not None:
@@ -136,6 +147,11 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         pygame.display.flip()
 
     def _build_debug_surface(self):
+        """Builds and returns a debug surface for rendering.
+
+        Returns:
+            {pygame.Surface} -- The debug surface.
+        """
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
         # Create coin surface
         coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
@@ -159,6 +175,13 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         return pygame.transform.scale(surface, (336, 336))
 
     def _step_spotlight_task(self):
+        """
+        Perform a step in the spotlight task and calculate the reward and changes due to spotlights.
+
+        Returns:
+            {tuple} -- A tuple containing the reward earned, a flag indicating if all spotlights are done,
+                    and the background surface after processing the spotlight task.
+        """
         reward = 0.0
         done = False
         # Spawn spotlights
@@ -221,6 +244,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         return (x, y)
 
     def _spawn_coin(self):
+        """Spawn a new coin on the game screen."""
         self.coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.coin_surface.fill(255)
         self.coin_surface.set_colorkey(255)
@@ -236,6 +260,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         self.coin.draw(self.coin_surface)
 
     def _step_coin_task(self):
+        """Perform a step in the coin collection task and calculate the reward."""
         reward = 0.0
         # Check whether the agent collected a coin and redraw the coin surface
         update_coin_surface = False
@@ -254,6 +279,16 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         return reward
 
     def reset(self, seed = None, return_info = True, options = None):
+        """Reset the environment.
+
+        Arguments:
+            seed {int} -- The seed for the environment's random number generator. (default: {None})
+            return_info {bool} -- Whether to return additional reset information. (default: {True})
+            options {dict} -- Reset parameters for the environment. (default: {None})
+
+        Returns:
+            {tuple} -- The initial observation, additional reset information, if specified.
+        """
         super().reset(seed=seed)
         self.current_seed = seed
         self.reset_params = EndlessSearingSpotlightsEnv.process_reset_params(options)
@@ -353,6 +388,14 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         return vis_obs, {"ground_truth": np.concatenate((np.asarray(self.agent.rect.center), np.asarray(self.coin.location))) / self.screen_dim}
 
     def step(self, action):
+        """Take a step in the environment.
+
+        Arguments:
+            action {list} -- The action to take.
+
+        Returns:
+            {tuple} -- The resulting observation, reward, done flag, truncation, info dictionary.
+        """
         # Move the agent's controlled character
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.walkable_rect)
 
@@ -438,11 +481,17 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         return vis_obs, reward, done, False, info
 
     def close(self):
+        """Close the environment."""
         if self.debug_window is not None:
             self.debug_window.destroy()
         pygame.quit()
 
     def render(self):
+        """Render the environment.
+
+        Returns:
+            {np.ndarray} -- The rendered image of the environment.
+        """
         if self.render_mode is not None:
             if self.render_mode == "rgb_array":
                 self.clock.tick(EndlessSearingSpotlightsEnv.metadata["render_fps"])
