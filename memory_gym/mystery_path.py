@@ -50,6 +50,11 @@ class MysteryPathEnv(CustomEnv):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        """Initialize the EndlessMysteryPath class.
+
+        Arguments:
+            render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
+        """
         super().__init__()
         self.render_mode = render_mode
         if render_mode is None:
@@ -83,6 +88,11 @@ class MysteryPathEnv(CustomEnv):
         self.tile_dim = self.screen_dim / self.grid_dim
 
     def _draw_surfaces(self, surfaces):
+        """Draw all surfaces onto the Pygame screen.
+
+        Arguments:
+            surfaces {list} -- A list of surfaces to draw on the screen.
+        """
         # Draw all surfaces
         for surface in surfaces:
             if surface[0] is not None:
@@ -90,6 +100,11 @@ class MysteryPathEnv(CustomEnv):
         pygame.display.flip()
 
     def _build_debug_surface(self):
+        """Builds and returns a debug surface for rendering.
+
+        Returns:
+            {pygame.Surface} -- The debug surface.
+        """
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
         surface.fill(0)
         self.mystery_path.draw_to_surface(surface, self.tile_dim, True, True, True, True)
@@ -101,9 +116,27 @@ class MysteryPathEnv(CustomEnv):
         return pygame.transform.scale(surface, (336, 336))
 
     def _normalize_agent_position(self, agent_position):
-            return (agent_position[0] // self.tile_dim, agent_position[1] // self.tile_dim)
+        """Normalize the agent's position relative to the arena.
+
+        Arguments:
+            agent_position {tuple} -- The agent's position.
+
+        Returns:
+            {tuple} -- The normalized agent position.
+        """
+        return (agent_position[0] // self.tile_dim, agent_position[1] // self.tile_dim)
 
     def reset(self, seed = None, return_info = True, options = None):
+        """Reset the environment.
+
+        Arguments:
+            seed {int} -- The seed for the environment's random number generator. (default: {None})
+            return_info {bool} -- Whether to return additional reset information. (default: {True})
+            options {dict} -- Reset parameters for the environment. (default: {None})
+
+        Returns:
+            {tuple} -- The initial observation, additional reset information, if specified.
+        """
         super().reset(seed=seed)
         self.current_seed = seed
         self.t = 0
@@ -166,6 +199,14 @@ class MysteryPathEnv(CustomEnv):
         return vis_obs, {}
 
     def step(self, action):
+        """Take a step in the environment.
+
+        Arguments:
+            action {int} -- The action to take.
+
+        Returns:
+            {tuple} -- The resulting observation, reward, done flag, truncation, info dictionary.
+        """
         reward = 0
         done = False
         success = 0
@@ -234,6 +275,11 @@ class MysteryPathEnv(CustomEnv):
         return vis_obs, reward, done, False, info
 
     def render(self):
+        """Render the environment.
+
+        Returns:
+            {np.ndarray} -- The rendered image of the environment.
+        """
         if self.render_mode is not None:
             if self.render_mode == "rgb_array":
                 self.clock.tick(MysteryPathEnv.metadata["render_fps"])
@@ -255,6 +301,7 @@ class MysteryPathEnv(CustomEnv):
                 return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
+        """Close the environment."""
         if self.debug_window is not None:
             self.debug_window.destroy()
         pygame.quit()
