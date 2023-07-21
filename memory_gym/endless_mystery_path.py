@@ -53,7 +53,7 @@ class EndlessMysteryPathEnv(CustomEnv):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
-        """Initialize the EndlessMortarMayhemEnv class.
+        """Initialize the EndlessMysteryPath class.
 
         Arguments:
             render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
