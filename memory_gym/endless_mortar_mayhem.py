@@ -399,7 +399,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
                 return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
-         """Close the environment."""
+        """Close the environment."""
         if self.debug_window is not None:
             self.debug_window.destroy()
         pygame.quit()
