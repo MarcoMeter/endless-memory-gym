@@ -81,6 +81,12 @@ class SearingSpotlightsEnv(CustomEnv):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        """
+        Initialize the SearingSpotlights environment.
+
+        Arguments:
+            render_mode {str} -- The rendering mode for the environment. (default: None)
+        """
         super().__init__()
         self.render_mode = render_mode
         if render_mode is None:
@@ -136,6 +142,11 @@ class SearingSpotlightsEnv(CustomEnv):
         return intervals
 
     def _draw_surfaces(self, surfaces):
+        """Draw all surfaces onto the Pygame screen.
+
+        Arguments:
+            surfaces {list} -- A list of surfaces to draw on the screen.
+        """
         # Draw all surfaces
         for surface in surfaces:
             if surface[0] is not None:
@@ -143,6 +154,11 @@ class SearingSpotlightsEnv(CustomEnv):
         pygame.display.flip()
 
     def _build_debug_surface(self):
+        """Builds and returns a debug surface for rendering.
+
+        Returns:
+            {pygame.Surface} -- The debug surface.
+        """
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
         # Create coin surface
         coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
@@ -168,6 +184,13 @@ class SearingSpotlightsEnv(CustomEnv):
         return pygame.transform.scale(surface, (336, 336))
 
     def _step_spotlight_task(self):
+        """
+        Perform a step in the spotlight task and calculate the reward and changes due to spotlights.
+
+        Returns:
+            {tuple} -- A tuple containing the reward earned, a flag indicating if all spotlights are done,
+                    and the background surface after processing the spotlight task.
+        """
         reward = 0.0
         done = False
         # Spawn spotlights
@@ -232,6 +255,7 @@ class SearingSpotlightsEnv(CustomEnv):
         return (x, y)
 
     def _spawn_coins(self):
+        """Spawns new coins on the game screen."""
         self.coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.coin_surface.fill(255)
         self.coin_surface.set_colorkey(255)
@@ -244,6 +268,7 @@ class SearingSpotlightsEnv(CustomEnv):
             self.coins.append(coin)
 
     def _spawn_exit(self):
+        """Spawn the exit on the game screen."""
         spawn_pos = self.grid_sampler.sample(21)
         spawn_pos = (spawn_pos[0] + self.np_random.integers(2, 4), spawn_pos[1] + self.np_random.integers(2, 4))
         spawn_pos = self._process_spawn_pos(spawn_pos)
@@ -251,6 +276,11 @@ class SearingSpotlightsEnv(CustomEnv):
         self.exit.draw(open=False)
 
     def _step_coin_task(self):
+        """Perform a step in the coin collection task and calculate the reward.
+        
+        Returns:
+            {tuple} -- A tuple containing the reward (float) and done flag (bool) after the step.
+        """
         reward = 0.0
         done = False
         # Check whether the agent collected a coin and redraw the coin surface
@@ -271,6 +301,15 @@ class SearingSpotlightsEnv(CustomEnv):
         return reward, done
 
     def _step_exit_task(self, coins_done):
+        """
+        Perform a step in the exit task and calculate the reward.
+
+        Arguments:
+            coins_done {bool} -- A flag indicating whether all coins have been collected.
+
+        Returns:
+            {tuple} -- A tuple containing the reward (float) and done flag (bool) after the step.
+        """
         reward = 0.0
         done = False
         if coins_done:
@@ -281,6 +320,16 @@ class SearingSpotlightsEnv(CustomEnv):
         return reward, done
 
     def reset(self, seed = None, return_info = True, options = None):
+        """Reset the environment.
+
+        Arguments:
+            seed {int} -- The seed for the environment's random number generator. (default: {None})
+            return_info {bool} -- Whether to return additional reset information. (default: {True})
+            options {dict} -- Reset parameters for the environment. (default: {None})
+
+        Returns:
+            {tuple} -- The initial observation, additional reset information, if specified.
+        """
         super().reset(seed=seed)
         self.current_seed = seed
         self.reset_params = SearingSpotlightsEnv.process_reset_params(options)
@@ -391,6 +440,14 @@ class SearingSpotlightsEnv(CustomEnv):
         return vis_obs, {}
 
     def step(self, action):
+        """Take a step in the environment.
+
+        Arguments:
+            action {list} -- The action to take.
+
+        Returns:
+            {tuple} -- The resulting observation, reward, done flag, truncation, info dictionary.
+        """
         # Move the agent's controlled character
         self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.walkable_rect)
 
@@ -495,11 +552,17 @@ class SearingSpotlightsEnv(CustomEnv):
         return vis_obs, reward, done, False, info
 
     def close(self):
+        """Close the environment."""
         if self.debug_window is not None:
             self.debug_window.destroy()
         pygame.quit()
 
     def render(self):
+        """Render the environment.
+
+        Returns:
+            {np.ndarray} -- The rendered image of the environment.
+        """
         if self.render_mode is not None:
             if self.render_mode == "rgb_array":
                 self.clock.tick(SearingSpotlightsEnv.metadata["render_fps"])

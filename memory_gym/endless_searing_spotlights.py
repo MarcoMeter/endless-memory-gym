@@ -74,7 +74,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
 
     def __init__(self, render_mode = None) -> None:
         """
-        Initialize the EndlessSearingSpotlightsEnv environment.
+        Initialize the EndlessSearingSpotlights environment.
 
         Arguments:
             render_mode {str} -- The rendering mode for the environment. (default: None)
@@ -260,7 +260,11 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         self.coin.draw(self.coin_surface)
 
     def _step_coin_task(self):
-        """Perform a step in the coin collection task and calculate the reward."""
+        """Perform a step in the coin collection task and calculate the reward.
+        
+        Returns:
+            {tuple} -- A tuple containing the reward (float) and done flag (bool) after the step.
+        """
         reward = 0.0
         # Check whether the agent collected a coin and redraw the coin surface
         update_coin_surface = False
