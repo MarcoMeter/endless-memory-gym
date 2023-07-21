@@ -53,6 +53,11 @@ class GridMortarMayhemEnv(CustomEnv):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        """Initialize the GridMortarMayhem Environment.
+
+        Arguments:
+            render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
+        """
         super().__init__()
         self.render_mode = render_mode
         if render_mode is None:
@@ -84,6 +89,11 @@ class GridMortarMayhemEnv(CustomEnv):
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
     def _draw_surfaces(self, surfaces):
+        """Draw all surfaces onto the Pygame screen.
+
+        Arguments:
+            surfaces {list} -- A list of surfaces to draw on the screen.
+        """
         # Draw all surfaces
         for surface in surfaces:
             if surface[0] is not None:
@@ -91,6 +101,11 @@ class GridMortarMayhemEnv(CustomEnv):
         pygame.display.flip()
 
     def _build_debug_surface(self):
+        """Builds and returns a debug surface for rendering.
+
+        Returns:
+            {pygame.Surface} -- The debug surface.
+        """
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
 
         # Gather surfaces
@@ -119,10 +134,26 @@ class GridMortarMayhemEnv(CustomEnv):
         return pygame.transform.scale(surface, (336, 336))
 
     def _normalize_agent_position(self, agent_position):
+        """Normalize the agent's position relative to the arena.
+
+        Arguments:
+            agent_position {tuple} -- The agent's position.
+
+        Returns:
+            {tuple} -- The normalized agent position.
+        """
         return ((agent_position[0] - self.arena.rect[0]) // self.arena.tile_dim,
                 (agent_position[1] - self.arena.rect[1]) // self.arena.tile_dim)
 
     def _get_valid_commands(self, pos):
+        """Get the list of valid commands that can be executed from the given position.
+
+        Arguments:
+            pos {tuple} -- The position to check for valid commands.
+
+        Returns:
+            {list} -- A list of valid commands that can be executed from the given position.
+        """
         # Check whether each command can be executed or not
         valid_commands = []
         keys = list(Command.COMMANDS.keys())[:self.reset_params["allowed_commands"]]
@@ -136,6 +167,14 @@ class GridMortarMayhemEnv(CustomEnv):
         return valid_commands
 
     def _generate_commands(self, start_pos):
+        """Generate a list of random commands.
+
+        Arguments:
+            num_commands {int} -- The number of commands to generate.
+
+        Returns:
+            {list} -- The generated commands.
+        """
         simulated_pos = start_pos
         commands = []
         self.num_commands = self.np_random.choice(self.reset_params["command_count"])
@@ -152,7 +191,7 @@ class GridMortarMayhemEnv(CustomEnv):
     def _generate_command_visualization(self, commands, duration=1, delay=0):
         """Generates a list that states on which step to show which command. Each element corresponds to one step.
 
-        Args:
+        Arguments:
             commands {list} -- Sampled commands
             duration {int} -- How many steps to show one command (default: {1})
             delay {int} -- How many steps until the next command is shown (default: {0})
@@ -171,6 +210,16 @@ class GridMortarMayhemEnv(CustomEnv):
         return command_vis
 
     def reset(self, seed = None, return_info = True, options = None):
+        """Reset the environment.
+
+        Arguments:
+            seed {int} -- The seed for the environment's random number generator. (default: {None})
+            return_info {bool} -- Whether to return additional reset information. (default: {True})
+            options {dict} -- Reset parameters for the environment. (default: {None})
+
+        Returns:
+            {tuple} -- The initial observation, additional reset information, if specified.
+        """
         super().reset(seed=seed)
         self.current_seed = seed
 
@@ -228,6 +277,14 @@ class GridMortarMayhemEnv(CustomEnv):
         return vis_obs, {}
 
     def step(self, action):
+        """Take a step in the environment.
+
+        Arguments:
+            action {list} -- The action to take.
+
+        Returns:
+            {tuple} -- The resulting observation, reward, done flag, truncation, info dictionary.
+        """
         reward = 0
         done = False
         success = 0
@@ -317,6 +374,11 @@ class GridMortarMayhemEnv(CustomEnv):
         return vis_obs, reward, done, False, info
 
     def render(self):
+        """Render the environment.
+
+        Returns:
+            {np.ndarray} -- The rendered image of the environment.
+        """
         if self.render_mode is not None:
             if self._command_visualization:
                     fps = GridMortarMayhemEnv.metadata["render_fps"]
@@ -343,6 +405,7 @@ class GridMortarMayhemEnv(CustomEnv):
                 return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
+        """Close the environment."""
         if self.debug_window is not None:
             self.debug_window.destroy()
         pygame.quit()
