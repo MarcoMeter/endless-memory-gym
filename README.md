@@ -2,19 +2,6 @@
 
 # Memory Gym: Partially Observable Challenges to Memory-Based Agents in Endless Episodes
 
-<style>
-  table {
-    border-collapse: collapse;
-    margin: 0 auto; /* Added margin for center alignment */
-  }
-  td {
-    text-align: center;
-    vertical-align: middle;
-    padding: 5px;
-    border: none;
-  }
-</style>
-
 <table align="center">
   <tr>
     <td></td>
