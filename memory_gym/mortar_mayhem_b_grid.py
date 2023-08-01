@@ -52,6 +52,8 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        super().__init__()
+
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')

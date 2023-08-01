@@ -58,6 +58,8 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         Arguments:
             render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
         """
+        super().__init__()
+
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
