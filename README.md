@@ -344,7 +344,7 @@ Baseline results are avaible via these repositories.
 
 [Recurrence + PPO](https://github.com/MarcoMeter/recurrent-ppo-truncated-bptt)
 
-[Gated TransformerXL + PPO](https://github.com/MarcoMeter/episodic-transformer-memory-ppo)
+[TransformerXL + PPO](https://github.com/MarcoMeter/episodic-transformer-memory-ppo)
 
 ## Changelog
 
