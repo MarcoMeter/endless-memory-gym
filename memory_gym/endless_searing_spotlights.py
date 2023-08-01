@@ -41,7 +41,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
                 "coins_visible": False,
                 # Agent Parameters
                 "agent_speed": 12.0 * SCALE,
-                "agent_health": 20,
+                "agent_health": 10,
                 "agent_scale": 1.0 * SCALE,
                 "agent_visible": False,
                 "sample_agent_position": True,
@@ -51,7 +51,6 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
                 "reward_inside_spotlight": 0.0,
                 "reward_outside_spotlight": 0.0,
                 "reward_death": 0.0,
-                "reward_max_steps": 0.0,
                 "reward_coin": 0.25,
             }
 

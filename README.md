@@ -152,10 +152,10 @@ max episode length = (command_show_duration + command_show_delay) * command_coun
 | Parameter              | Default | Description                                                                                                                                       |
 |------------------------|--------:|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | agent_scale            |    0.25 | The dimensions of the agent.                                                                                                                      |
-| agent_speed            |     2.5 | The speed of the agent.                                                                                                                           |
+| agent_speed            |     3.0 | The speed of the agent.                                                                                                                           |
 | arena_size             |       5 | The grid dimension of the arena (min: 2, max: 6)                                                                                                  |
 | allowed_commands       |       9 | Available commands: right, down, left, up, stay, right down, right up, left down, left up. If set to five, the first five commands are available. |
-| command_count          |     [5] | The number of commands that are asked to be executed by the agent. This is a list that the environment samples from.                              |
+| command_count          |     [10] | The number of commands that are asked to be executed by the agent. This is a list that the environment samples from.                              |
 | command_show_duration  |     [3] | The number of steps that one command is shown. This is a list that the environment samples from.                                                  |
 | command_show_delay     |     [1] | The number of steps between showing one command. This is a list that the environment samples from.                                                |
 | explosion_duration     |     [6] | The number of steps that an agent has to stay on the commanded tile. This is a list that the environment samples form.                            |
@@ -168,6 +168,23 @@ max episode length = (command_show_duration + command_show_delay) * command_coun
 ## Endless Mortar Mayhem
 
 To extend the core concept of Mortar Mayhem to Endless Mortar Mayhem, we introduce an ever-growing command sequence. The phases of displaying and executing commands are alternated. Only one command is shown before command execution, while the agent must execute all previously displayed commands in the underlying episode. To accommodate a potentially infinite command sequence, the arena undergoes a screen wrap, behaving like a torus.
+
+### Reset Parameters
+
+| Parameter              | Default | Description                                                                                                                                       |
+|------------------------|--------:|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| max_steps            |    -1 | Maximum number of steps that an episode may last. If less than 1, the episode length is not limited by this reset parameter.                                                                                                                      |
+| agent_scale            |    0.25 | The dimensions of the agent.                                                                                                                      |
+| agent_speed            |     3.0 | The speed of the agent.                                                                                                                           |
+| allowed_commands       |       9 | Available commands: right, down, left, up, stay, right down, right up, left down, left up. If set to five, the first five commands are available. |
+| initial_command_count            |     1 | Specifies the number of commands that are initially shown.                                                                                                                           |
+| command_show_duration  |     [3] | The number of steps that one command is shown. This is a list that the environment samples from.                                                  |
+| command_show_delay     |     [1] | The number of steps between showing one command. This is a list that the environment samples from.                                                |
+| explosion_duration     |     [6] | The number of steps that an agent has to stay on the commanded tile. This is a list that the environment samples form.                            |
+| explosion_delay        |    [18] | The entire duration in steps that the agent has to execute the current command. This is a list that the environments samples from.                |
+| visual_feedback        |    True | Whether to turn off the visualization of the feedback. Upon command evaluation, the wrong tiles are rendered red.                                 |
+| reward_command_failure |     0.0 | What reward to signal upon failing at the current command.                                                                                        |
+| reward_command_success |     0.1 | What reward to signal upon succeeding at the current command.                                                                                       |
 
 ## Mystery Path
 
@@ -192,9 +209,9 @@ Mystery Path procedurally generates an invisible path for the agent to cross fro
 |------------------------|-------------:|-----------------------------------------------------------------------------------------------------------------------------|
 | max_steps              |          512 | The maximum number of steps for the agent to play one episode.                                                              |
 | agent_scale            |         0.25 | The dimensions of the agent.                                                                                                |
-| agent_speed            |          2.5 | The speed of the agent.                                                                                                     |
+| agent_speed            |          3.0 | The speed of the agent.                                                                                                     |
 | cardinal_origin_choice | [0, 1, 2, 3] | Allowed cardinal directions for the path generation to place the origin. This is a list that the environment samples from.  |
-| show_origin            |         True | Whether to hide or show the origin tile of the generated path.                                                              |
+| show_origin            |         False | Whether to hide or show the origin tile of the generated path.                                                              |
 | show_goal              |        False | Whether to hide or show the goal tile of the generated path.                                                                |
 | visual_feedback        |         True | Whether to visualize that the agent is off the path. A red cross is rendered on top of the agent.                           |
 | reward_goal            |          1.0 | What reward to signal when reaching the goal tile.                                                                          |
@@ -209,6 +226,24 @@ Mystery Path procedurally generates an invisible path for the agent to cross fro
 </p>
 
 In Endless Mystery Path, a never-ending path is generated by exploiting the path generation of Mystery Path, which concatenates path segments. The terminal conditions of an episode need to be varied to accommodate the design of short episodes without making progress. The episode terminates if the agent fails to make progress within a few steps. Termination also occurs if the agent falls off before reaching its farthest progress, and the agent cannot fall off at the same location twice.
+
+### Reset Parameters
+
+| Parameter              |      Default | Explanation                                                                                                                 |
+|------------------------|-------------:|-----------------------------------------------------------------------------------------------------------------------------|
+| max_steps              |          -1 | The maximum number of steps for the agent to play one episode. If smaller than 1, the episode is not affected by this reset parameter.                                                              |
+| agent_scale            |         0.25 | The dimensions of the agent.                                                                                                |
+| agent_speed            |          3.0 | The speed of the agent.                                                                                                     |
+| show_origin            |         False | Whether to hide or show the origin tile of the generated path.                                                              |
+| show_past_path            |         True | Whether to hide or show the path behing the agent.                                                              |
+| show_background              |        False | Whether to hide or show a tiled background.                                                                |
+| show_stamina              |        False | Whether to hide or show a stamina bar indicating the remaining time to make progress on the path.                                                                |
+| visual_feedback        |         True | Whether to visualize that the agent is off the path. A red cross is rendered on top of the agent.                           |
+| camera_offset_scale        |         5.0 | Offset of the camera's X position. Decreasing this value will hide more of the path behind the agennt.                           |
+| stamina_level            |          20 | Number of steps that the agent has time to touch on the next path tile leading to progress.                                                                          |
+| reward_fall_off        |          0.0 | What reward to signal when falling off.                                                                                     |
+| reward_path_progress   |          0.1 | What reward to signal when making progress on the path. This is only signaled for reaching another tile for the first time. |
+| reward_step            |          0.0 | What reward to signal for each step.                                                                                        |
 
 ## Searing Spotlights
 
@@ -231,9 +266,47 @@ Searing Spotlights is a pitch black surrounding to the agent. The environment is
 
 | Parameter                | Default | Explanation                                                                                                     |
 |--------------------------|--------:|-----------------------------------------------------------------------------------------------------------------|
-| max_steps                |     512 | The maximum number of steps for the agent to play one episode.                                                  |
+| max_steps                |     -1 | The maximum number of steps for the agent to play one episode. If smaller than 1, the episode is not affected by this reset parameter.                                                  |
+| steps_per_coin                |     160 | Number of steps that the agent has to collect a newly spawned coin.                                                  |
 | agent_scale              |    0.25 | The dimensions of the agent.                                                                                    |
-| agent_speed              |     2.5 | The speed of the agent.                                                                                         |
+| agent_speed              |     3.0 | The speed of the agent.                                                                                         |
+| agent_health             |     10 | The initial health points of the agent.                                                                         |
+| agent_visible            |   False | Whether to make the agent permanently visible.                                                                  |
+| sample_agent_position    |    True | Whether to hide or show the goal tile of the generated path.                                                    |
+| num_coins                |     [1] | The number of coins that are spawned. This is a list that the environment samples from.                         |
+| coin_scale               |   0.375 | The scale of the coins.                                                                                         |
+| coins_visible            |   False | Whether to make the coins permanently visible.                                                                  |
+| use_exit                 |    True | Whether to spawn and use the exit task. The exit is accessible by the agent after collecting all coins.         |
+| exit_scale               |     0.0 | The scale of the exit.                                                                                          |
+| exit_visible             | False   | Whether to make the exit permanently visible.                                                                   |
+| initial_spawns           | 3       | The number of spotlights that are initially spawned.                                                            |
+| spawn_interval | 50      | Number of steps to spawn a new spotlight.                                              |
+| spot_min_radius          | 7.5     | The minimum radius of the spotlights. The radius is sampled from the range min to max.                          |
+| spot_max_radius          | 13.75   | The maximum radius of the spotlights. The radius is sampled from the range min to max.                          |
+| spot_min_speed           | 0.0025  | The minimum speed of the spotlights. The speed is sampled from the range min to max.                            |
+| spot_max_speed           | 0.0075  | The maximum speed of the spotlights. The speed is sampled from the range min to max.                            |
+| spot_damage              | 1.0     | Damage per step while the agent is spotted by one spotlight.                                                    |
+| light_dim_off_duration   | 6       | The number of steps to dim off the global light.                                                                |
+| light_threshold          | 255     | The threshold for dimming the global light. A value of 255 indicates that the light will dimmed of completely.  |
+| visual_feedback          | True    | Whether to render the tiled background red if the agent is spotted.                                             |
+| black_background         | False   | Whether to render the environments background black, while the spotlights are rendered as white circumferences. |
+| hide_chessboard          | False   | Whether to hide the chessboard background. This renders the background of the environment white.                           |
+| reward_inside_spotlight  | 0.0     | What reward to signal for each step while being inside a spotlight.                                             |
+| reward_outside_spotlight | 0.0     | What reward to signal for each step while being outside of a spotlight.                                         |
+| reward_death             | 0.0     | What reward to signal upon losing all health points.                                                            |
+| reward_coin              | 0.25    | What reward to signal upon collecting one coin.                                                                 |
+
+## Endless Searing Spotlights
+
+Endless Searing Spotlights solely revolves around a coin collection task, with no consideration of an exit task leading to episode termination. Upon collecting the only coin present, a new one is immediately spawned. The agent operates under a limited time budget to collect the newly spawned coin.
+
+### Reset Parameters
+
+| Parameter                | Default | Explanation                                                                                                     |
+|--------------------------|--------:|-----------------------------------------------------------------------------------------------------------------|
+| max_steps                |     -1 | The maximum number of steps for the agent to play one episode.                                                  |
+| agent_scale              |    0.25 | The dimensions of the agent.                                                                                    |
+| agent_speed              |     3.0 | The speed of the agent.                                                                                         |
 | agent_health             |     100 | The initial health points of the agent.                                                                         |
 | agent_visible            |   False | Whether to make the agent permanently visible.                                                                  |
 | sample_agent_position    |    True | Whether to hide or show the goal tile of the generated path.                                                    |
@@ -264,11 +337,6 @@ Searing Spotlights is a pitch black surrounding to the agent. The environment is
 | reward_exit              | 1.0     | What reward to signal after successfully using the exit.                                                        |
 | reward_max_steps         | 0.0     | What reward to signal if max steps is reached.                                                                  |
 | reward_coin              | 0.25    | What reward to signal upon collecting one coin.                                                                 |
-
-## Endless Searing Spotlights
-
-Endless Searing Spotlights solely revolves around a coin collection task, with no consideration of an exit task leading to episode termination. Upon collecting the only coin present, a new one is immediately spawned. The agent operates under a limited time budget to collect the newly spawned coin.
-
 
 ## Training
 
