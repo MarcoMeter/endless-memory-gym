@@ -478,7 +478,7 @@ def main():
     options = parser.parse_args()
 
     env = EndlessMysteryPathEnv(render_mode = "debug_rgb_array")
-    reset_params = {"stamina_level": 100000}
+    reset_params = {}
     seed = options.seed
     vis_obs, reset_info = env.reset(seed = seed, options = reset_params)
     img = env.render()
