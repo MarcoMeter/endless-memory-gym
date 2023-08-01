@@ -18,8 +18,8 @@
   <tr>
     <td>Ground Truth</td>
     <td><img src="docs/assets/emm_0_gt.gif" width=180></td>
-    <td><img src="docs/assets/emp_0.gif" width=180></td>
-    <td><img src="docs/assets/ess_0.gif" width=180></td>
+    <td><img src="docs/assets/emp_0_gt.gif" width=180></td>
+    <td><img src="docs/assets/ess_0_gt.gif" width=180></td>
   </tr>
 </table>
 
