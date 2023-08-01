@@ -30,9 +30,9 @@ setup(
       author="Marco Pleines",
       package_dir={'': '.'},
       packages=find_packages(where='.', include="memory_gym*"),
-      python_requires=">=3.6",
+      python_requires=">=3.8",
       include_package_data=True,
-      install_requires=["gymnasium==0.28.1",
+      install_requires=["gymnasium==0.29.0",
                         "pygame==2.4.0"],
       entry_points={
             "console_scripts": [
