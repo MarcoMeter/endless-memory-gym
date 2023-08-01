@@ -20,7 +20,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
 
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
-                "agent_speed": 10.0 * SCALE,
+                "agent_speed": 12.0 * SCALE,
                 "arena_size": 5,
                 "allowed_commands": 9,
                 "command_count": [5],
@@ -40,7 +40,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
             reset_params {dict} -- Provided reset parameters that are to be validated and completed
 
         Returns:
-            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+            {dict} -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
         cloned_params = MortarMayhemTaskBEnv.default_reset_parameters.copy()
         if reset_params is not None:
@@ -53,6 +53,13 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        """Initialize the MortarMayhemTaskB Environment.
+
+        Arguments:
+            render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
+        """
+        super().__init__()
+
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
@@ -93,6 +100,14 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
     def _encode_commands_one_hot(self, commands):
+        """Encode the list of commands into a one-hot encoded representation.
+
+        Arguments:
+            commands {list} -- The list of commands to be encoded.
+
+        Returns:
+            {np.ndarray} -- A one-hot encoded array representing the commands.
+        """
         one_hot_commands = np.zeros((self.max_num_commands * 9), dtype = np.float32)
         for c, command in enumerate(commands):
             if command == "stay":
@@ -116,6 +131,16 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         return one_hot_commands
 
     def reset(self, seed = None, return_info = True, options = None):
+        """Reset the environment.
+
+        Arguments:
+            seed {int} -- The seed for the environment's random number generator. (default: {None})
+            return_info {bool} -- Whether to return additional reset information. (default: {True})
+            options {dict} -- Reset parameters for the environment. (default: {None})
+
+        Returns:
+            {tuple} -- The initial observation, additional reset information, if specified.
+        """
         if seed is not None:
             self._np_random, seed = seeding.np_random(seed)
         self.current_seed = seed
@@ -161,7 +186,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         self._explosion_delay = self.np_random.choice(self.reset_params["explosion_delay"])
 
         # Draw
-        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect)])
+        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), self.agent.get_rotated_sprite(0)])
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
@@ -171,6 +196,14 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         return {"visual_observation": vis_obs, "vector_observation": self._commands_one_hot}, {}
 
     def step(self, action):
+        """Take a step in the environment.
+
+        Arguments:
+            action {list} -- The action to take.
+
+        Returns:
+            {tuple} -- The resulting observation, reward, done flag, truncation, info dictionary.
+        """
         reward = 0
         done = False
         success = 0

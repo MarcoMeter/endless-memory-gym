@@ -5,13 +5,14 @@ import pygame
 
 from argparse import ArgumentParser
 from gymnasium import spaces
+from memory_gym.environment import CustomEnv
 from memory_gym.character_controller import CharacterController
 from memory_gym.pygame_assets import Command, MortarArena, calc_max_episode_steps
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
-class MortarMayhemEnv(gym.Env):
+class MortarMayhemEnv(CustomEnv):
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
         "render_fps": 25,
@@ -19,16 +20,16 @@ class MortarMayhemEnv(gym.Env):
 
     default_reset_parameters = {
                 "agent_scale": 1.0 * SCALE,
-                "agent_speed": 10.0 * SCALE,
+                "agent_speed": 12.0 * SCALE,
                 "arena_size": 5,
                 "allowed_commands": 9,
-                "command_count": [5],
+                "command_count": [10],
                 "command_show_duration": [3],
                 "command_show_delay": [1],
                 "explosion_duration": [6],
                 "explosion_delay": [18],
                 "visual_feedback": True,
-                "reward_command_failure": -0.1,
+                "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,
                 "reward_episode_success": 0.0
             }
@@ -41,7 +42,7 @@ class MortarMayhemEnv(gym.Env):
             reset_params {dict} -- Provided reset parameters that are to be validated and completed
 
         Returns:
-            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+            {dict} -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
         cloned_params = MortarMayhemEnv.default_reset_parameters.copy()
         if reset_params is not None:
@@ -53,6 +54,13 @@ class MortarMayhemEnv(gym.Env):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        """Initialize the MortarMayhem Environment.
+
+        Arguments:
+            render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
+        """
+        super().__init__()
+        
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
@@ -83,6 +91,11 @@ class MortarMayhemEnv(gym.Env):
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
     def _draw_surfaces(self, surfaces):
+        """Draw all surfaces onto the Pygame screen.
+
+        Arguments:
+            surfaces {list} -- A list of surfaces to draw on the screen.
+        """
         # Draw all surfaces
         for surface in surfaces:
             if surface[0] is not None:
@@ -90,6 +103,11 @@ class MortarMayhemEnv(gym.Env):
         pygame.display.flip()
 
     def _build_debug_surface(self):
+        """Builds and returns a debug surface for rendering.
+
+        Returns:
+            {pygame.Surface} -- The debug surface.
+        """
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
 
         # Gather surfaces
@@ -98,7 +116,7 @@ class MortarMayhemEnv(gym.Env):
         if self.rotated_agent_surface is not None:
             surfs.append((self.rotated_agent_surface, self.rotated_agent_rect))
         else:
-            surfs.append((self.agent.surface, self.agent.rect))
+            surfs.append(self.agent.get_rotated_sprite(0))
 
         # Draw command visualization
         if self._command_visualization:
@@ -118,6 +136,14 @@ class MortarMayhemEnv(gym.Env):
         return pygame.transform.scale(surface, (336, 336))
 
     def _normalize_agent_position(self, agent_position):
+        """Normalize the agent's position relative to the arena.
+
+        Arguments:
+            agent_position {tuple} -- The agent's position.
+
+        Returns:
+            {tuple} -- The normalized agent position.
+        """
         return ((agent_position[0] - self.arena.rect[0]) // self.arena.tile_dim,
                 (agent_position[1] - self.arena.rect[1]) // self.arena.tile_dim)
 
@@ -135,6 +161,14 @@ class MortarMayhemEnv(gym.Env):
         return valid_commands
 
     def _generate_commands(self, start_pos):
+        """Generate a sequence of commands for the agent starting from the given position.
+
+        Arguments:
+            start_pos {tuple} -- The starting position of the agent in the arena.
+
+        Returns:
+            {list} -- A list of strings representing the generated commands.
+        """
         simulated_pos = start_pos
         commands = []
         self.num_commands = self.np_random.choice(self.reset_params["command_count"])
@@ -151,7 +185,7 @@ class MortarMayhemEnv(gym.Env):
     def _generate_command_visualization(self, commands, duration=1, delay=0):
         """Generates a list that states on which step to show which command. Each element corresponds to one step.
 
-        Args:
+        Arguments:
             commands {list} -- Sampled commands
             duration {int} -- How many steps to show one command (default: {1})
             delay {int} -- How many steps until the next command is shown (default: {0})
@@ -170,6 +204,16 @@ class MortarMayhemEnv(gym.Env):
         return command_vis
 
     def reset(self, seed = None, return_info = True, options = None):
+        """Reset the environment.
+
+        Arguments:
+            seed {int} -- The seed for the environment's random number generator. (default: {None})
+            return_info {bool} -- Whether to return additional reset information. (default: {True})
+            options {dict} -- Reset parameters for the environment. (default: {None})
+
+        Returns:
+            {tuple} -- The initial observation, additional reset information, if specified.
+        """
         super().reset(seed=seed)
         self.current_seed = seed
 
@@ -192,9 +236,9 @@ class MortarMayhemEnv(gym.Env):
         # Setup the agent and sample its position
         self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"])
         spawn_pos = self.arena.get_tile_global_position(self.np_random.integers(0, self.reset_params["arena_size"] ** 2))
-        offset = self.np_random.integers(-8 * SCALE, 8 * SCALE, 2)
-        translate_x = self.arena.rect.center[0] - self.arena.local_center[0] + self.arena.tile_dim // 2 + offset[0]
-        translate_y = self.arena.rect.center[1] - self.arena.local_center[1] + self.arena.tile_dim // 2 + offset[1]
+        # offset = self.np_random.integers(-8 * SCALE, 8 * SCALE, 2)
+        translate_x = self.arena.rect.center[0] - self.arena.local_center[0] + self.arena.tile_dim // 2 #+ offset[0]
+        translate_y = self.arena.rect.center[1] - self.arena.local_center[1] + self.arena.tile_dim // 2 #+ offset[1]
         self.agent.rect.center = spawn_pos[0] + translate_x, spawn_pos[1] + translate_y
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
 
@@ -219,7 +263,7 @@ class MortarMayhemEnv(gym.Env):
         self._explosion_delay = self.np_random.choice(self.reset_params["explosion_delay"])
 
         # Draw
-        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), (self.agent.surface, self.agent.rect),
+        self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), self.agent.get_rotated_sprite(0),
                             (command.surface, (((self.screen_dim // 2) - command.rect_dim // 2, (self.screen_dim // 2) - command.rect_dim // 2)))])
 
         # Retrieve the rendered image of the environment
@@ -228,6 +272,14 @@ class MortarMayhemEnv(gym.Env):
         return vis_obs, {}
 
     def step(self, action):
+        """Take a step in the environment.
+
+        Arguments:
+            action {list} -- The action to take.
+
+        Returns:
+            {tuple} -- The resulting observation, reward, done flag, truncation, info dictionary.
+        """
         reward = 0
         done = False
         success = 0
@@ -236,7 +288,7 @@ class MortarMayhemEnv(gym.Env):
         # Show each command one by one, while the agent cannot move
         if self._command_visualization:
             command = Command(self._command_visualization.pop(0), SCALE)
-            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.surface, self.agent.rect
+            self.rotated_agent_surface, self.rotated_agent_rect = self.agent.get_rotated_sprite(0)
         # All commands were shown, the agent can move now, while the command execution logic is running
         else:
             # Move the agent's controlled character
@@ -317,6 +369,11 @@ class MortarMayhemEnv(gym.Env):
         return vis_obs, reward, done, False, info
 
     def render(self):
+        """Render the environment.
+
+        Returns:
+            {np.ndarray} -- The rendered image of the environment.
+        """
         if self.render_mode is not None:
             if self._command_visualization:
                     fps = 4
@@ -343,9 +400,10 @@ class MortarMayhemEnv(gym.Env):
                 return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
-            if self.debug_window is not None:
-                self.debug_window.destroy()
-            pygame.quit()
+        """Close the environment."""
+        if self.debug_window is not None:
+            self.debug_window.destroy()
+        pygame.quit()
 
 def main():
     parser = ArgumentParser()

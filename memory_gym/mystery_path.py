@@ -5,13 +5,14 @@ import pygame
 
 from argparse import ArgumentParser
 from gymnasium import spaces
+from memory_gym.environment import CustomEnv
 from memory_gym.character_controller import CharacterController
 from memory_gym.pygame_assets import MysteryPath
 from pygame._sdl2 import Window, Texture, Renderer
 
 SCALE = 0.25
 
-class MysteryPathEnv(gym.Env):
+class MysteryPathEnv(CustomEnv):
     metadata = {
         "render_modes": ["rgb_array", "debug_rgb_array"],
         "render_fps": 25,
@@ -20,14 +21,14 @@ class MysteryPathEnv(gym.Env):
     default_reset_parameters = {
                 "max_steps": 512,
                 "agent_scale": 1.0 * SCALE,
-                "agent_speed": 10.0 * SCALE,
+                "agent_speed": 12.0 * SCALE,
                 "cardinal_origin_choice": [0, 1, 2, 3],
-                "show_origin": True,
-                "show_goal": True,
+                "show_origin": False,
+                "show_goal": False,
                 "visual_feedback": True,
                 "reward_goal": 1.0,
                 "reward_fall_off": 0.0,
-                "reward_path_progress": 0.0,
+                "reward_path_progress": 0.1,
                 "reward_step": 0.0
             }
 
@@ -39,7 +40,7 @@ class MysteryPathEnv(gym.Env):
             reset_params {dict} -- Provided reset parameters that are to be validated and completed
 
         Returns:
-            dict -- Returns a complete and valid dictionary comprising the to be used reset parameters.
+            {dict} -- Returns a complete and valid dictionary comprising the to be used reset parameters.
         """
         cloned_params = MysteryPathEnv.default_reset_parameters.copy()
         if reset_params is not None:
@@ -49,6 +50,13 @@ class MysteryPathEnv(gym.Env):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        """Initialize the EndlessMysteryPath class.
+
+        Arguments:
+            render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
+        """
+        super().__init__()
+        
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
@@ -81,6 +89,11 @@ class MysteryPathEnv(gym.Env):
         self.tile_dim = self.screen_dim / self.grid_dim
 
     def _draw_surfaces(self, surfaces):
+        """Draw all surfaces onto the Pygame screen.
+
+        Arguments:
+            surfaces {list} -- A list of surfaces to draw on the screen.
+        """
         # Draw all surfaces
         for surface in surfaces:
             if surface[0] is not None:
@@ -88,6 +101,11 @@ class MysteryPathEnv(gym.Env):
         pygame.display.flip()
 
     def _build_debug_surface(self):
+        """Builds and returns a debug surface for rendering.
+
+        Returns:
+            {pygame.Surface} -- The debug surface.
+        """
         surface = pygame.Surface((336 * SCALE, 336 * SCALE))
         surface.fill(0)
         self.mystery_path.draw_to_surface(surface, self.tile_dim, True, True, True, True)
@@ -99,9 +117,27 @@ class MysteryPathEnv(gym.Env):
         return pygame.transform.scale(surface, (336, 336))
 
     def _normalize_agent_position(self, agent_position):
-            return (agent_position[0] // self.tile_dim, agent_position[1] // self.tile_dim)
+        """Normalize the agent's position relative to the arena.
+
+        Arguments:
+            agent_position {tuple} -- The agent's position.
+
+        Returns:
+            {tuple} -- The normalized agent position.
+        """
+        return (agent_position[0] // self.tile_dim, agent_position[1] // self.tile_dim)
 
     def reset(self, seed = None, return_info = True, options = None):
+        """Reset the environment.
+
+        Arguments:
+            seed {int} -- The seed for the environment's random number generator. (default: {None})
+            return_info {bool} -- Whether to return additional reset information. (default: {True})
+            options {dict} -- Reset parameters for the environment. (default: {None})
+
+        Returns:
+            {tuple} -- The initial observation, additional reset information, if specified.
+        """
         super().reset(seed=seed)
         self.current_seed = seed
         self.t = 0
@@ -146,9 +182,9 @@ class MysteryPathEnv(gym.Env):
         self.fall_off_surface.set_alpha(0)
 
         # Setup the agent and sample its position
-        rotation = self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
+        rotation = 0 # self.np_random.choice([0, 45, 90, 135, 180, 225, 270, 315])
         self.agent = CharacterController(self.reset_params["agent_speed"], self.reset_params["agent_scale"], rotation)
-        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.rotate(rotation)
+        self.rotated_agent_surface, self.rotated_agent_rect = self.agent.get_rotated_sprite(rotation)
         # Place the agent on the path's starting position
         self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
         self.normalized_agent_position = self._normalize_agent_position(self.agent.rect.center)
@@ -164,6 +200,14 @@ class MysteryPathEnv(gym.Env):
         return vis_obs, {}
 
     def step(self, action):
+        """Take a step in the environment.
+
+        Arguments:
+            action {int} -- The action to take.
+
+        Returns:
+            {tuple} -- The resulting observation, reward, done flag, truncation, info dictionary.
+        """
         reward = 0
         done = False
         success = 0
@@ -172,6 +216,7 @@ class MysteryPathEnv(gym.Env):
         if not self.is_off_path:
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step(action, self.screen.get_rect())
         else:
+            self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
             self.rotated_agent_surface, self.rotated_agent_rect = self.agent.step([0, 0], self.screen.get_rect())
 
         # Check whether the agent reached the goal
@@ -186,13 +231,12 @@ class MysteryPathEnv(gym.Env):
             for node in self.mystery_path.path:
                 if self.normalized_agent_position == (node.x, node.y):
                     on_path = True
-                    if not node.visited and not (node.x, node.y) == self.start and not (node.x, node.y) == self.end:
+                    if not node.reward_visited and not (node.x, node.y) == self.start and not (node.x, node.y) == self.end:
                         # Reward the agent for reaching a tile that it has not visisted before
                         reward += self.reset_params["reward_path_progress"]
-                        node.visited = True
+                        node.reward_visited = True
                     break
             if not on_path:
-                self.agent.rect.center = (self.start[0] * self.tile_dim + self.agent.radius, self.start[1] * self.tile_dim + self.agent.radius)
                 reward += self.reset_params["reward_fall_off"]
                 self.num_fails += 1
                 if self.reset_params["visual_feedback"]:
@@ -232,6 +276,11 @@ class MysteryPathEnv(gym.Env):
         return vis_obs, reward, done, False, info
 
     def render(self):
+        """Render the environment.
+
+        Returns:
+            {np.ndarray} -- The rendered image of the environment.
+        """
         if self.render_mode is not None:
             if self.render_mode == "rgb_array":
                 self.clock.tick(MysteryPathEnv.metadata["render_fps"])
@@ -253,6 +302,7 @@ class MysteryPathEnv(gym.Env):
                 return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
 
     def close(self):
+        """Close the environment."""
         if self.debug_window is not None:
             self.debug_window.destroy()
         pygame.quit()

@@ -23,7 +23,7 @@ def run():
             steps += 1
         fps = steps / (time.time() - start_time)
         fps_list.append(fps)
-        rew_list.append(info["exit_success"])
+        rew_list.append(info["success"])
     fps_list = np.array(fps_list)
     print("Mean steps per second: " + str(np.mean(fps_list)) + " std: " + str(np.std(fps_list)))
     rew_list = np.array(rew_list)
