@@ -59,6 +59,7 @@ class EndlessMysteryPathEnv(CustomEnv):
             render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
         """
         super().__init__()
+        
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
@@ -477,7 +478,7 @@ def main():
     options = parser.parse_args()
 
     env = EndlessMysteryPathEnv(render_mode = "debug_rgb_array")
-    reset_params = {"stamina_level": 100000}
+    reset_params = {}
     seed = options.seed
     vis_obs, reset_info = env.reset(seed = seed, options = reset_params)
     img = env.render()

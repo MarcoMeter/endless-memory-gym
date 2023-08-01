@@ -1,17 +1,35 @@
-[[Paper](https://openreview.net/forum?id=jHc8dCx6DDr)] [[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Searing Spotlights](#searing-spotlights)] [[Training](#training)]
+[[Paper](https://openreview.net/forum?id=jHc8dCx6DDr)] [[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Endless Mortar Mayhem](#endless-mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Endless Mystery Path](#enndless-mystery-path)] [[Searing Spotlights](#searing-spotlights)] [[Endless Searing Spotlights](#endless-searing-spotlights)] [[Training](#training)]
 
-# Memory Gym: Partially Observable Challenges for Memory-Based Agents
-<p align="center">
-<img src="docs/assets/mortar_mayhem_0.gif" width=180> <img src="docs/assets/mystery_path_0.gif" width=180> <img src="docs/assets/searing_spotlights_0.gif" width=180>
-</p>
-<p align="center">
-<img src="docs/assets/mortar_mayhem_0_gt.gif" width=180> <img src="docs/assets/mystery_path_0_gt.gif" width=180> <img src="docs/assets/searing_spotlights_0_gt.gif" width=180>
-</p>
+# Memory Gym: Partially Observable Challenges to Memory-Based Agents in Endless Episodes
+
+<table align="center">
+  <tr>
+    <td></td>
+    <td>Endless Mortar Mayhem</td>
+    <td>Endless Mystery Path</td>
+    <td>Endless Searing Spotlights</td>
+  </tr>
+  <tr>
+    <td>Agent Observation</td>
+    <td><img src="docs/assets/emm_0.gif" width=180></td>
+    <td><img src="docs/assets/emp_0.gif" width=180></td>
+    <td><img src="docs/assets/ess_0.gif" width=180></td>
+  </tr>
+  <tr>
+    <td>Ground Truth</td>
+    <td><img src="docs/assets/emm_0_gt.gif" width=180></td>
+    <td><img src="docs/assets/emp_0_gt.gif" width=180></td>
+    <td><img src="docs/assets/ess_0_gt.gif" width=180></td>
+  </tr>
+</table>
+
 
 Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **Searing Spotlights** that are inspired by some mini games of [Pummel Party](http://rebuiltgames.com/). These environments shall benchmark an agent's memory to
 - memorize events across long sequences,
 - generalize,
 - and be robust to noise.
+
+Especially, these environments feature endless task variants (see the gifs above). As the agent's policy improves, the task goes on. The traveling game "I packed my bag ..." inspired this dynamic concept, which allows for examining levels of effectinvess instead of just sample efficiency.
 
 ## Citation
 
@@ -28,11 +46,11 @@ url={https://openreview.net/forum?id=jHc8dCx6DDr}
 ## Installation
 
 Major dependencies:
-- gymnasium==0.28.1
-- PyGame==2.1.2 (Pygame >= 2.3.0 breaks Searing Spotlights)
+- gymnasium==0.29.0
+- PyGame==2.4.0
 
 ```console
-conda create -n memory-gym python=3.9 --yes
+conda create -n memory-gym python=3.11 --yes
 conda activate memory-gym
 pip install memory-gym
 ```
@@ -40,7 +58,7 @@ pip install memory-gym
 or
 
 ```console
-conda create -n memory-gym python=3.9 --yes
+conda create -n memory-gym python=3.11 --yes
 conda activate memory-gym
 git clone https://github.com/MarcoMeter/drl-memory-gym.git
 cd drl-memory-gym
@@ -108,7 +126,16 @@ Controls:
 
 ## Mortar Mayhem
 
-![Mortar Mayhem Environment](/docs/assets/mm.jpg)
+<table align="center">
+  <tr>
+    <td>Agent Observation</td>
+    <td>Ground Truth</td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/mortar_mayhem_0.gif" width=180></td>
+    <td><img src="docs/assets/mortar_mayhem_0_gt.gif" width=180></td>
+  </tr>
+</table>
 
 Mortar Mayhem challenges the agent with a sequence of commands that the agent has to memorize and execute in the right order. During the beginning of the episode, each command is visualized one by one. Mortar Mayhem can be reduced to solely executing commands. In this case, the command sequence is always available as vector observation (one-hot encoded) and, therefore, is not visualized.
 
@@ -117,6 +144,8 @@ The max length of an episode can be calculated as follows:
 ```
 max episode length = (command_show_duration + command_show_delay) * command_count + (explosion_delay + explosion_duration) * command_count - 2
 ```
+
+![Mortar Mayhem Environment](/docs/assets/mm.jpg)
 
 ### Reset Parameters
 
@@ -136,11 +165,24 @@ max episode length = (command_show_duration + command_show_delay) * command_coun
 | reward_command_success |     0.1 | What reward to signal upon succeeding at the current command.                                                                                       |
 | reward_episode_success |     0.0 | What reward to signal if the entire command sequence is successfully solved by the agent.                                                         |
 
+## Endless Mortar Mayhem
+
 ## Mystery Path
 
-![Mystery Path Environment](/docs/assets/mp.jpg)
+<table align="center">
+  <tr>
+    <td>Agent Observation</td>
+    <td>Ground Truth</td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/mystery_path_0.gif" width=180></td>
+    <td><img src="docs/assets/mystery_path_0_gt.gif" width=180></td>
+  </tr>
+</table>
 
 Mystery Path procedurally generates an invisible path for the agent to cross from the origin to the goal. Per default, only the origin of the path is visible. Upon falling off the path, the agent has to restart from the origin. Note that the episode is not terminated by falling off. Hence, the agent has to memorize where it fell off and where it did not.
+
+![Mystery Path Environment](/docs/assets/mp.jpg)
 
 ### Reset Parameters
 
@@ -158,12 +200,28 @@ Mystery Path procedurally generates an invisible path for the agent to cross fro
 | reward_path_progress   |          0.0 | What reward to signal when making progress on the path. This is only signaled for reaching another tile for the first time. |
 | reward_step            |          0.0 | What reward to signal for each step.                                                                                        |
 
+## Endless Mystery Path
+
+<p align=center>
+<img src="docs/assets/emp_path.png" width=420>
+</p>
+
 ## Searing Spotlights
 
-![Searing Spotlights Environment](/docs/assets/spots.jpg)
+<table align="center">
+  <tr>
+    <td>Agent Observation</td>
+    <td>Ground Truth</td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/searing_spotlights_0.gif" width=180></td>
+    <td><img src="docs/assets/searing_spotlights_0_gt.gif" width=180></td>
+  </tr>
+</table>
 
 Searing Spotlights is a pitch black surrounding to the agent. The environment is initially fully observable but the light is dimmed untill off during the first few frames. Only randomly moving spotlights unveil information on the environment's ground truth, while posing a threat to the agent. If spotted by spotlight, the agent looses health points. While the agent must avoid closing in spotlights, it further has to collect coins. After collecting all coins, the agent has to take the environment's exit.
 
+![Searing Spotlights Environment](/docs/assets/spots.jpg)
 
 ### Reset Parameters
 
@@ -203,6 +261,9 @@ Searing Spotlights is a pitch black surrounding to the agent. The environment is
 | reward_max_steps         | 0.0     | What reward to signal if max steps is reached.                                                                  |
 | reward_coin              | 0.25    | What reward to signal upon collecting one coin.                                                                 |
 
+## Endless Searing Spotlights
+
+
 ## Training
 
 Baseline results are avaible via these repositories.
@@ -222,6 +283,8 @@ Improvements
     - Endless Searing Spotlights
 - Improved simulation speed by using already rotated sprites and not rotating the character's surface every frame
 - Mystery Path: A* obstacle walls are also placed now on the environments boundary to mitigate trivial paths
+- All endless environments feature a ground truth space. As specified by this space ground truth information is added to the info dictionary
+- Searing Spotlights may also visualize whether a positive reward was signaled on the previous frame
 
 Breaking Changes
 - Refactored the info key "exit_success" in Searing Spotlights to "success"
