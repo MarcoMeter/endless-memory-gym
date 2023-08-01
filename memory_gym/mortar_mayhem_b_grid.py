@@ -52,6 +52,11 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         return cloned_params
 
     def __init__(self, render_mode = None) -> None:
+        """Initialize the GridMortarMayhemTaskB Environment.
+
+        Arguments:
+            render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
+        """
         self.render_mode = render_mode
         if render_mode is None:
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
@@ -92,6 +97,14 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
 
     def _encode_commands_one_hot(self, commands):
+        """Encode the list of commands into a one-hot encoded representation.
+
+        Arguments:
+            commands {list} -- The list of commands to be encoded.
+
+        Returns:
+            {np.ndarray} -- A one-hot encoded array representing the commands.
+        """
         one_hot_commands = np.zeros((self.max_num_commands * 9), dtype = np.float32)
         for c, command in enumerate(commands):
             if command == "stay":
@@ -115,6 +128,16 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         return one_hot_commands
 
     def reset(self, seed = None, return_info = True, options = None):
+        """Reset the environment.
+
+        Arguments:
+            seed {int} -- The seed for the environment's random number generator. (default: {None})
+            return_info {bool} -- Whether to return additional reset information. (default: {True})
+            options {dict} -- Reset parameters for the environment. (default: {None})
+
+        Returns:
+            {tuple} -- The initial observation, additional reset information, if specified.
+        """
         if seed is not None:
             self._np_random, seed = seeding.np_random(seed)
         self.current_seed = seed
@@ -169,6 +192,14 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         return {"visual_observation": vis_obs, "vector_observation": self._commands_one_hot}, {}
 
     def step(self, action):
+        """Take a step in the environment.
+
+        Arguments:
+            action {list} -- The action to take.
+
+        Returns:
+            {tuple} -- The resulting observation, reward, done flag, truncation, info dictionary.
+        """
         reward = 0
         done = False
         success = 0
