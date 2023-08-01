@@ -242,6 +242,15 @@ class SearingSpotlightsEnv(CustomEnv):
         return reward, done, bg
 
     def _process_spawn_pos(self, spawn_pos, offset = 30):
+        """Process the spawn position to ensure it remains within the game screen boundaries.
+
+        Arguments:
+            spawn_pos {tuple} -- The original spawn position as a tuple (x, y).
+            offset {int} -- The offset distance from the screen boundary. Default is 30.
+
+        Returns:
+            {tuple} -- The processed spawn position ensuring it is within the screen boundaries.
+        """
         x = spawn_pos[0]
         y = spawn_pos[1]
         offset = int(offset * SCALE)

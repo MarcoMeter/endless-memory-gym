@@ -146,6 +146,7 @@ class CharacterController():
         return self.get_rotated_sprite(self.rotation)
 
 class CardinalDirection(Enum):
+    """Enumeration representing the cardinal directions (North, West, South, and East)."""
     NORTH = 0
     WEST = 1
     SOUTH = 2

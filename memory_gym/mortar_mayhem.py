@@ -161,6 +161,14 @@ class MortarMayhemEnv(CustomEnv):
         return valid_commands
 
     def _generate_commands(self, start_pos):
+        """Generate a sequence of commands for the agent starting from the given position.
+
+        Arguments:
+            start_pos {tuple} -- The starting position of the agent in the arena.
+
+        Returns:
+            {list} -- A list of strings representing the generated commands.
+        """
         simulated_pos = start_pos
         commands = []
         self.num_commands = self.np_random.choice(self.reset_params["command_count"])
@@ -177,7 +185,7 @@ class MortarMayhemEnv(CustomEnv):
     def _generate_command_visualization(self, commands, duration=1, delay=0):
         """Generates a list that states on which step to show which command. Each element corresponds to one step.
 
-        Args:
+        Arguments:
             commands {list} -- Sampled commands
             duration {int} -- How many steps to show one command (default: {1})
             delay {int} -- How many steps until the next command is shown (default: {0})
