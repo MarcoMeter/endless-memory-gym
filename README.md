@@ -270,7 +270,7 @@ Searing Spotlights is a pitch black surrounding to the agent. The environment is
 | steps_per_coin                |     160 | Number of steps that the agent has to collect a newly spawned coin.                                                  |
 | agent_scale              |    0.25 | The dimensions of the agent.                                                                                    |
 | agent_speed              |     3.0 | The speed of the agent.                                                                                         |
-| agent_health             |     10 | The initial health points of the agent.                                                                         |
+| agent_health             |     5 | The initial health points of the agent.                                                                         |
 | agent_visible            |   False | Whether to make the agent permanently visible.                                                                  |
 | sample_agent_position    |    True | Whether to hide or show the goal tile of the generated path.                                                    |
 | num_coins                |     [1] | The number of coins that are spawned. This is a list that the environment samples from.                         |
@@ -291,6 +291,8 @@ Searing Spotlights is a pitch black surrounding to the agent. The environment is
 | visual_feedback          | True    | Whether to render the tiled background red if the agent is spotted.                                             |
 | black_background         | False   | Whether to render the environments background black, while the spotlights are rendered as white circumferences. |
 | hide_chessboard          | False   | Whether to hide the chessboard background. This renders the background of the environment white.                           |
+| show_last_action         | True    | Whether to encode and render the previouss action to the visual observation.                                    |
+| show_last_positive_reward | True   | Whether to render if the agent received a positive reward on the previous step.                                 |
 | reward_inside_spotlight  | 0.0     | What reward to signal for each step while being inside a spotlight.                                             |
 | reward_outside_spotlight | 0.0     | What reward to signal for each step while being outside of a spotlight.                                         |
 | reward_death             | 0.0     | What reward to signal upon losing all health points.                                                            |
@@ -307,20 +309,15 @@ Endless Searing Spotlights solely revolves around a coin collection task, with n
 | max_steps                |     -1 | The maximum number of steps for the agent to play one episode.                                                  |
 | agent_scale              |    0.25 | The dimensions of the agent.                                                                                    |
 | agent_speed              |     3.0 | The speed of the agent.                                                                                         |
-| agent_health             |     100 | The initial health points of the agent.                                                                         |
+| agent_health             |     10 | The initial health points of the agent.                                                                         |
 | agent_visible            |   False | Whether to make the agent permanently visible.                                                                  |
 | sample_agent_position    |    True | Whether to hide or show the goal tile of the generated path.                                                    |
-| num_coins                |     [1] | The number of coins that are spawned. This is a list that the environment samples from.                         |
+| coin_show_duration       |     6 | How many steps to make the coin visible to the agent unill its hidden behind the dark.                         |
 | coin_scale               |   0.375 | The scale of the coins.                                                                                         |
 | coins_visible            |   False | Whether to make the coins permanently visible.                                                                  |
-| use_exit                 |    True | Whether to spawn and use the exit task. The exit is accessible by the agent after collecting all coins.         |
-| exit_scale               |     0.0 | The scale of the exit.                                                                                          |
-| exit_visible             | False   | Whether to make the exit permanently visible.                                                                   |
-| initial_spawns           | 4       | The number of spotlights that are initially spawned.                                                            |
-| num_spawns               | 30      | The number of spotlights that are to be spawned.                                                                |
-| initial_spawn_interval   | 30      | The number of steps until the next spotlight is spawned.                                                        |
-| spawn_interval_threshold | 10      | The spawn interval is decayed until reaching this lower threshold.                                              |
-| spawn_interval_decay     | 0.95    | The decay rate of the spotlight spawn interval.                                                                 |
+| steps_per_coin            |   160 | Time budget to collect a single coin.                                                                  |
+| initial_spawns           | 3       | The number of spotlights that are initially spawned.                                                            |
+| spawn_interval   | 50      | The number of steps until the next spotlight is spawned.                                                        |
 | spot_min_radius          | 7.5     | The minimum radius of the spotlights. The radius is sampled from the range min to max.                          |
 | spot_max_radius          | 13.75   | The maximum radius of the spotlights. The radius is sampled from the range min to max.                          |
 | spot_min_speed           | 0.0025  | The minimum speed of the spotlights. The speed is sampled from the range min to max.                            |
@@ -331,11 +328,11 @@ Endless Searing Spotlights solely revolves around a coin collection task, with n
 | visual_feedback          | True    | Whether to render the tiled background red if the agent is spotted.                                             |
 | black_background         | False   | Whether to render the environments background black, while the spotlights are rendered as white circumferences. |
 | hide_chessboard          | False   | Whether to hide the chessboard background. This renders the background of the environment white.                           |
+| show_last_action         | True    | Whether to encode and render the previouss action to the visual observation.                                    |
+| show_last_positive_reward | True   | Whether to render if the agent received a positive reward on the previous step.                                 |
 | reward_inside_spotlight  | 0.0     | What reward to signal for each step while being inside a spotlight.                                             |
 | reward_outside_spotlight | 0.0     | What reward to signal for each step while being outside of a spotlight.                                         |
 | reward_death             | 0.0     | What reward to signal upon losing all health points.                                                            |
-| reward_exit              | 1.0     | What reward to signal after successfully using the exit.                                                        |
-| reward_max_steps         | 0.0     | What reward to signal if max steps is reached.                                                                  |
 | reward_coin              | 0.25    | What reward to signal upon collecting one coin.                                                                 |
 
 ## Training
