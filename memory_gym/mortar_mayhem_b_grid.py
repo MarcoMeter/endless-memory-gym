@@ -57,7 +57,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         Arguments:
             render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
         """
-        super().__init__()
+        super().__init__(render_mode)
 
         self.render_mode = render_mode
         if render_mode is None:

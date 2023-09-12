@@ -23,7 +23,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
                 "agent_speed": 12.0 * SCALE,
                 "arena_size": 5,
                 "allowed_commands": 9,
-                "command_count": [5],
+                "command_count": [10],
                 "explosion_duration": [6],
                 "explosion_delay": [18],
                 "visual_feedback": True,
@@ -58,7 +58,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         Arguments:
             render_mode {str} -- The render mode for the environment. Default is None. (default: {None})
         """
-        super().__init__()
+        super().__init__(render_mode)
 
         self.render_mode = render_mode
         if render_mode is None:
