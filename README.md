@@ -29,7 +29,7 @@ Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **
 - generalize,
 - and be robust to noise.
 
-Especially, these environments feature endless task variants. As the agent's policy improves, the task goes on. The traveling game "I packed my bag ..." inspired this dynamic concept, which allows for examining levels of effectinvess instead of just sample efficiency.
+Especially, these environments feature endless task variants. As the agent's policy improves, the task goes on. The traveling game "I packed my bag ..." inspired this dynamic concept, which allows for examining levels of effectiveness instead of just sample efficiency.
 
 ## Citation
 
