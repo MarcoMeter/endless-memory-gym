@@ -1,6 +1,6 @@
-[[Paper](https://openreview.net/forum?id=jHc8dCx6DDr)] [[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Endless Mortar Mayhem](#endless-mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Endless Mystery Path](#enndless-mystery-path)] [[Searing Spotlights](#searing-spotlights)] [[Endless Searing Spotlights](#endless-searing-spotlights)] [[Training](#training)]
+[[Paper](https://arxiv.org/abs/2309.17207)] [[Installation](#installation)]  [[Usage](#usage)] [[Mortar Mayhem](#mortar-mayhem)] [[Endless Mortar Mayhem](#endless-mortar-mayhem)] [[Mystery Path](#mystery-path)] [[Endless Mystery Path](#endless-mystery-path)] [[Searing Spotlights](#searing-spotlights)] [[Endless Searing Spotlights](#endless-searing-spotlights)] [[Training](#training)]
 
-# Memory Gym: Partially Observable Challenges to Memory-Based Agents in Endless Episodes
+# Memory Gym: Towards Endless Tasks to Benchmark Memory Capabilities of Agents
 
 <table align="center">
   <tr>
@@ -24,22 +24,32 @@
 </table>
 
 
-Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **Searing Spotlights** that are inspired by some mini games of [Pummel Party](http://rebuiltgames.com/). These environments shall benchmark an agent's memory to
-- memorize events across long sequences,
-- generalize,
-- and be robust to noise.
-
-Especially, these environments feature endless task variants. As the agent's policy improves, the task goes on. The traveling game "I packed my bag ..." inspired this dynamic concept, which allows for examining levels of effectiveness instead of just sample efficiency.
+Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **Searing Spotlights** that are inspired by some mini games of [Pummel Party](http://rebuiltgames.com/). These 2D environments benchmark the memory capabilities of agents.
+Especially, these environments feature endless task variants. As the agent's policy improves, the task goes on. The cumulative memory game "I packed my bag ..." inspired this dynamic concept, which allows for examining levels of effectiveness instead of just sample efficiency.
+Interactive videos, based on selected agent behavios, can be found here: https://marcometer.github.io/
 
 ## Citation
 
+Preprint Journal Paper (under review)
+```bibtex
+@misc{pleines2024memory,
+      title={Memory Gym: Towards Endless Tasks to Benchmark Memory Capabilities of Agents}, 
+      author={Marco Pleines and Matthias Pallasch and Frank Zimmer and Mike Preuss},
+      year={2024},
+      eprint={2309.17207},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
+
+ICLR Paper
 ```bibtex
 @inproceedings{pleines2023memory,
-title={Memory Gym: Partially Observable Challenges to Memory-Based Agents},
-author={Marco Pleines and Matthias Pallasch and Frank Zimmer and Mike Preuss},
-booktitle={International Conference on Learning Representations},
-year={2023},
-url={https://openreview.net/forum?id=jHc8dCx6DDr}
+      title={Memory Gym: Partially Observable Challenges to Memory-Based Agents},
+      author={Marco Pleines and Matthias Pallasch and Frank Zimmer and Mike Preuss},
+      booktitle={International Conference on Learning Representations},
+      year={2023},
+      url={https://openreview.net/forum?id=jHc8dCx6DDr}
 }
 ```
 
