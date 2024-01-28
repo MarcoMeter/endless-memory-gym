@@ -81,10 +81,10 @@ class EndlessMysteryPathEnv(CustomEnv):
         # Setup observation and action space
         self.action_space = spaces.Discrete(4)
         self.observation_space= spaces.Box(
-                    low = 0.0,
-                    high = 1.0,
+                    low = 0,
+                    high = 255,
                     shape = [self.screen_dim, self.screen_dim, 3],
-                    dtype = np.float32)
+                    dtype = np.uint8)
         
         # Optional information that is part of the returned info dictionary during reset and step
         # The cardinal direction where the next path tile is located
@@ -274,7 +274,7 @@ class EndlessMysteryPathEnv(CustomEnv):
             self._draw_surfaces([(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))])
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return vis_obs, {"ground_truth": self.target_direction}
 
@@ -436,7 +436,7 @@ class EndlessMysteryPathEnv(CustomEnv):
             self._draw_surfaces([(self.rotated_agent_surface, (self.agent_draw_x, self.rotated_agent_rect.y))])
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return vis_obs, reward, done, False, info
 

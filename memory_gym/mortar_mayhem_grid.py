@@ -81,10 +81,10 @@ class GridMortarMayhemEnv(CustomEnv):
         # Setup observation and action space
         self.action_space = spaces.Discrete(4)
         self.observation_space= spaces.Box(
-                    low = 0.0,
-                    high = 1.0,
+                    low = 0,
+                    high = 255,
                     shape = [self.screen_dim, self.screen_dim, 3],
-                    dtype = np.float32)
+                    dtype = np.uint8)
 
         # Environment members
         self.rotated_agent_surface, self.rotated_agent_rect = None, None
@@ -273,8 +273,8 @@ class GridMortarMayhemEnv(CustomEnv):
                             (command.surface, (((self.screen_dim // 2) - command.rect_dim // 2, (self.screen_dim // 2) - command.rect_dim // 2)))])
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
-
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        
         return vis_obs, {}
 
     def step(self, action):
@@ -370,7 +370,7 @@ class GridMortarMayhemEnv(CustomEnv):
         self._draw_surfaces(surfaces)
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return vis_obs, reward, done, False, info
 

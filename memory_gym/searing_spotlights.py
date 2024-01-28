@@ -110,10 +110,10 @@ class SearingSpotlightsEnv(CustomEnv):
         # Setup observation and action space
         self.action_space = spaces.MultiDiscrete([3, 3])
         self.observation_space= spaces.Box(
-                    low = 0.0,
-                    high = 1.0,
+                    low = 0,
+                    high = 255,
                     shape = [self.screen_dim, self.screen_dim, 3],
-                    dtype = np.float32)
+                    dtype = np.uint8)
 
         # Environment members
         # Tiled background surface
@@ -444,7 +444,7 @@ class SearingSpotlightsEnv(CustomEnv):
         # plt.show()
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         # Return the visual observation and the ground truth
         return vis_obs, {}
@@ -557,7 +557,7 @@ class SearingSpotlightsEnv(CustomEnv):
             info = {}
         
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return vis_obs, reward, done, False, info
 

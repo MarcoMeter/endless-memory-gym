@@ -83,10 +83,10 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         self.observation_space = spaces.Dict(
             {
                 "visual_observation": spaces.Box(
-                    low = 0.0,
-                    high = 1.0,
+                    low = 0,
+                    high = 255,
                     shape = [self.screen_dim, self.screen_dim, 3],
-                    dtype = np.float32),
+                    dtype = np.uint8),
                 "vector_observation": spaces.Box(
                     low = np.zeros((self.max_num_commands * 9), dtype=np.float32),
                     high = np.ones((self.max_num_commands * 9), dtype=np.float32),
@@ -187,7 +187,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         self._draw_surfaces([(self.bg, (0, 0)), (self.arena.surface, self.arena.rect), self.agent.get_rotated_sprite(0)])
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
         # Retrieve the encoded commands for the observation space
         self._commands_one_hot = self._encode_commands_one_hot(self._commands)
 
@@ -281,7 +281,7 @@ class GridMortarMayhemTaskBEnv(GridMortarMayhemEnv):
         self._draw_surfaces(surfaces)
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return {"visual_observation": vis_obs, "vector_observation": self._commands_one_hot}, reward, done, False, info
 

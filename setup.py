@@ -49,5 +49,5 @@ setup(
             "mystery_path_grid=memory_gym.mystery_path_grid:main",
             ],
       },
-      version="1.0.0",
+      version="1.0.1",
 )

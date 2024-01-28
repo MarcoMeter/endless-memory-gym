@@ -79,11 +79,11 @@ class EndlessMortarMayhemEnv(CustomEnv):
 
         # Setup observation and action space
         self.action_space = spaces.MultiDiscrete([3, 3])
-        self.observation_space= spaces.Box(
-                    low = 0.0,
-                    high = 1.0,
+        self.observation_space= sspaces.Box(
+                    low = 0,
+                    high = 255,
                     shape = [self.screen_dim, self.screen_dim, 3],
-                    dtype = np.float32)
+                    dtype = np.uint8)
 
         # Optional information that is part of the returned info dictionary during reset and step
         # The absolute position (ground truth) of the agent is distributed using the info dictionary.
@@ -253,7 +253,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
                             (command.surface, (((self.screen_dim // 2) - command.rect_dim // 2, (self.screen_dim // 2) - command.rect_dim // 2)))])
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return vis_obs, {"ground_truth": np.asarray([*self._target_pos]) / 5.0} 
 
@@ -364,7 +364,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
         self._draw_surfaces(surfaces)
 
         # Retrieve the rendered image of the environment
-        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.float32) / 255.0 # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         return vis_obs, reward, done, False, info
 
