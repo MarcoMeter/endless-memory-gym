@@ -14,7 +14,7 @@ SCALE = 0.25
 
 class MortarMayhemTaskBEnv(MortarMayhemEnv):
     metadata = {
-        "render_modes": ["rgb_array", "debug_rgb_array"],
+        "render_modes": ["human", "rgb_array", "debug_rgb_array"],
         "render_fps": 25,
     }
 
@@ -61,7 +61,7 @@ class MortarMayhemTaskBEnv(MortarMayhemEnv):
         super().__init__(render_mode)
 
         self.render_mode = render_mode
-        if render_mode is None:
+        if render_mode != "human":
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
         else:
@@ -292,7 +292,7 @@ def main():
     parser.add_argument("--seed", type=int, help="The to be used seed for the environment's random number generator.", default=0)
     options = parser.parse_args()
 
-    env = MortarMayhemTaskBEnv(render_mode = "debug_rgb_array")
+    env = MortarMayhemTaskBEnv(render_mode = "human")
     reset_params = {}
     seed = options.seed
     obs, reset_info = env.reset(seed = options.seed, options = reset_params)

@@ -14,7 +14,7 @@ SCALE = 0.25
 
 class GridMysteryPathEnv(CustomEnv):
     metadata = {
-        "render_modes": ["rgb_array", "debug_rgb_array"],
+        "render_modes": ["human", "rgb_array", "debug_rgb_array"],
         "render_fps": 3,
     }
 
@@ -57,7 +57,7 @@ class GridMysteryPathEnv(CustomEnv):
         super().__init__()
         
         self.render_mode = render_mode
-        if render_mode is None:
+        if render_mode != "human":
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
         else:
@@ -280,27 +280,27 @@ class GridMysteryPathEnv(CustomEnv):
         """Render the environment.
 
         Returns:
-            {np.ndarray} -- The rendered image of the environment.
+            {np.ndarray} -- The rendered image of the environment. Returns None if the render mode is set to "human".
         """
-        if self.render_mode is not None:
-            if self.render_mode == "rgb_array":
-                self.clock.tick(GridMysteryPathEnv.metadata["render_fps"])
-                return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
-            elif self.render_mode == "debug_rgb_array":
-                # Create debug window if it doesn't exist yet
-                if self.debug_window is None:
-                    self.debug_window = Window(size = (336, 336))
-                    self.debug_window.show()
-                    self.renderer = Renderer(self.debug_window)
-                
-                self.debug_window.title = "seed " + str(self.current_seed)
-                self.clock.tick(GridMysteryPathEnv.metadata["render_fps"])
+        if self.render_mode == "human":
+            # Create debug window if it doesn't exist yet
+            if self.debug_window is None:
+                self.debug_window = Window(size = (336, 336))
+                self.debug_window.show()
+                self.renderer = Renderer(self.debug_window)
+            
+            self.debug_window.title = "seed " + str(self.current_seed)
+            self.clock.tick(GridMysteryPathEnv.metadata["render_fps"])
 
-                debug_surface = self._build_debug_surface()
-                texture = Texture.from_surface(self.renderer, debug_surface)
-                texture.draw(dstrect=(0, 0))
-                self.renderer.present()
-                return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
+            debug_surface = self._build_debug_surface()
+            texture = Texture.from_surface(self.renderer, debug_surface)
+            texture.draw(dstrect=(0, 0))
+            self.renderer.present()
+        elif self.render_mode == "rgb_array":
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        elif self.render_mode == "debug_rgb_array":
+            debug_surface = self._build_debug_surface()
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(debug_surface).astype(np.uint8), 3))
 
     def close(self):
         """Close the environment."""
@@ -313,7 +313,7 @@ def main():
     parser.add_argument("--seed", type=int, help="The to be used seed for the environment's random number generator.", default=0)
     options = parser.parse_args()
 
-    env = GridMysteryPathEnv(render_mode = "debug_rgb_array")
+    env = GridMysteryPathEnv(render_mode = "human")
     reset_params = {}
     seed = options.seed
     vis_obs, reset_info = env.reset(seed = seed, options = reset_params)

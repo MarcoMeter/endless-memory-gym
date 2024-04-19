@@ -14,7 +14,7 @@ SCALE = 0.25
 
 class EndlessMortarMayhemEnv(CustomEnv):
     metadata = {
-        "render_modes": ["rgb_array", "debug_rgb_array"],
+        "render_modes": ["human", "rgb_array", "debug_rgb_array"],
         "render_fps": 25,
     }
 
@@ -60,7 +60,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
         super().__init__()
         
         self.render_mode = render_mode
-        if render_mode is None:
+        if render_mode != "human":
             os.putenv('SDL_VIDEODRIVER', 'fbcon')
             os.environ["SDL_VIDEODRIVER"] = "dummy"
         else:
@@ -79,7 +79,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
 
         # Setup observation and action space
         self.action_space = spaces.MultiDiscrete([3, 3])
-        self.observation_space= sspaces.Box(
+        self.observation_space= spaces.Box(
                     low = 0,
                     high = 255,
                     shape = [self.screen_dim, self.screen_dim, 3],
@@ -372,32 +372,31 @@ class EndlessMortarMayhemEnv(CustomEnv):
         """Render the environment.
 
         Returns:
-            {np.ndarray} -- The rendered image of the environment.
+            {np.ndarray} -- The rendered image of the environment. Returns None if the render mode is set to "human".
         """
-        if self.render_mode is not None:
-            if self._command_visualization:
-                    fps = 3
-            else:
-                fps = EndlessMortarMayhemEnv.metadata["render_fps"]
+        if self.render_mode == "human":
+            # Create debug window if it doesn't exist yet
+            if self.debug_window is None:
+                self.debug_window = Window(size = (336, 336))
+                self.debug_window.show()
+                self.renderer = Renderer(self.debug_window)
             
-            if self.render_mode == "rgb_array":
-                self.clock.tick(fps)
-                return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
-            elif self.render_mode == "debug_rgb_array":
-                # Create debug window if it doesn't exist yet
-                if self.debug_window is None:
-                    self.debug_window = Window(size = (336, 336))
-                    self.debug_window.show()
-                    self.renderer = Renderer(self.debug_window)
-                
-                self.debug_window.title = "seed " + str(self.current_seed)
-                self.clock.tick(fps)
+            self.debug_window.title = "seed " + str(self.current_seed)
+            
+            fps = EndlessMortarMayhemEnv.metadata["render_fps"]
+            if self._command_visualization:
+                fps = 3
+            self.clock.tick(fps)
 
-                debug_surface = self._build_debug_surface()
-                texture = Texture.from_surface(self.renderer, debug_surface)
-                texture.draw(dstrect=(0, 0))
-                self.renderer.present()
-                return np.fliplr(np.rot90(pygame.surfarray.array3d(self.renderer.to_surface()).astype(np.uint8), 3))
+            debug_surface = self._build_debug_surface()
+            texture = Texture.from_surface(self.renderer, debug_surface)
+            texture.draw(dstrect=(0, 0))
+            self.renderer.present()
+        elif self.render_mode == "rgb_array":
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8), 3)) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
+        elif self.render_mode == "debug_rgb_array":
+            debug_surface = self._build_debug_surface()
+            return np.fliplr(np.rot90(pygame.surfarray.array3d(debug_surface).astype(np.uint8), 3))
 
     def close(self):
         """Close the environment."""
@@ -410,7 +409,7 @@ def main():
     parser.add_argument("--seed", type=int, help="The to be used seed for the environment's random number generator.", default=0)
     options = parser.parse_args()
 
-    env = EndlessMortarMayhemEnv(render_mode="debug_rgb_array")
+    env = EndlessMortarMayhemEnv(render_mode = "human")
     reset_params = {}
     seed = options.seed
     vis_obs, reset_info = env.reset(seed = options.seed, options = reset_params)
