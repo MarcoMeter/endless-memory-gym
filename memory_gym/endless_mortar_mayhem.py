@@ -31,6 +31,7 @@ class EndlessMortarMayhemEnv(CustomEnv):
                 "visual_feedback": True,
                 "reward_command_failure": 0.0,
                 "reward_command_success": 0.1,
+                "reward_new_command_success": 0.0,
             }
 
     def process_reset_params(reset_params):
@@ -295,9 +296,12 @@ class EndlessMortarMayhemEnv(CustomEnv):
 
                     # Check if the agent is on the target position
                     if self.normalized_agent_position == self._target_pos:
-                        # Success!
+                        # Success! Reward the agent for completing a command (dense reward)
                         reward += self.reset_params["reward_command_success"]
                         self._total_commands_completed += 1
+                        # Reward the agent for completing the last command of the current sequence (sparse reward)
+                        if self._current_command == self.num_commands:
+                            reward += self.reset_params["reward_new_command_success"]
                     # If the agent is not on the target position, terminate the episode
                     else:
                         # Failure!

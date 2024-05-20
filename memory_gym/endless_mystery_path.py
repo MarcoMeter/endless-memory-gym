@@ -32,6 +32,7 @@ class EndlessMysteryPathEnv(CustomEnv):
                 "stamina_level": 20,
                 "reward_fall_off": 0.0,
                 "reward_path_progress": 0.1,
+                "reward_path_progress_dense": 0.0,
                 "reward_step": 0.0
             }
 
@@ -339,12 +340,14 @@ class EndlessMysteryPathEnv(CustomEnv):
             if self.normalized_agent_position == (node.x, node.y):
                 on_path = True
                 self.current_node = node
-                if not node.reward_visited and not (node.x, node.y) == self.start:
-                    # Reward the agent for reaching a tile that it has not visisted before
+                if not node.reward_visited and not (node.x, node.y) == (self.start.x, self.start.y):
+                    # Reward the agent for reaching a tile that it has not visisted before (sparse reward)
                     reward += self.reset_params["reward_path_progress"]
                     self.tiles_visited += 1
                     node.reward_visited = True
-                if not node.stamina_visited and not (node.x, node.y) == self.start:
+                if not node.stamina_visited and not (node.x, node.y) == (self.start.x, self.start.y):
+                    # Reward the agent for reaching the next tile (dense reward)
+                    reward += self.reset_params["reward_path_progress_dense"]
                     # Reset the agent's stamina for reaching a tile that it has not visited before
                     self.stamina = self.reset_params["stamina_level"]
                     node.stamina_visited = True
