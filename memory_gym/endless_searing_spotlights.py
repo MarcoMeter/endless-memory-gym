@@ -36,6 +36,7 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
                 "light_dim_off_duration": 6,
                 "light_threshold": 255,
                 # Coin Parameters
+                "coin_enabled": True,
                 "coin_scale": 1.5 * SCALE,
                 "coin_show_duration": 6,
                 "coins_visible": False,
@@ -157,7 +158,8 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         coin_surface.fill(255)
         coin_surface.set_colorkey(255)
-        self.coin.draw(coin_surface)
+        if self.reset_params["coin_enabled"]:
+            self.coin.draw(coin_surface)
 
         # Gather surfaces
         surfs = [(self.bg, (0, 0)), (self.spotlight_surface, (0, 0)), (coin_surface, (0, 0))]
@@ -253,7 +255,6 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
 
     def _spawn_coin(self):
         """Spawn a new coin on the game screen."""
-        self.coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.coin_surface.fill(255)
         self.coin_surface.set_colorkey(255)
         # Reset grid sampler
@@ -364,9 +365,11 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
                                                             self.reset_params["black_background"]))
 
         # Spawn coin
+        self.coin_surface = pygame.Surface((self.screen_dim, self.screen_dim))
         self.coins_collected = 0
         self.coin = None
-        self._spawn_coin()
+        if self.reset_params["coin_enabled"]:
+            self._spawn_coin()
 
         # Draw initially all surfaces
         self.bg = self.blue_background_surface
@@ -397,7 +400,11 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
 
         # Return the visual observation and the ground truth
-        return vis_obs, {"ground_truth": np.concatenate((np.asarray(self.agent.rect.center), np.asarray(self.coin.location))) / self.screen_dim}
+        if self.reset_params["coin_enabled"]:
+            coin_location =  np.asarray(self.coin.location)
+        else:
+            coin_location = np.zeros((2))
+        return vis_obs, {"ground_truth": np.concatenate((np.asarray(self.agent.rect.center), coin_location)) / self.screen_dim}
 
     def step(self, action):
         """Take a step in the environment.
@@ -429,8 +436,9 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         r, spotlights_done, self.bg = self._step_spotlight_task()
         reward += r
         # Coin collection task
-        r = self._step_coin_task()
-        reward += r
+        if self.reset_params["coin_enabled"]:
+            r = self._step_coin_task()
+            reward += r
 
         # Determine done
         done = False
@@ -440,11 +448,10 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         # Time limit
         self.t += 1
         self.coin_t += 1
-        if self.coin_t == self.reset_params["steps_per_coin"]:
+        if self.coin_t == self.reset_params["steps_per_coin"] and self.reset_params["coin_enabled"]:
             done = True
         if self.t == self.max_episode_steps:
             done = True
-
 
         # Render the last reward of the agent
         if self.reset_params["show_last_positive_reward"]:
@@ -474,18 +481,24 @@ class EndlessSearingSpotlightsEnv(CustomEnv):
         # Track all rewards
         self.episode_rewards.append(reward)
 
+        # Coin location
+        if self.reset_params["coin_enabled"]:
+            coin_location =  np.asarray(self.coin.location)
+        else:
+            coin_location = np.zeros((2))
+
         if done:
             info = {
                 "reward": sum(self.episode_rewards),
                 "length": len(self.episode_rewards),
                 "agent_health": self.current_agent_health / self.agent_health,
                 "coins_collected": self.coins_collected,
-                "ground_truth": np.concatenate((np.asarray(self.agent.rect.center), np.asarray(self.coin.location))) / self.screen_dim,
+                "ground_truth": np.concatenate((np.asarray(self.agent.rect.center), coin_location)) / self.screen_dim,
                 # "mean_steps_between_coins": sum(self.steps_between_coins) / self.coins_collected
             }
         else:
             # Ground truth: agent and coin position
-            info = {"ground_truth": np.concatenate((np.asarray(self.agent.rect.center), np.asarray(self.coin.location))) / self.screen_dim}
+            info = {"ground_truth": np.concatenate((np.asarray(self.agent.rect.center), coin_location)) / self.screen_dim}
 
         # Retrieve the rendered image of the environment
         vis_obs = pygame.surfarray.array3d(pygame.display.get_surface()).astype(np.uint8) # pygame.surfarray.pixels3d(pygame.display.get_surface()).astype(np.uint8)
