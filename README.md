@@ -26,7 +26,7 @@
 
 Memory Gym features the environments **Mortar Mayhem**, **Mystery Path**, and **Searing Spotlights** that are inspired by some mini games of [Pummel Party](http://rebuiltgames.com/). These 2D environments benchmark the memory capabilities of agents.
 Especially, these environments feature endless task variants. As the agent's policy improves, the task goes on. The cumulative memory game "I packed my bag ..." inspired this dynamic concept, which allows for examining levels of effectiveness instead of just sample efficiency.
-Interactive videos, based on selected agent behavios, can be found here: https://marcometer.github.io/
+Interactive videos, based on selected agent behavios, can be found here: [https://marcometer.github.io/](https://marcometer.github.io/jmlr_2024.github.io/)
 
 ## Citation
 
